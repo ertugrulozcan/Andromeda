@@ -5,6 +5,6 @@
     <color name="colorAccent">#194084</color>
     <color name="colorForeground">#FFFFFF</color>
     <color name="transparent">#00000000</color>
-    <color name="blackShadow">#66000000</color>
+    <color name="blackShadow">#77000000</color>
     <color name="colorTileBackground">#A3194084</color>
 </resources>

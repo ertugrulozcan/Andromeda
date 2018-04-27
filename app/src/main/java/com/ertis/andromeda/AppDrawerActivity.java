@@ -1,28 +1,42 @@
 package com.ertis.andromeda;
 
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Loader;
-import android.graphics.Color;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.WindowManager;
 
+import com.ertis.andromeda.adapters.AppMenuAdapter;
 import com.ertis.andromeda.adapters.TilesAdapter;
 import com.ertis.andromeda.managers.AppsLoader;
-import com.ertis.andromeda.managers.SpannedGridLayoutManager;
+import com.ertis.andromeda.models.AppMenuItem;
 import com.ertis.andromeda.models.AppModel;
 import com.ertis.andromeda.models.Tile;
+import com.ertis.andromeda.utilities.TypefaceUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AppDrawerActivity extends FragmentActivity implements LoaderManager.LoaderCallbacks<ArrayList<AppModel>>
 {
-	private List<Tile> tileList = new ArrayList<>();
-	private RecyclerView recyclerView;
+	private AppDrawerFragment appDrawerFragment;
+	private AppListFragment appListFragment;
+	
 	private TilesAdapter tilesAdapter;
+	private AppMenuAdapter menuItemAdapter;
+	
+	private List<Tile> tileList = new ArrayList<>();
+	private List<AppMenuItem> menuItemList = new ArrayList<>();
+	
+	private static final int NUM_PAGES = 2;
+	private ViewPager viewPager;
+	private PagerAdapter viewPagerAdapter;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -30,40 +44,17 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_app_drawer);
 		
-		recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+		TypefaceUtil.overrideFont(getApplicationContext(), "SANS", "fonts/segoeui.ttf");
 		
-		/*
-		SpannedGridLayoutManager.GridSpanLookup gridSpanLookup = new SpannedGridLayoutManager.GridSpanLookup()
-		{
-			@Override
-			public SpannedGridLayoutManager.SpanInfo getSpanInfo(int position)
-			{
-				Tile.TileType tileType = tileList.get(position).getTileType();
-				switch (tileType)
-				{
-					case Small:
-						return new SpannedGridLayoutManager.SpanInfo(1, 1);
-					case Medium:
-						return new SpannedGridLayoutManager.SpanInfo(2, 2);
-					case MediumWide:
-						return new SpannedGridLayoutManager.SpanInfo(4, 2);
-					case Big:
-						return new SpannedGridLayoutManager.SpanInfo(4, 4);
-				}
-				
-				return new SpannedGridLayoutManager.SpanInfo(2, 2);
-			}
-		};
+		this.tilesAdapter = new TilesAdapter(this, tileList);
+		this.appDrawerFragment = AppDrawerFragment.newInstance(tilesAdapter);
 		
-		RecyclerView.LayoutManager mLayoutManager = new SpannedGridLayoutManager(gridSpanLookup, 6, 1);
-		*/
+		this.menuItemAdapter = new AppMenuAdapter(this, this.menuItemList);
+		this.appListFragment = AppListFragment.newInstance(this.menuItemAdapter);
 		
-		SpannedGridLayoutManager spannedGridLayoutManager = new SpannedGridLayoutManager(SpannedGridLayoutManager.Orientation.VERTICAL, 6);
-		spannedGridLayoutManager.setItemOrderIsStable(true);
-		recyclerView.setLayoutManager(spannedGridLayoutManager);
-		
-		tilesAdapter = new TilesAdapter(this, tileList);
-		recyclerView.setAdapter(tilesAdapter);
+		this.viewPager = (ViewPager) findViewById(R.id.viewpager);
+		this.viewPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+		this.viewPager.setAdapter(this.viewPagerAdapter);
 		
 		// create the loader to load the apps list in background
 		getLoaderManager().initLoader(0, null, this);
@@ -71,8 +62,34 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		// FullScreen
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 		
-		//loadTiles();
+		//this.loadFragment(appListFragment);
 	}
+	
+	@Override
+	public void onBackPressed()
+	{
+		if (this.viewPager.getCurrentItem() == 0)
+		{
+			// If the user is currently looking at the first step, allow the system to handle the
+			// Back button. This calls finish() on this activity and pops the back stack.
+			super.onBackPressed();
+		}
+		else
+		{
+			// Otherwise, select the previous step.
+			this.viewPager.setCurrentItem(this.viewPager.getCurrentItem() - 1);
+		}
+	}
+	
+	/*
+	private void loadFragment(Fragment fragment)
+	{
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		fragmentTransaction.replace(R.id.frameLayout, fragment);
+		fragmentTransaction.commit();
+	}
+	*/
 	
 	private void loadTiles(ArrayList<AppModel> appList)
 	{
@@ -91,6 +108,25 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		}
 		
 		this.tilesAdapter.notifyDataSetChanged();
+	}
+	
+	private void loadMenuItemList(ArrayList<AppModel> appList)
+	{
+		if (appList == null)
+		{
+			this.menuItemList.clear();
+			this.menuItemAdapter.notifyDataSetChanged();
+			return;
+		}
+		
+		// appList.size()
+		for (int i = 0; i < appList.size(); i++)
+		{
+			AppModel application = appList.get(i);
+			menuItemList.add(new AppMenuItem(application));
+		}
+		
+		this.menuItemAdapter.notifyDataSetChanged();
 	}
 	
 	private Tile.TileType GetTileType(int index)
@@ -179,11 +215,41 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 	public void onLoadFinished(Loader<ArrayList<AppModel>> loader, ArrayList<AppModel> data)
 	{
 		this.loadTiles(data);
+		this.loadMenuItemList(data);
 	}
 	
 	@Override
 	public void onLoaderReset(Loader<ArrayList<AppModel>> loader)
 	{
 		this.loadTiles(null);
+		this.loadMenuItemList(null);
+	}
+	
+	private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter
+	{
+		public ScreenSlidePagerAdapter(FragmentManager fm)
+		{
+			super(fm);
+		}
+		
+		@Override
+		public Fragment getItem(int position)
+		{
+			switch (position)
+			{
+				case 0:
+					return appDrawerFragment;
+				case 1:
+					return appListFragment;
+			}
+			
+			return appDrawerFragment;
+		}
+		
+		@Override
+		public int getCount()
+		{
+			return NUM_PAGES;
+		}
 	}
 }

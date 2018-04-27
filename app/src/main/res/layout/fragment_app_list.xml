@@ -3,18 +3,18 @@
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             tools:context=".AppDrawerFragment">
+             android:background="@color/blackShadow"
+             tools:context=".AppListFragment">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="left"
-        android:scrollbars="none"
+        android:scrollbars="vertical"
+        android:clipToPadding="false"
         android:paddingTop="44dp"
         android:paddingBottom="96dp"
-        android:clipToPadding="false"
-        android:layout_marginLeft="2dp"
-        android:layout_marginRight="2dp" />
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp" />
 
 </FrameLayout>
