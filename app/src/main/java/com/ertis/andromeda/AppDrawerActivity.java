@@ -1,12 +1,12 @@
 package com.ertis.andromeda;
 
+import android.graphics.drawable.ColorDrawable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Loader;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -14,12 +14,24 @@ import android.view.WindowManager;
 
 import com.ertis.andromeda.adapters.AppMenuAdapter;
 import com.ertis.andromeda.adapters.TilesAdapter;
+import com.ertis.andromeda.helpers.Colors;
 import com.ertis.andromeda.managers.AppsLoader;
 import com.ertis.andromeda.models.AppMenuItem;
 import com.ertis.andromeda.models.AppModel;
 import com.ertis.andromeda.models.Tile;
 import com.ertis.andromeda.utilities.TypefaceUtil;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +56,7 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_app_drawer);
 		
-		TypefaceUtil.overrideFont(getApplicationContext(), "SANS", "fonts/segoeui.ttf");
+		TypefaceUtil.overrideFont(getApplicationContext(), "SANS", "font/segoeui.ttf");
 		
 		this.tilesAdapter = new TilesAdapter(this, tileList);
 		this.appDrawerFragment = AppDrawerFragment.newInstance(tilesAdapter);
@@ -55,6 +67,39 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		this.viewPager = (ViewPager) findViewById(R.id.viewpager);
 		this.viewPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 		this.viewPager.setAdapter(this.viewPagerAdapter);
+		
+		this.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
+		{
+			@Override
+			public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+			{
+				int max = 0xB1;
+				
+				if (position == 1)
+				{
+					appListFragment.setBackgroundColor(max * 0x1000000);
+				}
+				else
+				{
+					int aValue = (int)(max * positionOffset);
+					int colorValue = aValue * 0x1000000;
+					
+					appListFragment.setBackgroundColor(colorValue);
+				}
+			}
+			
+			@Override
+			public void onPageSelected(int position)
+			{
+			
+			}
+			
+			@Override
+			public void onPageScrollStateChanged(int state)
+			{
+			
+			}
+		});
 		
 		// create the loader to load the apps list in background
 		getLoaderManager().initLoader(0, null, this);
@@ -81,17 +126,7 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		}
 	}
 	
-	/*
-	private void loadFragment(Fragment fragment)
-	{
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.replace(R.id.frameLayout, fragment);
-		fragmentTransaction.commit();
-	}
-	*/
-	
-	private void loadTiles(ArrayList<AppModel> appList)
+	private void loadTiles(final ArrayList<AppModel> appList)
 	{
 		if (appList == null)
 		{
@@ -100,11 +135,55 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 			return;
 		}
 		
-		// appList.size()
-		for (int i = 0; i < 22; i++)
+		try
 		{
-			AppModel application = appList.get(i);
-			tileList.add(new Tile(application, this.GetTileType2(i + 1)));
+			String jsonStr = this.ReadTileLayoutsFromJsonResource();
+			
+			JSONObject jsonObj = new JSONObject(jsonStr);
+			JSONArray tiles = jsonObj.getJSONArray("tiles");
+			
+			for (int i = 0; i < tiles.length(); i++)
+			{
+				JSONObject tileData = tiles.getJSONObject(i);
+				String appPath = tileData.getString("appPath");
+				int tileTypeValue = tileData.getInt("tileType");
+				int tileStyleValue = tileData.getInt("tileStyle");
+				String tileBackgroundStr = tileData.getString("tileBackground");
+				
+				if (tileTypeValue < 0 || tileTypeValue >= Tile.TileType.values().length)
+					tileTypeValue = 0;
+				
+				if (tileStyleValue < 0 || tileStyleValue >= Tile.TileStyle.values().length)
+					tileStyleValue = 0;
+				
+				Tile.TileType tileType = Tile.TileType.values()[tileTypeValue];
+				Tile.TileStyle tileStyle = Tile.TileStyle.values()[tileStyleValue];
+				
+				ColorDrawable tileColor = Colors.rgb(tileBackgroundStr);
+				if (tileBackgroundStr == null || tileBackgroundStr.isEmpty())
+					tileColor = new ColorDrawable(getResources().getColor(R.color.colorTileBackground));
+				
+				Tile tile = null;
+				for (int a = 0; a < appList.size(); a++)
+				{
+					AppModel application = appList.get(a);
+					String sourceDir = application.getAppInfo().sourceDir;
+					if (appPath.equals(sourceDir))
+					{
+						tile = new Tile(application, tileType, tileColor, tileStyle);
+						continue;
+					}
+				}
+				
+				if (tile == null)
+					tile = Tile.CreateFakeTile(tileType);
+				
+				tileList.add(tile);
+			}
+		}
+		catch (Exception ex)
+		{
+		
 		}
 		
 		this.tilesAdapter.notifyDataSetChanged();
@@ -119,7 +198,6 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 			return;
 		}
 		
-		// appList.size()
 		for (int i = 0; i < appList.size(); i++)
 		{
 			AppModel application = appList.get(i);
@@ -127,6 +205,40 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		}
 		
 		this.menuItemAdapter.notifyDataSetChanged();
+	}
+	
+	private String ReadTileLayoutsFromJsonResource() throws IOException
+	{
+		InputStream is = getResources().openRawResource(R.raw.tiles_layout);
+		Writer writer = new StringWriter();
+		char[] buffer = new char[1024];
+		
+		try
+		{
+			Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+			int n;
+			while ((n = reader.read(buffer)) != -1)
+			{
+				writer.write(buffer, 0, n);
+			}
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+		finally
+		{
+			is.close();
+		}
+		
+		String jsonString = writer.toString();
+		return jsonString;
 	}
 	
 	private Tile.TileType GetTileType(int index)

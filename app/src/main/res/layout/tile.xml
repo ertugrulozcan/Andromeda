@@ -12,7 +12,6 @@
         android:id="@+id/tile_box"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorTileBackground"
         android:layout_gravity="center_horizontal">
 
         <ImageView
@@ -25,8 +24,9 @@
             android:id="@+id/tileLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="12sp"
             android:layout_gravity="bottom|left"
-            android:layout_marginLeft="2dp"
-            android:layout_marginBottom="1dp" />
+            android:layout_marginLeft="3dp"
+            android:layout_marginBottom="2dp" />
     </FrameLayout>
 </LinearLayout>

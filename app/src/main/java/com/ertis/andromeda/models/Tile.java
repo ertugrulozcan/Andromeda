@@ -1,6 +1,9 @@
 package com.ertis.andromeda.models;
 
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+
+import com.ertis.andromeda.helpers.Colors;
 
 /**
  * Created by ertugrulozcan on 18.04.2018.
@@ -10,9 +13,11 @@ public class Tile
 {
 	private String caption;
 	private Drawable icon;
+	private ColorDrawable tileColor;
 	private int iconId;
 	private AppModel application;
 	private TileType type;
+	private TileStyle style;
 	
 	public String getCaption()
 	{
@@ -20,8 +25,8 @@ public class Tile
 		if (application != null)
 			label = this.application.getLabel();
 		
-		if (label.length() > 15)
-			label = label.substring(0, 15);
+		if (label.length() > 25)
+			label = label.substring(0, 25);
 		
 		return label;
 	}
@@ -74,24 +79,49 @@ public class Tile
 		this.type = type;
 	}
 	
-	public Tile(String label, Drawable icon, TileType tileType)
+	public TileStyle getStyle()
 	{
-		this.setCaption(label);
-		this.setIcon(icon);
-		this.setTileType(tileType);
+		return style;
 	}
 	
-	public Tile(String label, int iconId, TileType tileType)
+	private void setStyle(TileStyle style)
 	{
-		this.setCaption(label);
-		this.setIconId(iconId);
-		this.setTileType(tileType);
+		this.style = style;
 	}
 	
-	public Tile(AppModel appModel, TileType tileType)
+	public ColorDrawable getTileColor()
+	{
+		return tileColor;
+	}
+	
+	public void setTileColor(ColorDrawable tileColor)
+	{
+		this.tileColor = tileColor;
+	}
+	
+	public Tile(AppModel appModel, TileType tileType, ColorDrawable color)
 	{
 		this.setApplication(appModel);
 		this.setTileType(tileType);
+		this.setTileColor(color);
+		this.setStyle(TileStyle.Icon);
+	}
+	
+	public Tile(AppModel appModel, TileType tileType, ColorDrawable color, TileStyle style)
+	{
+		this.setApplication(appModel);
+		this.setTileType(tileType);
+		this.setTileColor(color);
+		this.setStyle(style);
+	}
+	
+	public static Tile CreateFakeTile(TileType tileType)
+	{
+		Tile tile = new Tile(null, tileType, Colors.rgb("00000000"));
+		tile.setCaption("");
+		tile.setIcon(null);
+		
+		return tile;
 	}
 	
 	public enum TileType
@@ -100,5 +130,12 @@ public class Tile
 		Medium,
 		MediumWide,
 		Big
+	}
+	
+	public enum TileStyle
+	{
+		Icon,
+		Image,
+		LiveTile,
 	}
 }

@@ -1,6 +1,9 @@
 package com.ertis.andromeda.adapters;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
@@ -15,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ertis.andromeda.R;
+import com.ertis.andromeda.helpers.Colors;
 import com.ertis.andromeda.helpers.SizeConverter;
 import com.ertis.andromeda.managers.SpanLayoutParams;
 import com.ertis.andromeda.managers.SpanSize;
@@ -51,6 +55,9 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.TileViewHold
 		
 		holder.tileBox.setLayoutParams(this.calculateTileBoxLayoutParams(tile.getTileType()));
 		holder.tileLayout.setLayoutParams(this.calculateTileBoxSpanLayoutParams(tile.getTileType()));
+		
+		ColorDrawable tileColor = tile.getTileColor();
+		holder.tileBox.setBackground(tileColor);
 		
 		if (tile.getTileType() != Tile.TileType.Small)
 			holder.tileLabel.setText(tile.getCaption());

@@ -1,20 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
+             android:id="@+id/app_list_fragment_base_layout"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:background="@color/blackShadow"
              tools:context=".AppListFragment">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        android:clipToPadding="false"
-        android:paddingTop="44dp"
-        android:paddingBottom="96dp"
-        android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp" />
+        android:orientation="vertical"
+        android:layout_marginTop="32dp">
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/search_box_style"
+            android:drawablePadding="8dp"
+            android:hint="Search"
+            android:layout_margin="8dp"
+            android:padding="8dp" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:clipToPadding="false"
+            android:paddingTop="18dp"
+            android:paddingBottom="96dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp" />
+    </LinearLayout>
 
 </FrameLayout>
