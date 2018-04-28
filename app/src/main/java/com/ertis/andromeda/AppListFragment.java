@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.ertis.andromeda.adapters.AppMenuAdapter;
+import com.ertis.andromeda.adapters.StickyHeadersLinearLayoutManager;
 
 public class AppListFragment extends Fragment
 {
@@ -46,8 +47,13 @@ public class AppListFragment extends Fragment
 		baseLayout = (FrameLayout) view.findViewById(R.id.app_list_fragment_base_layout);
 		recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 		
+		/*
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(view.getContext());
 		recyclerView.setLayoutManager(linearLayoutManager);
+		*/
+		
+		StickyHeadersLinearLayoutManager<AppMenuAdapter> layoutManager = new StickyHeadersLinearLayoutManager<>(view.getContext());
+		recyclerView.setLayoutManager(layoutManager);
 		
 		//recyclerView.addItemDecoration(new AppListMenuItemDecoration(this, LinearLayoutManager.VERTICAL, 16));
 		recyclerView.setAdapter(this.menuItemAdapter);

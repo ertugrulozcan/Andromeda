@@ -30,10 +30,10 @@
     "tileStyle": 0,
     "tileBackground": ""
   }, {
-    "appPath": "/data/app/com.whatsapp-1/base.apk",
+    "appPath": "/data/app/com.whatsapp-2/base.apk",
     "tileType": 1,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "#CD232F3C"
   }, {
     "appPath": "/data/app/com.android.chrome-1/base.apk",
     "tileType": 1,

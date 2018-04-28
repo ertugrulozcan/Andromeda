@@ -17,10 +17,12 @@ import com.ertis.andromeda.models.Tile;
 
 import java.util.List;
 
-public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuItemViewHolder>
+public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuItemViewHolder> implements StickyHeaders
 {
 	private Context parentView;
 	private List<AppMenuItem> menuItemList;
+	
+	private static final int HEADER_ITEM = 123;
 	
 	public AppMenuAdapter(Context context, List<AppMenuItem> menuItemList)
 	{
@@ -31,28 +33,58 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 	@Override
 	public AppMenuAdapter.AppMenuItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
 	{
-		View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.app_menu_item, parent, false);
-		return new AppMenuAdapter.AppMenuItemViewHolder(itemView);
+		if (viewType == HEADER_ITEM)
+		{
+			View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_header, parent, false);
+			return new AppMenuAdapter.AppMenuItemViewHolder(itemView);
+		}
+		else
+		{
+			View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.app_menu_item, parent, false);
+			return new AppMenuAdapter.AppMenuItemViewHolder(itemView);
+		}
 	}
 	
 	@Override
 	public void onBindViewHolder(AppMenuAdapter.AppMenuItemViewHolder holder, int position)
 	{
+		int viewType = getItemViewType(position);
 		AppMenuItem menuItem = this.menuItemList.get(position);
 		
-		holder.tileLabel.setText(menuItem.getLabel());
-		
-		Drawable icon = menuItem.getIcon();
-		if (icon != null)
-			holder.tileIconImageView.setImageDrawable(icon);
-		
-		holder.tileIconImageView.requestLayout();
+		if (viewType == HEADER_ITEM)
+		{
+			holder.headerCaption.setText(menuItem.getHeader());
+		}
+		else
+		{
+			holder.tileLabel.setText(menuItem.getLabel());
+			
+			Drawable icon = menuItem.getIcon();
+			if (icon != null)
+				holder.tileIconImageView.setImageDrawable(icon);
+			
+			holder.tileIconImageView.requestLayout();
+		}
 	}
 	
 	@Override
 	public int getItemCount()
 	{
 		return this.menuItemList.size();
+	}
+	
+	@Override
+	public int getItemViewType(int position)
+	{
+		AppMenuItem menuItem = this.menuItemList.get(position);
+		return menuItem.isHeaderItem() ? HEADER_ITEM : super.getItemViewType(position);
+	}
+	
+	@Override
+	public boolean isStickyHeader(int position)
+	{
+		AppMenuItem menuItem = this.menuItemList.get(position);
+		return menuItem.isHeaderItem();
 	}
 	
 	public class AppMenuItemViewHolder extends RecyclerView.ViewHolder
@@ -62,6 +94,8 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 		private TextView tileLabel;
 		private ImageView tileIconImageView;
 		
+		private TextView headerCaption;
+		
 		public AppMenuItemViewHolder(View itemView)
 		{
 			super(itemView);
@@ -70,6 +104,8 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 			this.tileBox = itemView.findViewById(R.id.menu_item_box);
 			this.tileLabel = itemView.findViewById(R.id.menu_item_label);
 			this.tileIconImageView = itemView.findViewById(R.id.menu_item_icon);
+			
+			this.headerCaption = itemView.findViewById(R.id.section_label);
 		}
 	}
 }

@@ -198,10 +198,25 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 			return;
 		}
 		
+		char lastHeaderChar = '?';
 		for (int i = 0; i < appList.size(); i++)
 		{
 			AppModel application = appList.get(i);
-			menuItemList.add(new AppMenuItem(application));
+			AppMenuItem item = new AppMenuItem(application);
+			
+			Character firstLetter = item.getLabel().charAt(0);
+			if (!Character.isLetterOrDigit(firstLetter))
+				firstLetter = '#';
+			
+			firstLetter = Character.toUpperCase(firstLetter);
+			
+			if (firstLetter != lastHeaderChar)
+			{
+				menuItemList.add(AppMenuItem.CreateHeaderMenuItem(firstLetter.toString()));
+				lastHeaderChar = firstLetter;
+			}
+			
+			menuItemList.add(item);
 		}
 		
 		this.menuItemAdapter.notifyDataSetChanged();
