@@ -51,6 +51,19 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.TileViewHold
 		return tileViewList;
 	}
 	
+	public List<Tile> getTileList()
+	{
+		return tileList;
+	}
+	
+	public Tile getTile(int index)
+	{
+		if (index >= 0 && index < this.tileList.size())
+			return this.tileList.get(index);
+		
+		return null;
+	}
+	
 	public void setOnClickListener(View.OnClickListener onClickListener)
 	{
 		this.onClickListener = onClickListener;

@@ -5,7 +5,9 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +21,8 @@ import android.view.ViewGroup;
 
 import com.ertis.andromeda.adapters.TilesAdapter;
 import com.ertis.andromeda.managers.SpannedGridLayoutManager;
+import com.ertis.andromeda.models.AppModel;
+import com.ertis.andromeda.models.Tile;
 
 import java.util.List;
 import java.util.Random;
@@ -72,7 +76,18 @@ public class AppDrawerFragment extends Fragment
 			@Override
 			public void onClick(View view)
 			{
-				AnimateTileFlip(view);
+				//AnimateTileFlip(view);
+				List<View> tileViewList = tilesAdapter.getTileViewList();
+				int tileIndex = tileViewList.indexOf(view);
+				Tile tile = tilesAdapter.getTile(tileIndex);
+				if (tile != null)
+				{
+					AppModel app = tile.getApplication();
+					if (app != null)
+					{
+						startNewActivity(getActivity(), app.getApplicationPackageName());
+					}
+				}
 			}
 		});
 		
@@ -81,6 +96,21 @@ public class AppDrawerFragment extends Fragment
 		loadAnimations();
 		
 		return view;
+	}
+	
+	public void startNewActivity(Context context, String packageName)
+	{
+		Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+		
+		if (intent == null)
+		{
+			// Bring user to the market or let them choose an app?
+			intent = new Intent(Intent.ACTION_VIEW);
+			intent.setData(Uri.parse("market://details?id=" + packageName));
+		}
+		
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		context.startActivity(intent);
 	}
 	
 	@Override

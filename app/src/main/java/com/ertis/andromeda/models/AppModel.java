@@ -39,6 +39,11 @@ public class AppModel
 		return getAppInfo().packageName;
 	}
 	
+	public String getApplicationClassName()
+	{
+		return getAppInfo().className;
+	}
+	
 	public String getLabel()
 	{
 		return mAppLabel;
