@@ -24,6 +24,7 @@ import com.ertis.andromeda.managers.SpanLayoutParams;
 import com.ertis.andromeda.managers.SpanSize;
 import com.ertis.andromeda.models.Tile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,17 +35,34 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.TileViewHold
 {
 	private Context parentView;
 	private List<Tile> tileList;
+	private List<View> tileViewList;
+	
+	private View.OnClickListener onClickListener;
 	
 	public TilesAdapter(Context context, List<Tile> tileList)
 	{
 		this.parentView = context;
+		this.tileViewList = new ArrayList<>();
 		this.tileList = tileList;
+	}
+	
+	public List<View> getTileViewList()
+	{
+		return tileViewList;
+	}
+	
+	public void setOnClickListener(View.OnClickListener onClickListener)
+	{
+		this.onClickListener = onClickListener;
 	}
 	
 	@Override
 	public TileViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
 	{
 		View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.tile, parent, false);
+		itemView.setOnClickListener(this.onClickListener);
+		this.tileViewList.add(itemView);
+		
 		return new TileViewHolder(itemView);
 	}
 	
