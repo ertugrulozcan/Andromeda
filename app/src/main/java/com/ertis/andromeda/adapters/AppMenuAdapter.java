@@ -1,6 +1,8 @@
 package com.ertis.andromeda.adapters;
 
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,19 +17,30 @@ import com.ertis.andromeda.R;
 import com.ertis.andromeda.models.AppMenuItem;
 import com.ertis.andromeda.models.Tile;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuItemViewHolder> implements StickyHeaders
 {
 	private Context parentView;
 	private List<AppMenuItem> menuItemList;
+	private HashMap<View, AppMenuItem> menuItemViewDictionary;
 	
 	private static final int HEADER_ITEM = 123;
+	
+	private static Typeface segoeTypeface;
+	
+	private View.OnClickListener onClickListener;
 	
 	public AppMenuAdapter(Context context, List<AppMenuItem> menuItemList)
 	{
 		this.parentView = context;
 		this.menuItemList = menuItemList;
+		this.menuItemViewDictionary = new LinkedHashMap<>();
+		
+		segoeTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/segoewp/segoe-wp-light.ttf");
 	}
 	
 	@Override
@@ -36,11 +49,13 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 		if (viewType == HEADER_ITEM)
 		{
 			View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_header, parent, false);
+			itemView.setOnClickListener(this.onClickListener);
 			return new AppMenuAdapter.AppMenuItemViewHolder(itemView);
 		}
 		else
 		{
 			View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.app_menu_item, parent, false);
+			itemView.setOnClickListener(this.onClickListener);
 			return new AppMenuAdapter.AppMenuItemViewHolder(itemView);
 		}
 	}
@@ -51,6 +66,11 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 		int viewType = getItemViewType(position);
 		AppMenuItem menuItem = this.menuItemList.get(position);
 		
+		if (holder.itemView != null)
+		{
+			this.menuItemViewDictionary.put(holder.itemView, menuItem);
+		}
+		
 		if (viewType == HEADER_ITEM)
 		{
 			holder.headerCaption.setText(menuItem.getHeader());
@@ -58,6 +78,7 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 		else
 		{
 			holder.tileLabel.setText(menuItem.getLabel());
+			holder.tileLabel.setTypeface(segoeTypeface);
 			
 			Drawable icon = menuItem.getIcon();
 			if (icon != null)
@@ -65,6 +86,24 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 			
 			holder.tileIconImageView.requestLayout();
 		}
+	}
+	
+	public void setOnClickListener(View.OnClickListener onClickListener)
+	{
+		this.onClickListener = onClickListener;
+	}
+	
+	public List<AppMenuItem> getMenuItemList()
+	{
+		return menuItemList;
+	}
+	
+	public AppMenuItem getDataContext(View view)
+	{
+		if (this.menuItemViewDictionary.containsKey(view))
+			return this.menuItemViewDictionary.get(view);
+		
+		return null;
 	}
 	
 	@Override

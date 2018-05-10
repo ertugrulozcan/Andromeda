@@ -1,12 +1,10 @@
 package com.ertis.andromeda.adapters;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,13 +16,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ertis.andromeda.R;
-import com.ertis.andromeda.helpers.Colors;
-import com.ertis.andromeda.helpers.SizeConverter;
 import com.ertis.andromeda.managers.SpanLayoutParams;
 import com.ertis.andromeda.managers.SpanSize;
 import com.ertis.andromeda.models.Tile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -35,38 +33,20 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.TileViewHold
 {
 	private Context parentView;
 	private List<Tile> tileList;
-	private List<View> tileViewList;
+	private HashMap<View, Tile> tileViewDictionary;
 	
 	private View.OnClickListener onClickListener;
+	private View.OnLongClickListener onLongClickListener;
+	
+	private static Typeface segoeTypeface;
 	
 	public TilesAdapter(Context context, List<Tile> tileList)
 	{
 		this.parentView = context;
-		this.tileViewList = new ArrayList<>();
+		this.tileViewDictionary = new LinkedHashMap<>();
 		this.tileList = tileList;
-	}
-	
-	public List<View> getTileViewList()
-	{
-		return tileViewList;
-	}
-	
-	public List<Tile> getTileList()
-	{
-		return tileList;
-	}
-	
-	public Tile getTile(int index)
-	{
-		if (index >= 0 && index < this.tileList.size())
-			return this.tileList.get(index);
 		
-		return null;
-	}
-	
-	public void setOnClickListener(View.OnClickListener onClickListener)
-	{
-		this.onClickListener = onClickListener;
+		segoeTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/segoewp/segoe-wp.ttf");
 	}
 	
 	@Override
@@ -74,7 +54,7 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.TileViewHold
 	{
 		View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.tile, parent, false);
 		itemView.setOnClickListener(this.onClickListener);
-		this.tileViewList.add(itemView);
+		itemView.setOnLongClickListener(this.onLongClickListener);
 		
 		return new TileViewHolder(itemView);
 	}
@@ -84,12 +64,18 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.TileViewHold
 	{
 		Tile tile = this.tileList.get(position);
 		
+		if (holder.itemView != null)
+		{
+			this.tileViewDictionary.put(holder.itemView, tile);
+		}
+		
 		holder.tileBox.setLayoutParams(this.calculateTileBoxLayoutParams(tile.getTileType()));
 		holder.tileLayout.setLayoutParams(this.calculateTileBoxSpanLayoutParams(tile.getTileType()));
 		
 		ColorDrawable tileColor = tile.getTileColor();
 		holder.tileBox.setBackground(tileColor);
 		
+		holder.tileLabel.setTypeface(segoeTypeface);
 		if (tile.getTileType() != Tile.TileType.Small)
 			holder.tileLabel.setText(tile.getCaption());
 		
@@ -104,6 +90,29 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.TileViewHold
 			holder.tileIconImageView.getLayoutParams().height = 130;
 		}
 		
+		if (tile.getTileStyle() == Tile.TileStyle.Icon)
+		{
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+			params.gravity = Gravity.CENTER;
+			params.width = holder.tileIconImageView.getLayoutParams().width;
+			params.height = holder.tileIconImageView.getLayoutParams().height;
+			holder.tileIconImageView.setLayoutParams(params);
+			
+			holder.tileLabel.setVisibility(View.VISIBLE);
+		}
+		else if (tile.getTileStyle() == Tile.TileStyle.Image)
+		{
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+			params.gravity = Gravity.FILL;
+			holder.tileIconImageView.setLayoutParams(params);
+			
+			holder.tileLabel.setVisibility(View.INVISIBLE);
+		}
+		else if (tile.getTileStyle() == Tile.TileStyle.LiveTile)
+		{
+		
+		}
+		
 		Drawable icon = tile.getIcon();
 		if (icon != null)
 			holder.tileIconImageView.setImageDrawable(icon);
@@ -111,6 +120,29 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.TileViewHold
 			holder.tileIconImageView.setImageResource(tile.getIconId());
 		
 		holder.tileIconImageView.requestLayout();
+	}
+	
+	public void setOnClickListener(View.OnClickListener onClickListener)
+	{
+		this.onClickListener = onClickListener;
+	}
+	
+	public void setOnLongClickListener(View.OnLongClickListener onLongClickListener)
+	{
+		this.onLongClickListener = onLongClickListener;
+	}
+	
+	public Tile getDataContext(View view)
+	{
+		if (this.tileViewDictionary.containsKey(view))
+			return this.tileViewDictionary.get(view);
+		
+		return null;
+	}
+	
+	public List<View> getTileViewList()
+	{
+		return new ArrayList<>(tileViewDictionary.keySet());
 	}
 	
 	@Override

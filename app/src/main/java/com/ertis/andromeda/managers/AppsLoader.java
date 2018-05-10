@@ -2,8 +2,10 @@ package com.ertis.andromeda.managers;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 
 import com.ertis.andromeda.models.AppModel;
 import com.ertis.andromeda.receivers.PackageIntentReceiver;
@@ -35,6 +37,11 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>>
 	@Override
 	public ArrayList<AppModel> loadInBackground()
 	{
+		Intent indent = new Intent(Intent.ACTION_MAIN, null);
+		indent.addCategory(Intent.CATEGORY_LAUNCHER);
+		
+		final Context context = getContext();
+		
 		// retrieve the list of installed applications
 		List<ApplicationInfo> apps = mPm.getInstalledApplications(0);
 		
@@ -42,8 +49,6 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>>
 		{
 			apps = new ArrayList<ApplicationInfo>();
 		}
-		
-		final Context context = getContext();
 		
 		// create corresponding apps and load their labels
 		ArrayList<AppModel> items = new ArrayList<AppModel>(apps.size());
@@ -59,6 +64,24 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>>
 				items.add(app);
 			}
 		}
+		
+		/*
+		List<ResolveInfo> resolves = mPm.queryIntentActivities(indent,0);
+		ArrayList<AppModel> items = new ArrayList<AppModel>(resolves.size());
+		for (int i = 0; i < resolves.size(); i++)
+		{
+			ApplicationInfo applicationInfo = resolves.get(i).activityInfo.applicationInfo;
+			AppModel app = new AppModel(context, applicationInfo);
+			app.loadLabel(context);
+			items.add(app);
+		}
+		*/
+		
+		/*
+		List<String> packageNames = new ArrayList<>();
+		for (int i = 0; i < items.size(); i++)
+			packageNames.add(items.get(i).getApplicationPackageName());
+		*/
 		
 		// sort the list
 		Collections.sort(items, ALPHA_COMPARATOR);

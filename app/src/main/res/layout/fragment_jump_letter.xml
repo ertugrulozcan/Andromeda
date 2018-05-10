@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context=".JumpLetterFragment">
+
+    <FrameLayout
+        android:id="@+id/jumplistBaseLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/blackDarkShadow">
+
+        <GridLayout
+            android:id="@+id/keypadLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:rowCount="7"
+            android:columnCount="4">
+
+            <Button android:text="#" style="@style/JumpListButtonStyle" />
+            <Button android:text="A" style="@style/JumpListButtonStyle" />
+            <Button android:text="B" style="@style/JumpListButtonStyle" />
+            <Button android:text="C" style="@style/JumpListButtonStyle" />
+            <Button android:text="D" style="@style/JumpListButtonStyle" />
+            <Button android:text="E" style="@style/JumpListButtonStyle" />
+            <Button android:text="F" style="@style/JumpListButtonStyle" />
+            <Button android:text="G" style="@style/JumpListButtonStyle" />
+            <Button android:text="H" style="@style/JumpListButtonStyle" />
+            <Button android:text="I" style="@style/JumpListButtonStyle" />
+            <Button android:text="J" style="@style/JumpListButtonStyle" />
+            <Button android:text="K" style="@style/JumpListButtonStyle" />
+            <Button android:text="L" style="@style/JumpListButtonStyle" />
+            <Button android:text="M" style="@style/JumpListButtonStyle" />
+            <Button android:text="N" style="@style/JumpListButtonStyle" />
+            <Button android:text="O" style="@style/JumpListButtonStyle" />
+            <Button android:text="P" style="@style/JumpListButtonStyle" />
+            <Button android:text="Q" style="@style/JumpListButtonStyle" />
+            <Button android:text="R" style="@style/JumpListButtonStyle" />
+            <Button android:text="S" style="@style/JumpListButtonStyle" />
+            <Button android:text="T" style="@style/JumpListButtonStyle" />
+            <Button android:text="U" style="@style/JumpListButtonStyle" />
+            <Button android:text="V" style="@style/JumpListButtonStyle" />
+            <Button android:text="W" style="@style/JumpListButtonStyle" />
+            <Button android:text="X" style="@style/JumpListButtonStyle" />
+            <Button android:text="Y" style="@style/JumpListButtonStyle" />
+            <Button android:text="Z" style="@style/JumpListButtonStyle" />
+        </GridLayout>
+    </FrameLayout>
+</FrameLayout>

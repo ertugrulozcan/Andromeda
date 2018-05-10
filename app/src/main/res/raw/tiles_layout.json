@@ -1,114 +1,172 @@
 {
   "tiles": [{
-    "appPath": "/system/priv-app/SamsungContacts80/SamsungContacts80.apk",
+    "packageName": "com.samsung.android.contacts",
     "tileType": 2,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.google.android.apps.messaging-1/base.apk",
+    "packageName": "com.google.android.apps.messaging",
     "tileType": 0,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.samsung.android.calendar-1/base.apk",
+    "packageName": "com.samsung.android.calendar",
     "tileType": 0,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "",
+    "queryParams": ""
   }, {
-    "appPath": "/system/priv-app/SamsungContacts80/SamsungContacts80.apk",
+    "packageName": "com.samsung.android.contacts",
     "tileType": 1,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "5543B51F",
+    "queryParams": "phoneDialer"
   }, {
-    "appPath": "/data/app/com.google.android.gm-1/base.apk",
+    "packageName": "com.google.android.gm",
     "tileType": 1,
     "tileStyle": 0,
-    "tileBackground": "#99DD4B39"
+    "tileBackground": "#99DD4B39",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/ru.mail.mailapp-1/base.apk",
+    "packageName": "ru.mail.mailapp",
     "tileType": 1,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.whatsapp-2/base.apk",
+    "packageName": "com.whatsapp",
     "tileType": 1,
     "tileStyle": 0,
-    "tileBackground": "#CD232F3C"
+    "tileBackground": "#CD232F3C",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.android.chrome-1/base.apk",
+    "packageName": "com.android.chrome",
     "tileType": 1,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.twitter.android-2/base.apk",
+    "packageName": "com.twitter.android",
     "tileType": 0,
     "tileStyle": 0,
-    "tileBackground": "#FF55ACEE"
+    "tileBackground": "#1DA1F2",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.instagram.android-2/base.apk",
+    "packageName": "com.instagram.android",
     "tileType": 0,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.snapchat.android-1/base.apk",
+    "packageName": "com.snapchat.android",
     "tileType": 0,
     "tileStyle": 0,
-    "tileBackground": "#EEEC00"
+    "tileBackground": "",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.linkedin.android-1/base.apk",
+    "packageName": "com.linkedin.android",
     "tileType": 0,
     "tileStyle": 0,
-    "tileBackground": "#FF007BB5"
+    "tileBackground": "#FF007BB5",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.onedio.androidside-2/base.apk",
+    "packageName": "com.onedio.androidside",
     "tileType": 0,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "",
+    "queryParams": ""
   }, {
-    "appPath": "",
+    "packageName": "",
     "tileType": 0,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.android.vending-1/base.apk",
+    "packageName": "com.android.vending",
     "tileType": 1,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.sec.android.gallery3d-1/base.apk",
+    "packageName": "com.sec.android.gallery3d",
     "tileType": 2,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.spotify.music-2/base.apk",
+    "packageName": "com.spotify.music",
     "tileType": 1,
     "tileStyle": 0,
-    "tileBackground": "#CC222326"
+    "tileBackground": "#CC222326",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.google.android.youtube-1/base.apk",
+    "packageName": "com.google.android.youtube",
     "tileType": 1,
     "tileStyle": 0,
-    "tileBackground": "#66FF0000"
+    "tileBackground": "#66FF0000",
+    "queryParams": ""
   }, {
-    "appPath": "/system/priv-app/SamsungCamera6/SamsungCamera6.apk",
+    "packageName": "com.sec.android.app.camera",
     "tileType": 1,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.sec.android.app.clockpackage-2/base.apk",
+    "packageName": "com.microsoft.office.word",
     "tileType": 0,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "2C5898",
+    "queryParams": ""
   }, {
-    "appPath": "/data/app/com.aero.calculator-2/base.apk",
+    "packageName": "com.microsoft.office.excel",
     "tileType": 0,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "#207347",
+    "queryParams": ""
   }, {
-    "appPath": "/system/priv-app/SecSettings2/SecSettings2.apk",
+    "packageName": "com.aero.calculator",
     "tileType": 0,
     "tileStyle": 0,
-    "tileBackground": ""
+    "tileBackground": "",
+    "queryParams": ""
+  }, {
+    "packageName": "com.sec.android.app.clockpackage",
+    "tileType": 0,
+    "tileStyle": 0,
+    "tileBackground": "",
+    "queryParams": ""
+  }, {
+    "packageName": "com.android.settings",
+    "tileType": 0,
+    "tileStyle": 0,
+    "tileBackground": "",
+    "queryParams": ""
+  }, {
+    "packageName": "",
+    "tileType": 0,
+    "tileStyle": 0,
+    "tileBackground": "",
+    "queryParams": ""
+  }, {
+    "packageName": "com.microsoft.office.powerpoint",
+    "tileType": 0,
+    "tileStyle": 0,
+    "tileBackground": "#D04727",
+    "queryParams": ""
+  }, {
+    "packageName": "com.microsoft.office.onenote",
+    "tileType": 0,
+    "tileStyle": 0,
+    "tileBackground": "#7719AA",
+    "queryParams": ""
+  }, {
+    "packageName": "com.evernote",
+    "tileType": 0,
+    "tileStyle": 0,
+    "tileBackground": "",
+    "queryParams": ""
   }
   ]
 }

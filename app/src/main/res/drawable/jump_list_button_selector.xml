@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+    <item name="android:textSize">40sp</item>
+    <item name="android:background">@drawable/jump_list_button_selector</item>
+    <item name="android:textColor">@drawable/jump_list_button_selector</item>
+    <item name="android:layout_marginBottom">20dp</item>
+    -->
+
+    <!-- Default color -->
+    <item android:state_enabled="true"
+          android:state_pressed="false"
+          android:color="#FFFFFFFF"
+          android:textSize="40sp">
+        <shape android:shape="rectangle">
+            <stroke android:width="1dip" android:color="#EEEEEE" />
+        </shape>
+    </item>
+
+    <item android:state_enabled="true"
+          android:state_pressed="true"
+          android:color="#FFFF0000"
+          android:textSize="40sp">
+        <shape android:shape="rectangle">
+            <stroke android:width="1dip" android:color="#EEEEEE" />
+        </shape>
+    </item>
+
+    <item android:state_enabled="false"
+          android:color="#77CCCCCC"
+          android:textSize="40sp">
+        <shape android:shape="rectangle">
+            <stroke android:width="0dip" android:color="#EEEEEE" />
+        </shape>
+    </item>
+</selector>

@@ -1,6 +1,13 @@
 package com.ertis.andromeda;
 
+import android.animation.ObjectAnimator;
+import android.app.WallpaperManager;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.Fragment;
 import android.app.LoaderManager;
@@ -10,15 +17,23 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.Gravity;
+import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.BounceInterpolator;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.ertis.andromeda.adapters.AppMenuAdapter;
 import com.ertis.andromeda.adapters.TilesAdapter;
+import com.ertis.andromeda.components.SlidingDownPanelLayout;
 import com.ertis.andromeda.helpers.Colors;
 import com.ertis.andromeda.managers.AppsLoader;
 import com.ertis.andromeda.models.AppMenuItem;
 import com.ertis.andromeda.models.AppModel;
 import com.ertis.andromeda.models.Tile;
+import com.ertis.andromeda.slideup.SlideUp;
+import com.ertis.andromeda.slideup.SlideUpBuilder;
 import com.ertis.andromeda.utilities.TypefaceUtil;
 
 import org.json.JSONArray;
@@ -47,8 +62,14 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 	private List<AppMenuItem> menuItemList = new ArrayList<>();
 	
 	private static final int NUM_PAGES = 2;
+	private FrameLayout baseLayout;
 	private ViewPager viewPager;
 	private PagerAdapter viewPagerAdapter;
+	
+	private SlideUp slideUp;
+	private View sliderView;
+	
+	private ObjectAnimator bounceAnimation;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -56,7 +77,7 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_app_drawer);
 		
-		TypefaceUtil.overrideFont(getApplicationContext(), "SANS", "font/segoeui.ttf");
+		TypefaceUtil.overrideFont(getApplicationContext(), "SANS", "fonts/segoewp/segoe-wp-light.ttf");
 		
 		this.tilesAdapter = new TilesAdapter(this, tileList);
 		this.appDrawerFragment = AppDrawerFragment.newInstance(tilesAdapter);
@@ -67,6 +88,8 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		this.viewPager = (ViewPager) findViewById(R.id.viewpager);
 		this.viewPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 		this.viewPager.setAdapter(this.viewPagerAdapter);
+		
+		this.baseLayout = findViewById(R.id.baseLayout);
 		
 		this.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
 		{
@@ -101,6 +124,63 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 			}
 		});
 		
+		sliderView = this.findViewById(R.id.slideView);
+		
+		slideUp = new SlideUpBuilder(sliderView).withStartGravity(Gravity.TOP)
+				.withLoggingEnabled(true)
+				.withStartState(SlideUp.State.SHOWED)
+				.withListeners(new SlideUp.Listener.Events()
+				{
+					@Override
+					public void onSlide(float percent, boolean isShowOrHide)
+					{
+						if (percent == 0 && !isShowOrHide)
+							bounceAnimation.start();
+					}
+					
+					@Override
+					public void onVisibilityChanged(int visibility)
+					{
+						switch (visibility)
+						{
+							case View.GONE :
+								appDrawerFragment.Enable();
+								appListFragment.Enable();
+								break;
+							case View.VISIBLE :
+								appDrawerFragment.Disable();
+								appListFragment.Disable();
+								tilesAdapter.notifyDataSetChanged();
+								break;
+						}
+					}
+				})
+				.build();
+		//.withSlideFromOtherView(anotherView)
+		//.withGesturesEnabled()
+		//.withHideSoftInputWhenDisplayed()
+		//.withInterpolator()
+		//.withAutoSlideDuration()
+		//.withLoggingEnabled()
+		//.withTouchableAreaPx()
+		//.withTouchableAreaDp()
+		//.withListeners()
+		//.withSavedState()
+		
+		// Slider baslangicta acik geldigi icin;
+		appDrawerFragment.Disable();
+		appListFragment.Disable();
+		
+		bounceAnimation = CreateBounceAnimation(this.sliderView);
+		
+		this.setClockFonts();
+		
+		final WallpaperManager wallpaperManager = WallpaperManager.getInstance(this);
+		final Drawable wallpaperDrawable = wallpaperManager.getDrawable();
+		
+		this.baseLayout.setBackground(wallpaperDrawable);
+		this.sliderView.setBackground(wallpaperDrawable);
+		
 		// create the loader to load the apps list in background
 		getLoaderManager().initLoader(0, null, this);
 		
@@ -117,13 +197,38 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		{
 			// If the user is currently looking at the first step, allow the system to handle the
 			// Back button. This calls finish() on this activity and pops the back stack.
-			super.onBackPressed();
+			//super.onBackPressed();
+			
+			slideUp.show();
 		}
 		else
 		{
 			// Otherwise, select the previous step.
 			this.viewPager.setCurrentItem(this.viewPager.getCurrentItem() - 1);
 		}
+	}
+	
+	private ObjectAnimator CreateBounceAnimation(View targetView)
+	{
+		ObjectAnimator animator = ObjectAnimator.ofFloat(targetView, "translationY", 0, -150, 0);
+		animator.setInterpolator(new BounceInterpolator());
+		animator.setDuration(1200);
+		
+		return animator;
+	}
+	
+	private void setClockFonts()
+	{
+		Typeface segoeTypeface = Typeface.createFromAsset(getAssets(), "fonts/segoewp/segoe-wp-light.ttf");
+		
+		TextView hourTextView = (TextView)findViewById(R.id.hour_text);
+		hourTextView.setTypeface(segoeTypeface);
+		
+		TextView dayOfWeeokTextView = (TextView)findViewById(R.id.dayofweek_text);
+		dayOfWeeokTextView.setTypeface(segoeTypeface);
+		
+		TextView dateTextView = (TextView)findViewById(R.id.date_text);
+		dateTextView.setTypeface(segoeTypeface);
 	}
 	
 	private void loadTiles(final ArrayList<AppModel> appList)
@@ -137,6 +242,8 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		
 		try
 		{
+			this.tileList.clear();
+			
 			String jsonStr = this.ReadTileLayoutsFromJsonResource();
 			
 			JSONObject jsonObj = new JSONObject(jsonStr);
@@ -145,10 +252,11 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 			for (int i = 0; i < tiles.length(); i++)
 			{
 				JSONObject tileData = tiles.getJSONObject(i);
-				String appPath = tileData.getString("appPath");
+				String appPackageName = tileData.getString("packageName");
 				int tileTypeValue = tileData.getInt("tileType");
 				int tileStyleValue = tileData.getInt("tileStyle");
 				String tileBackgroundStr = tileData.getString("tileBackground");
+				String queryParams = tileData.getString("queryParams");
 				
 				if (tileTypeValue < 0 || tileTypeValue >= Tile.TileType.values().length)
 					tileTypeValue = 0;
@@ -167,8 +275,7 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 				for (int a = 0; a < appList.size(); a++)
 				{
 					AppModel application = appList.get(a);
-					String sourceDir = application.getAppInfo().sourceDir;
-					if (appPath.equals(sourceDir))
+					if (appPackageName.equals(application.getApplicationPackageName()))
 					{
 						tile = new Tile(application, tileType, tileColor, tileStyle);
 						continue;
@@ -177,6 +284,17 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 				
 				if (tile == null)
 					tile = Tile.CreateFakeTile(tileType);
+				
+				tile.setQueryParams(queryParams);
+				
+				if (queryParams.equals("phoneDialer"))
+				{
+					Resources res = getResources();
+					Drawable drawable = res.getDrawable(R.drawable.phone);
+					tile.setCustomIcon(drawable);
+					
+					tile.setCustomLabel("Phone");
+				}
 				
 				tileList.add(tile);
 			}

@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="black">#000000</color>
     <color name="colorPrimary">#111111</color>
     <color name="colorPrimaryDark">#050505</color>
     <color name="colorAccent">#194084</color>
     <color name="colorForeground">#FFFFFF</color>
     <color name="transparent">#00000000</color>
     <color name="blackShadow">#77000000</color>
+    <color name="blackDarkShadow">#DD000000</color>
     <color name="colorTileBackground">#A3194084</color>
+    <color name="popupBackground">#2B2B2B</color>
 </resources>

@@ -378,7 +378,7 @@ open class SpannedGridLayoutManager(val orientation: Orientation,
 
         while (--detachedCount >= 0) {
             val child = getChildAt(firstDetachedPos)
-            //removeAndRecycleViewAt(firstDetachedPos, recycler)
+            removeAndRecycleViewAt(firstDetachedPos, recycler)
             updateEdgesWithRemovedChild(child, direction)
         }
     }

@@ -16,10 +16,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/search_box_style"
+            android:textColor="@color/colorForeground"
             android:drawablePadding="8dp"
             android:hint="Search"
             android:layout_margin="8dp"
-            android:padding="8dp" />
+            android:padding="8dp"
+            android:selectAllOnFocus="true"
+            android:maxLines="1" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler_view"
@@ -32,5 +35,12 @@
             android:layout_marginLeft="12dp"
             android:layout_marginRight="12dp" />
     </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/contentLayout">
+
+    </FrameLayout>
 
 </FrameLayout>

@@ -1,13 +1,25 @@
 <resources>
+    <style name="JumpListButtonStyle">
+        <item name="android:textSize">40sp</item>
+        <item name="android:background">@drawable/jump_list_button_selector</item>
+        <item name="android:textColor">@drawable/jump_list_button_selector</item>
+        <item name="android:layout_marginBottom">32dp</item>
+    </style>
+
+    <style name="PopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/popup_template</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:itemBackground">@color/popupBackground</item>
+    </style>
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@drawable/wallpaper</item>
+        <item name="android:windowBackground">@color/black</item>
         <item name="android:textColor">@color/colorForeground</item>
         <item name="android:typeface">sans</item>
+        <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
     </style>
 </resources>

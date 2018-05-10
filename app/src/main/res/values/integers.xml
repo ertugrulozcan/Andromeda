@@ -2,5 +2,5 @@
 <resources>
     <integer name="slide_animation_duration">300</integer>
     <integer name="tile_pre_flip_time">600</integer>
-    <integer name="tile_flip_time_full">1000</integer>
+    <integer name="tile_flip_time_full">1200</integer>
 </resources>

@@ -1,8 +1,11 @@
 package com.ertis.andromeda;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,12 +15,21 @@ import android.widget.FrameLayout;
 
 import com.ertis.andromeda.adapters.AppMenuAdapter;
 import com.ertis.andromeda.adapters.StickyHeadersLinearLayoutManager;
+import com.ertis.andromeda.models.AppMenuItem;
+import com.ertis.andromeda.models.AppModel;
+import com.ertis.andromeda.models.Tile;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 public class AppListFragment extends Fragment
 {
 	private FrameLayout baseLayout;
 	private RecyclerView recyclerView;
 	private AppMenuAdapter menuItemAdapter;
+	
+	private boolean isEnabled = true;
 	
 	public AppListFragment()
 	{
@@ -55,10 +67,71 @@ public class AppListFragment extends Fragment
 		StickyHeadersLinearLayoutManager<AppMenuAdapter> layoutManager = new StickyHeadersLinearLayoutManager<>(view.getContext());
 		recyclerView.setLayoutManager(layoutManager);
 		
+		this.menuItemAdapter.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View view)
+			{
+				if (!isEnabled)
+					return;
+
+				AppMenuItem menuItem = menuItemAdapter.getDataContext(view);
+				if (menuItem != null)
+				{
+					if (menuItem.isHeaderItem())
+					{
+						// Show jump letters fragment
+						JumpLetterFragment jumpLetterFragment = JumpLetterFragment.newInstance(menuItemAdapter.getMenuItemList(), recyclerView);
+						FragmentManager fm = getActivity().getSupportFragmentManager();
+						fm.beginTransaction()
+								.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+								.replace(R.id.contentLayout, jumpLetterFragment,"jumpLetterFragment")
+								.addToBackStack("jumpLetterFragment")
+								.commit();
+					}
+					else
+					{
+						AppModel app = menuItem.getApp();
+						if (app != null)
+						{
+							startNewActivity(getActivity(), app.getApplicationPackageName());
+						}
+					}
+				}
+			}
+		});
+		
 		//recyclerView.addItemDecoration(new AppListMenuItemDecoration(this, LinearLayoutManager.VERTICAL, 16));
 		recyclerView.setAdapter(this.menuItemAdapter);
 		
 		return view;
+	}
+	
+	public void startNewActivity(Context context, String packageName)
+	{
+		Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+		
+		if (intent != null)
+		{
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			context.startActivity(intent);
+		}
+		else
+		{
+			// Bring user to the market or let them choose an app?
+			intent = new Intent(Intent.ACTION_VIEW);
+			intent.setData(Uri.parse("market://details?id=" + packageName));
+		}
+	}
+	
+	public void Enable()
+	{
+		this.isEnabled = true;
+	}
+	
+	public void Disable()
+	{
+		this.isEnabled = false;
 	}
 	
 	@Override

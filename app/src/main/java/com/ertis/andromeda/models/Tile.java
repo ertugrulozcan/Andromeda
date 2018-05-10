@@ -12,18 +12,29 @@ import com.ertis.andromeda.helpers.Colors;
 public class Tile
 {
 	private String caption;
+	private String customLabel;
 	private Drawable icon;
+	private Drawable customIcon;
 	private ColorDrawable tileColor;
 	private int iconId;
 	private AppModel application;
-	private TileType type;
+	protected TileType type;
 	private TileStyle style;
+	private String queryParams;
+	
+	public void setCustomLabel(String customLabel)
+	{
+		this.customLabel = customLabel;
+	}
 	
 	public String getCaption()
 	{
 		String label = this.caption;
 		if (application != null)
 			label = this.application.getLabel();
+		
+		if (this.customLabel != null && !this.customLabel.isEmpty())
+			label = this.customLabel;
 		
 		if (label.length() > 25)
 			label = label.substring(0, 25);
@@ -36,8 +47,16 @@ public class Tile
 		this.caption = caption;
 	}
 	
+	public void setCustomIcon(Drawable customIcon)
+	{
+		this.customIcon = customIcon;
+	}
+	
 	public Drawable getIcon()
 	{
+		if (this.customIcon != null)
+			return this.customIcon;
+		
 		if (application != null)
 			return this.application.getIcon();
 		
@@ -74,17 +93,20 @@ public class Tile
 		return this.type;
 	}
 	
-	public void setTileType(TileType type)
+	public void setTileType(TileType type) throws Exception
 	{
+		if (type == TileType.Group)
+			throw new Exception("Group yalnizca TileGroup class'i tarafindan kullanilablir.");
+		
 		this.type = type;
 	}
 	
-	public TileStyle getStyle()
+	public TileStyle getTileStyle()
 	{
 		return style;
 	}
 	
-	private void setStyle(TileStyle style)
+	private void setTileStyle(TileStyle style)
 	{
 		this.style = style;
 	}
@@ -99,20 +121,44 @@ public class Tile
 		this.tileColor = tileColor;
 	}
 	
+	public String getQueryParams()
+	{
+		return queryParams;
+	}
+	
+	public void setQueryParams(String queryParams)
+	{
+		this.queryParams = queryParams;
+	}
+	
 	public Tile(AppModel appModel, TileType tileType, ColorDrawable color)
 	{
-		this.setApplication(appModel);
-		this.setTileType(tileType);
-		this.setTileColor(color);
-		this.setStyle(TileStyle.Icon);
+		try
+		{
+			this.setApplication(appModel);
+			this.setTileType(tileType);
+			this.setTileColor(color);
+			this.setTileStyle(TileStyle.Icon);
+		}
+		catch (Exception ex)
+		{
+		
+		}
 	}
 	
 	public Tile(AppModel appModel, TileType tileType, ColorDrawable color, TileStyle style)
 	{
-		this.setApplication(appModel);
-		this.setTileType(tileType);
-		this.setTileColor(color);
-		this.setStyle(style);
+		try
+		{
+			this.setApplication(appModel);
+			this.setTileType(tileType);
+			this.setTileColor(color);
+			this.setTileStyle(style);
+		}
+		catch (Exception ex)
+		{
+		
+		}
 	}
 	
 	public static Tile CreateFakeTile(TileType tileType)
@@ -129,7 +175,8 @@ public class Tile
 		Small,
 		Medium,
 		MediumWide,
-		Big
+		Big,
+		Group
 	}
 	
 	public enum TileStyle
