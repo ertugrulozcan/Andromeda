@@ -11,6 +11,7 @@ import com.ertis.andromeda.helpers.Colors;
 
 public class Tile
 {
+	protected TileType type;
 	private String caption;
 	private String customLabel;
 	private Drawable icon;
@@ -18,7 +19,7 @@ public class Tile
 	private ColorDrawable tileColor;
 	private int iconId;
 	private AppModel application;
-	protected TileType type;
+	private TileSize size;
 	private TileStyle style;
 	private String queryParams;
 	
@@ -36,7 +37,7 @@ public class Tile
 		if (this.customLabel != null && !this.customLabel.isEmpty())
 			label = this.customLabel;
 		
-		if (label.length() > 25)
+		if (label != null && label.length() > 25)
 			label = label.substring(0, 25);
 		
 		return label;
@@ -88,17 +89,14 @@ public class Tile
 		this.application = app;
 	}
 	
-	public TileType getTileType()
+	public TileSize getTileSize()
 	{
-		return this.type;
+		return this.size;
 	}
 	
-	public void setTileType(TileType type) throws Exception
+	public void setTileSize(TileSize type)
 	{
-		if (type == TileType.Group)
-			throw new Exception("Group yalnizca TileGroup class'i tarafindan kullanilablir.");
-		
-		this.type = type;
+		this.size = type;
 	}
 	
 	public TileStyle getTileStyle()
@@ -109,6 +107,11 @@ public class Tile
 	private void setTileStyle(TileStyle style)
 	{
 		this.style = style;
+	}
+	
+	public TileType getTileType()
+	{
+		return type;
 	}
 	
 	public ColorDrawable getTileColor()
@@ -131,52 +134,45 @@ public class Tile
 		this.queryParams = queryParams;
 	}
 	
-	public Tile(AppModel appModel, TileType tileType, ColorDrawable color)
+	public Tile(AppModel appModel, TileSize tileSize, ColorDrawable color)
 	{
-		try
-		{
-			this.setApplication(appModel);
-			this.setTileType(tileType);
-			this.setTileColor(color);
-			this.setTileStyle(TileStyle.Icon);
-		}
-		catch (Exception ex)
-		{
-		
-		}
+		this.type = TileType.AppTile;
+		this.setApplication(appModel);
+		this.setTileSize(tileSize);
+		this.setTileColor(color);
+		this.setTileStyle(TileStyle.Icon);
 	}
 	
-	public Tile(AppModel appModel, TileType tileType, ColorDrawable color, TileStyle style)
+	public Tile(AppModel appModel, TileSize tileSize, ColorDrawable color, TileStyle style)
 	{
-		try
-		{
-			this.setApplication(appModel);
-			this.setTileType(tileType);
-			this.setTileColor(color);
-			this.setTileStyle(style);
-		}
-		catch (Exception ex)
-		{
-		
-		}
+		this.type = TileType.AppTile;
+		this.setApplication(appModel);
+		this.setTileSize(tileSize);
+		this.setTileColor(color);
+		this.setTileStyle(style);
 	}
 	
-	public static Tile CreateFakeTile(TileType tileType)
+	public static Tile CreateFakeTile(TileSize tileSize)
 	{
-		Tile tile = new Tile(null, tileType, Colors.rgb("00000000"));
+		Tile tile = new Tile(null, tileSize, Colors.rgb("00000000"));
 		tile.setCaption("");
 		tile.setIcon(null);
 		
 		return tile;
 	}
 	
-	public enum TileType
+	public enum TileSize
 	{
 		Small,
 		Medium,
 		MediumWide,
-		Big,
-		Group
+		Large
+	}
+	
+	public enum TileType
+	{
+		AppTile,
+		FolderTile
 	}
 	
 	public enum TileStyle

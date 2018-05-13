@@ -3,9 +3,7 @@ package com.ertis.andromeda;
 import android.animation.ObjectAnimator;
 import android.app.WallpaperManager;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.app.FragmentManager;
@@ -26,12 +24,12 @@ import android.widget.TextView;
 
 import com.ertis.andromeda.adapters.AppMenuAdapter;
 import com.ertis.andromeda.adapters.TilesAdapter;
-import com.ertis.andromeda.components.SlidingDownPanelLayout;
 import com.ertis.andromeda.helpers.Colors;
 import com.ertis.andromeda.managers.AppsLoader;
 import com.ertis.andromeda.models.AppMenuItem;
 import com.ertis.andromeda.models.AppModel;
 import com.ertis.andromeda.models.Tile;
+import com.ertis.andromeda.models.FolderTile;
 import com.ertis.andromeda.slideup.SlideUp;
 import com.ertis.andromeda.slideup.SlideUpBuilder;
 import com.ertis.andromeda.utilities.TypefaceUtil;
@@ -245,59 +243,7 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 			this.tileList.clear();
 			
 			String jsonStr = this.ReadTileLayoutsFromJsonResource();
-			
-			JSONObject jsonObj = new JSONObject(jsonStr);
-			JSONArray tiles = jsonObj.getJSONArray("tiles");
-			
-			for (int i = 0; i < tiles.length(); i++)
-			{
-				JSONObject tileData = tiles.getJSONObject(i);
-				String appPackageName = tileData.getString("packageName");
-				int tileTypeValue = tileData.getInt("tileType");
-				int tileStyleValue = tileData.getInt("tileStyle");
-				String tileBackgroundStr = tileData.getString("tileBackground");
-				String queryParams = tileData.getString("queryParams");
-				
-				if (tileTypeValue < 0 || tileTypeValue >= Tile.TileType.values().length)
-					tileTypeValue = 0;
-				
-				if (tileStyleValue < 0 || tileStyleValue >= Tile.TileStyle.values().length)
-					tileStyleValue = 0;
-				
-				Tile.TileType tileType = Tile.TileType.values()[tileTypeValue];
-				Tile.TileStyle tileStyle = Tile.TileStyle.values()[tileStyleValue];
-				
-				ColorDrawable tileColor = Colors.rgb(tileBackgroundStr);
-				if (tileBackgroundStr == null || tileBackgroundStr.isEmpty())
-					tileColor = new ColorDrawable(getResources().getColor(R.color.colorTileBackground));
-				
-				Tile tile = null;
-				for (int a = 0; a < appList.size(); a++)
-				{
-					AppModel application = appList.get(a);
-					if (appPackageName.equals(application.getApplicationPackageName()))
-					{
-						tile = new Tile(application, tileType, tileColor, tileStyle);
-						continue;
-					}
-				}
-				
-				if (tile == null)
-					tile = Tile.CreateFakeTile(tileType);
-				
-				tile.setQueryParams(queryParams);
-				
-				if (queryParams.equals("phoneDialer"))
-				{
-					Resources res = getResources();
-					Drawable drawable = res.getDrawable(R.drawable.phone);
-					tile.setCustomIcon(drawable);
-					
-					tile.setCustomLabel("Phone");
-				}
-				
-				tileList.add(tile);
-			}
+			this.tileList.addAll(this.ExtractTilesFromJson(jsonStr, appList));
 		}
 		catch (Exception ex)
 		{
@@ -305,6 +251,103 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		}
 		
 		this.tilesAdapter.notifyDataSetChanged();
+	}
+	
+	private List<Tile> ExtractTiles(JSONArray tiles, final ArrayList<AppModel> appList)
+	{
+		List<Tile> tileList = new ArrayList<>();
+		
+		try
+		{
+			for (int i = 0; i < tiles.length(); i++)
+			{
+				Tile tile = null;
+				
+				JSONObject tileData = tiles.getJSONObject(i);
+				
+				int tileTypeValue = tileData.getInt("tileSize");
+				if (tileTypeValue < 0 || tileTypeValue >= Tile.TileSize.values().length)
+					tileTypeValue = 0;
+				
+				Tile.TileSize tileSize = Tile.TileSize.values()[tileTypeValue];
+				
+				if (!tileData.isNull("packageName"))
+				{
+					int tileStyleValue = tileData.getInt("tileStyle");
+					if (tileStyleValue < 0 || tileStyleValue >= Tile.TileStyle.values().length)
+						tileStyleValue = 0;
+					
+					Tile.TileStyle tileStyle = Tile.TileStyle.values()[tileStyleValue];
+					
+					String tileBackgroundStr = tileData.getString("tileBackground");
+					ColorDrawable tileColor = Colors.rgb(tileBackgroundStr);
+					if (tileBackgroundStr == null || tileBackgroundStr.isEmpty())
+						tileColor = new ColorDrawable(getResources().getColor(R.color.colorTileBackground));
+					
+					String appPackageName = tileData.getString("packageName");
+					for (int a = 0; a < appList.size(); a++)
+					{
+						AppModel application = appList.get(a);
+						if (appPackageName.equals(application.getApplicationPackageName()))
+						{
+							tile = new Tile(application, tileSize, tileColor, tileStyle);
+							
+							continue;
+						}
+					}
+					
+					if (tile == null)
+					{
+						tile = Tile.CreateFakeTile(tileSize);
+					}
+					
+					String queryParams = tileData.getString("queryParams");
+					tile.setQueryParams(queryParams);
+					
+					if (queryParams.equals("phoneDialer"))
+					{
+						Resources res = getResources();
+						Drawable drawable = res.getDrawable(R.drawable.phone);
+						tile.setCustomIcon(drawable);
+						
+						tile.setCustomLabel("Phone");
+					}
+				}
+				else if (!tileData.isNull("folderName"))
+				{
+					String folderName = tileData.getString("folderName");
+					tile = new FolderTile(folderName, tileSize);
+					FolderTile folderTile = (FolderTile)tile;
+					
+					JSONArray subTilesArray = tileData.getJSONArray("subTiles");
+					List<Tile> subTiles = this.ExtractTiles(subTilesArray, appList);
+					folderTile.AddTiles(subTiles);
+				}
+				
+				tileList.add(tile);
+			}
+			
+			return tileList;
+		}
+		catch (Exception ex)
+		{
+			return null;
+		}
+	}
+	
+	private List<Tile> ExtractTilesFromJson(String jsonStr, final ArrayList<AppModel> appList)
+	{
+		try
+		{
+			JSONObject jsonObj = new JSONObject(jsonStr);
+			JSONArray tiles = jsonObj.getJSONArray("tiles");
+			
+			return this.ExtractTiles(tiles, appList);
+		}
+		catch (Exception ex)
+		{
+			return null;
+		}
 	}
 	
 	private void loadMenuItemList(ArrayList<AppModel> appList)
@@ -374,37 +417,37 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		return jsonString;
 	}
 	
-	private Tile.TileType GetTileType(int index)
+	private Tile.TileSize GetTileType(int index)
 	{
 		switch (index)
 		{
-			case 1 : return Tile.TileType.Medium;
-			case 2 : return Tile.TileType.Medium;
-			case 3 : return Tile.TileType.Small;
-			case 4 : return Tile.TileType.Small;
-			case 5 : return Tile.TileType.Small;
-			case 6 : return Tile.TileType.Small;
-			case 7 : return Tile.TileType.Medium;
-			case 8 : return Tile.TileType.MediumWide;
-			case 9 : return Tile.TileType.Small;
-			case 10 : return Tile.TileType.Small;
-			case 11 : return Tile.TileType.Medium;
-			case 12 : return Tile.TileType.Medium;
-			case 13 : return Tile.TileType.Small;
-			case 14 : return Tile.TileType.Small;
-			case 15 : return Tile.TileType.MediumWide;
-			case 16 : return Tile.TileType.Medium;
-			case 17 : return Tile.TileType.Big;
-			case 18 : return Tile.TileType.Medium;
-			case 19 : return Tile.TileType.Small;
-			case 20 : return Tile.TileType.Small;
-			case 21 : return Tile.TileType.Small;
-			case 22 : return Tile.TileType.Small;
+			case 1 : return Tile.TileSize.Medium;
+			case 2 : return Tile.TileSize.Medium;
+			case 3 : return Tile.TileSize.Small;
+			case 4 : return Tile.TileSize.Small;
+			case 5 : return Tile.TileSize.Small;
+			case 6 : return Tile.TileSize.Small;
+			case 7 : return Tile.TileSize.Medium;
+			case 8 : return Tile.TileSize.MediumWide;
+			case 9 : return Tile.TileSize.Small;
+			case 10 : return Tile.TileSize.Small;
+			case 11 : return Tile.TileSize.Medium;
+			case 12 : return Tile.TileSize.Medium;
+			case 13 : return Tile.TileSize.Small;
+			case 14 : return Tile.TileSize.Small;
+			case 15 : return Tile.TileSize.MediumWide;
+			case 16 : return Tile.TileSize.Medium;
+			case 17 : return Tile.TileSize.Large;
+			case 18 : return Tile.TileSize.Medium;
+			case 19 : return Tile.TileSize.Small;
+			case 20 : return Tile.TileSize.Small;
+			case 21 : return Tile.TileSize.Small;
+			case 22 : return Tile.TileSize.Small;
 			
-			case 23 : return Tile.TileType.Medium;
-			case 24 : return Tile.TileType.Medium;
-			case 25 : return Tile.TileType.Small;
-			case 26 : return Tile.TileType.Small;
+			case 23 : return Tile.TileSize.Medium;
+			case 24 : return Tile.TileSize.Medium;
+			case 25 : return Tile.TileSize.Small;
+			case 26 : return Tile.TileSize.Small;
 			default:
 			{
 				return this.GetTileType(index - 26);
@@ -412,36 +455,36 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		}
 	}
 	
-	private Tile.TileType GetTileType2(int index)
+	private Tile.TileSize GetTileType2(int index)
 	{
 		switch (index)
 		{
-			case 1 : return Tile.TileType.Medium;
-			case 2 : return Tile.TileType.Small;
-			case 3 : return Tile.TileType.Small;
-			case 4 : return Tile.TileType.Small;
-			case 5 : return Tile.TileType.Small;
-			case 6 : return Tile.TileType.MediumWide;
-			case 7 : return Tile.TileType.Small;
-			case 8 : return Tile.TileType.Small;
-			case 9 : return Tile.TileType.Medium;
-			case 10 : return Tile.TileType.Medium;
-			case 11 : return Tile.TileType.Medium;
-			case 12 : return Tile.TileType.Medium;
-			case 13 : return Tile.TileType.MediumWide;
-			case 14 : return Tile.TileType.Small;
-			case 15 : return Tile.TileType.Small;
-			case 16 : return Tile.TileType.Medium;
-			case 17 : return Tile.TileType.Medium;
-			case 18 : return Tile.TileType.Small;
-			case 19 : return Tile.TileType.Small;
-			case 20 : return Tile.TileType.MediumWide;
-			case 21 : return Tile.TileType.Medium;
-			case 22 : return Tile.TileType.Big;
-			case 23 : return Tile.TileType.Medium;
-			case 24 : return Tile.TileType.Small;
-			case 25 : return Tile.TileType.Small;
-			case 26 : return Tile.TileType.Small;
+			case 1 : return Tile.TileSize.Medium;
+			case 2 : return Tile.TileSize.Small;
+			case 3 : return Tile.TileSize.Small;
+			case 4 : return Tile.TileSize.Small;
+			case 5 : return Tile.TileSize.Small;
+			case 6 : return Tile.TileSize.MediumWide;
+			case 7 : return Tile.TileSize.Small;
+			case 8 : return Tile.TileSize.Small;
+			case 9 : return Tile.TileSize.Medium;
+			case 10 : return Tile.TileSize.Medium;
+			case 11 : return Tile.TileSize.Medium;
+			case 12 : return Tile.TileSize.Medium;
+			case 13 : return Tile.TileSize.MediumWide;
+			case 14 : return Tile.TileSize.Small;
+			case 15 : return Tile.TileSize.Small;
+			case 16 : return Tile.TileSize.Medium;
+			case 17 : return Tile.TileSize.Medium;
+			case 18 : return Tile.TileSize.Small;
+			case 19 : return Tile.TileSize.Small;
+			case 20 : return Tile.TileSize.MediumWide;
+			case 21 : return Tile.TileSize.Medium;
+			case 22 : return Tile.TileSize.Large;
+			case 23 : return Tile.TileSize.Medium;
+			case 24 : return Tile.TileSize.Small;
+			case 25 : return Tile.TileSize.Small;
+			case 26 : return Tile.TileSize.Small;
 			
 			default:
 			{

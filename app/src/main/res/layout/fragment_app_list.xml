@@ -30,7 +30,7 @@
             android:layout_height="match_parent"
             android:scrollbars="vertical"
             android:clipToPadding="false"
-            android:paddingTop="18dp"
+            android:paddingTop="14dp"
             android:paddingBottom="96dp"
             android:layout_marginLeft="12dp"
             android:layout_marginRight="12dp" />

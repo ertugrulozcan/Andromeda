@@ -1,169 +1,179 @@
 {
   "tiles": [{
     "packageName": "com.samsung.android.contacts",
-    "tileType": 2,
+    "tileSize": 2,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "com.google.android.apps.messaging",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "com.samsung.android.calendar",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "com.samsung.android.contacts",
-    "tileType": 1,
+    "tileSize": 1,
     "tileStyle": 0,
     "tileBackground": "5543B51F",
     "queryParams": "phoneDialer"
   }, {
     "packageName": "com.google.android.gm",
-    "tileType": 1,
+    "tileSize": 1,
     "tileStyle": 0,
     "tileBackground": "#99DD4B39",
     "queryParams": ""
   }, {
     "packageName": "ru.mail.mailapp",
-    "tileType": 1,
+    "tileSize": 1,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "com.whatsapp",
-    "tileType": 1,
+    "tileSize": 1,
     "tileStyle": 0,
     "tileBackground": "#CD232F3C",
     "queryParams": ""
   }, {
     "packageName": "com.android.chrome",
-    "tileType": 1,
+    "tileSize": 1,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "com.twitter.android",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "#1DA1F2",
     "queryParams": ""
   }, {
     "packageName": "com.instagram.android",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "com.snapchat.android",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "com.linkedin.android",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "#FF007BB5",
     "queryParams": ""
   }, {
     "packageName": "com.onedio.androidside",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "com.android.vending",
-    "tileType": 1,
+    "tileSize": 1,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "com.sec.android.gallery3d",
-    "tileType": 2,
+    "tileSize": 2,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "com.spotify.music",
-    "tileType": 1,
+    "tileSize": 1,
     "tileStyle": 0,
     "tileBackground": "#CC222326",
     "queryParams": ""
   }, {
     "packageName": "com.google.android.youtube",
-    "tileType": 1,
+    "tileSize": 1,
     "tileStyle": 0,
     "tileBackground": "#66FF0000",
     "queryParams": ""
   }, {
     "packageName": "com.sec.android.app.camera",
-    "tileType": 1,
+    "tileSize": 1,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
-    "packageName": "com.microsoft.office.word",
-    "tileType": 0,
+    "folderName": "Test folder",
+    "tileType": 1,
+    "tileSize": 1,
     "tileStyle": 0,
-    "tileBackground": "2C5898",
-    "queryParams": ""
-  }, {
-    "packageName": "com.microsoft.office.excel",
-    "tileType": 0,
-    "tileStyle": 0,
-    "tileBackground": "#207347",
-    "queryParams": ""
+    "tileBackground": "",
+    "queryParams": "",
+    "subTiles": [
+      {
+        "packageName": "com.microsoft.office.word",
+        "tileSize": 0,
+        "tileStyle": 0,
+        "tileBackground": "2C5898",
+        "queryParams": ""
+      }, {
+        "packageName": "com.microsoft.office.excel",
+        "tileSize": 0,
+        "tileStyle": 0,
+        "tileBackground": "#207347",
+        "queryParams": ""
+      },{
+        "packageName": "com.microsoft.office.powerpoint",
+        "tileSize": 0,
+        "tileStyle": 0,
+        "tileBackground": "#D04727",
+        "queryParams": ""
+      }, {
+        "packageName": "com.microsoft.office.onenote",
+        "tileSize": 0,
+        "tileStyle": 0,
+        "tileBackground": "#7719AA",
+        "queryParams": ""
+      }
+    ]
   }, {
     "packageName": "com.aero.calculator",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "com.sec.android.app.clockpackage",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "com.android.settings",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
     "packageName": "",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
-    "packageName": "com.microsoft.office.powerpoint",
-    "tileType": 0,
-    "tileStyle": 0,
-    "tileBackground": "#D04727",
-    "queryParams": ""
-  }, {
-    "packageName": "com.microsoft.office.onenote",
-    "tileType": 0,
-    "tileStyle": 0,
-    "tileBackground": "#7719AA",
-    "queryParams": ""
-  }, {
     "packageName": "com.evernote",
-    "tileType": 0,
+    "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""

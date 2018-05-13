@@ -1,43 +1,32 @@
 package com.ertis.andromeda;
 
-import android.animation.Animator;
 import android.animation.AnimatorInflater;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.ConsoleMessage;
-import android.widget.TextView;
 
 import com.ertis.andromeda.adapters.TilesAdapter;
 import com.ertis.andromeda.managers.SpannedGridLayoutManager;
+import com.ertis.andromeda.managers.TileFolderManager;
 import com.ertis.andromeda.models.AppModel;
+import com.ertis.andromeda.models.FolderTile;
 import com.ertis.andromeda.models.Tile;
-import com.ertis.andromeda.slideup.SlideUp;
-import com.ertis.andromeda.slideup.SlideUpBuilder;
+import com.ertis.andromeda.models.TileFolder;
 
-import java.io.Console;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
@@ -67,6 +56,7 @@ public class AppDrawerFragment extends Fragment
 		Bundle args = new Bundle();
 		fragment.setArguments(args);
 		fragment.tilesAdapter = tilesAdapter;
+		TileFolderManager.Current.setTilesAdapter(tilesAdapter);
 		
 		return fragment;
 	}
@@ -100,14 +90,21 @@ public class AppDrawerFragment extends Fragment
 				Tile tile = tilesAdapter.getDataContext(view);
 				if (tile != null)
 				{
-					AppModel app = tile.getApplication();
-					if (app != null)
+					if (!(tile instanceof FolderTile))
 					{
-						if (app.getApplicationPackageName().equals("com.samsung.android.contacts") && tile.getQueryParams().equals("phoneDialer"))
-							startPhoneApp();
-						else
-							startNewActivity(getActivity(), app.getApplicationPackageName());
-							
+						AppModel app = tile.getApplication();
+						if (app != null)
+						{
+							if (app.getApplicationPackageName().equals("com.samsung.android.contacts") && tile.getQueryParams().equals("phoneDialer"))
+								startPhoneApp();
+							else
+								startNewActivity(getActivity(), app.getApplicationPackageName());
+						}
+					}
+					else
+					{
+						FolderTile folderTile = (FolderTile)tile;
+						TileFolderManager.Current.OnClickFolderTile(folderTile);
 					}
 				}
 			}
@@ -216,6 +213,10 @@ public class AppDrawerFragment extends Fragment
 	private void AnimateTileFlip(final View tileView)
 	{
 		if (tileView == null)
+			return;
+		
+		Tile tile = tilesAdapter.getDataContext(tileView);
+		if (tile.getTileType() == Tile.TileType.FolderTile || tile instanceof TileFolder)
 			return;
 		
 		Activity activity = getActivity();

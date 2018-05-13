@@ -74,6 +74,7 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 		if (viewType == HEADER_ITEM)
 		{
 			holder.headerCaption.setText(menuItem.getHeader());
+			holder.headerCaption.setTypeface(segoeTypeface);
 		}
 		else
 		{
