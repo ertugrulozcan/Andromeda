@@ -49,13 +49,21 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 		if (viewType == HEADER_ITEM)
 		{
 			View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_header, parent, false);
+			if (itemView == null)
+				return null;
+				
 			itemView.setOnClickListener(this.onClickListener);
+			
 			return new AppMenuAdapter.AppMenuItemViewHolder(itemView);
 		}
 		else
 		{
 			View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.app_menu_item, parent, false);
+			if (itemView == null)
+				return null;
+			
 			itemView.setOnClickListener(this.onClickListener);
+			
 			return new AppMenuAdapter.AppMenuItemViewHolder(itemView);
 		}
 	}
@@ -63,6 +71,9 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 	@Override
 	public void onBindViewHolder(AppMenuAdapter.AppMenuItemViewHolder holder, int position)
 	{
+		if (holder == null)
+			return;
+		
 		int viewType = getItemViewType(position);
 		AppMenuItem menuItem = this.menuItemList.get(position);
 		
