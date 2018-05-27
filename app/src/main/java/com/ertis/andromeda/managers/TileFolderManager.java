@@ -1,8 +1,11 @@
 package com.ertis.andromeda.managers;
 
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.ertis.andromeda.AppDrawerFragment;
 import com.ertis.andromeda.adapters.TilesAdapter;
+import com.ertis.andromeda.listeners.TileClickListener;
 import com.ertis.andromeda.models.*;
 
 import java.util.ArrayList;
@@ -17,16 +20,18 @@ public class TileFolderManager
 	private TilesAdapter.TileFolderViewHolder folderViewHolder;
 	private TilesAdapter mainTilesAdapter;
 	private TilesAdapter folderTilesAdapter;
-	private List<Tile> subTiles;
 	
-	private boolean isFolderOpen;
 	private FolderTile openedFolderTile;
 	private TileFolder tileFolder;
 	
 	private TileFolderManager()
 	{
-		this.subTiles = new ArrayList<>();
 		this.tileFolder = new TileFolder("");
+	}
+	
+	public boolean IsFolderOpened()
+	{
+		return this.openedFolderTile != null;
 	}
 	
 	public void Construct(final TilesAdapter.TileFolderViewHolder folderViewHolder)
@@ -35,12 +40,17 @@ public class TileFolderManager
 			return;
 		
 		this.folderViewHolder = folderViewHolder;
-		this.folderTilesAdapter = new TilesAdapter(folderViewHolder.getFolderLayoutBase().getContext(), this.subTiles);
+		this.folderTilesAdapter = new TilesAdapter(folderViewHolder.getFolderLayoutBase().getContext(), this.tileFolder.getSubTiles());
+		
+		TileClickListener tileClickListener = AppDrawerFragment.Current.GenerateTileClickListener(this.folderTilesAdapter);
+		this.folderTilesAdapter.setOnClickListener(tileClickListener);
+		this.folderTilesAdapter.setOnLongClickListener(tileClickListener);
+		
 		RecyclerView recyclerView = this.folderViewHolder.getRecyclerView();
 		SpannedGridLayoutManager spannedGridLayoutManager = new SpannedGridLayoutManager(SpannedGridLayoutManager.Orientation.VERTICAL, 6);
 		spannedGridLayoutManager.setItemOrderIsStable(true);
 		recyclerView.setLayoutManager(spannedGridLayoutManager);
-		this.folderViewHolder.getRecyclerView().setAdapter(this.folderTilesAdapter);
+		recyclerView.setAdapter(this.folderTilesAdapter);
 		this.folderTilesAdapter.notifyDataSetChanged();
 		
 		this.isConstructed = true;
@@ -53,58 +63,80 @@ public class TileFolderManager
 	
 	public void OnClickFolderTile(FolderTile folderTile)
 	{
-		if (!isFolderOpen)
+		if (!this.IsFolderOpened())
+		{
 			this.OpenFolder(folderTile);
+		}
 		else
+		{
+			boolean aDifferentTile = this.openedFolderTile != folderTile;
 			this.CloseFolder();
+			
+			if (aDifferentTile)
+				this.OpenFolder(folderTile);
+		}
+		
+		if (this.folderTilesAdapter != null)
+		{
+			synchronized (this.folderTilesAdapter)
+			{
+				this.folderTilesAdapter.notifyAll();
+			}
+		}
 	}
 	
-	public void OpenFolder(FolderTile folderTile)
+	synchronized private void OpenFolder(FolderTile folderTile)
 	{
 		if (folderTile == null)
 			return;
 		
 		try
 		{
-			this.CloseFolder();
-			
 			this.openedFolderTile = folderTile;
+			
+			this.tileFolder.SetParentTile(this.openedFolderTile);
+			if (this.folderTilesAdapter != null)
+			{
+				synchronized (this.folderTilesAdapter)
+				{
+					this.folderTilesAdapter.notifyAll();
+				}
+			}
+			
 			int indexOfTile = this.mainTilesAdapter.getItemIndex(this.openedFolderTile);
 			int indexOfFolder = indexOfTile + 1;
-			this.tileFolder.setCustomLabel(folderTile.getCaption());
+			this.mainTilesAdapter.InsertTile(this.tileFolder, indexOfFolder);
 			
-			this.subTiles.clear();
-			this.subTiles.addAll(folderTile.getSubTiles());
-			if (this.folderTilesAdapter != null)
-				this.folderTilesAdapter.notifyDataSetChanged();
-			
-			this.mainTilesAdapter.InsertTile(tileFolder, indexOfFolder);
-			
-			this.mainTilesAdapter.ScrollToItem(indexOfTile);
+			//this.mainTilesAdapter.ScrollToItem(indexOfTile);
 		}
-		finally
+		catch (Exception ex)
 		{
-			this.isFolderOpen = true;
+		
 		}
 	}
 	
-	public void CloseFolder()
+	synchronized public void CloseFolder()
 	{
-		if (this.tileFolder == null)
-			return;
-		
 		try
 		{
+			this.openedFolderTile = null;
+			this.tileFolder.SetParentTile(this.openedFolderTile);
+			
+			if (this.folderTilesAdapter != null)
+			{
+				synchronized (this.folderTilesAdapter)
+				{
+					this.folderTilesAdapter.notifyAll();
+				}
+			}
+			
 			int indexOfTile = this.mainTilesAdapter.getItemIndex(this.tileFolder);
 			if (indexOfTile >= 0)
 				this.mainTilesAdapter.RemoveTile(indexOfTile);
-			
-			this.subTiles.clear();
 		}
 		finally
 		{
-			this.openedFolderTile = null;
-			this.isFolderOpen = false;
+		
 		}
 	}
 }

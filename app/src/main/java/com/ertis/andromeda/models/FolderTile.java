@@ -11,7 +11,7 @@ public class FolderTile extends Tile
 	
 	public FolderTile(String folderName, TileSize tileSize)
 	{
-		super(null, tileSize, Colors.rgb(0x33FFFFFF));
+		super(null, tileSize, Colors.rgb(0x33FFFFFF), TileStyle.Image);
 		
 		this.type = TileType.FolderTile;
 		this.subTiles = new ArrayList<>();

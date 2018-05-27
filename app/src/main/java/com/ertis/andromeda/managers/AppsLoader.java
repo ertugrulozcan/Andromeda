@@ -86,6 +86,17 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>>
 		// sort the list
 		Collections.sort(items, ALPHA_COMPARATOR);
 		
+		StringBuilder stringBuilder = new StringBuilder();
+		for (int i = 0; i < items.size(); i++)
+		{
+			AppModel app = items.get(i);
+			String appName = app.getLabel();
+			String packageName = app.getApplicationPackageName();
+			stringBuilder.append((i + 1) + ". " + appName + " - " + packageName + "\n");
+		}
+		
+		String appsString = stringBuilder.toString();
+		
 		return items;
 	}
 	
