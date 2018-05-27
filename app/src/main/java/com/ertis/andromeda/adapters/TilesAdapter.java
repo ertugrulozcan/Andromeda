@@ -12,11 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ertis.andromeda.R;
+import com.ertis.andromeda.helpers.SizeConverter;
 import com.ertis.andromeda.managers.SpanLayoutParams;
 import com.ertis.andromeda.managers.SpanSize;
 import com.ertis.andromeda.managers.TileFolderManager;
@@ -35,6 +37,12 @@ import java.util.List;
 
 public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileViewHolder>
 {
+	private int SMALL_TILE_SIZE = 221;
+	private int MEDIUM_TILE_SIZE = 458;
+	private int WIDE_TILE_SIZE = 932;
+	private int FULL_TILE_SIZE = 1406;
+	private int TILE_MARGIN = 8;
+	
 	private Context parentView;
 	private List<Tile> tileList;
 	private HashMap<View, Tile> tileViewDictionary;
@@ -45,7 +53,8 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 	private static Typeface segoeTypeface;
 	
 	private int TILE_CODE = 124;
-	private int FOLDER_CODE = 666;
+	private int FOLDER_TILE_CODE = 336;
+	private int TILE_FOLDER_CODE = 666;
 	
 	public TilesAdapter(Context context, List<Tile> tileList)
 	{
@@ -53,19 +62,35 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 		this.tileViewDictionary = new LinkedHashMap<>();
 		this.tileList = tileList;
 		
+		this.SetTileSizes(context);
+		
 		segoeTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/segoewp/segoe-wp.ttf");
+	}
+	
+	private void SetTileSizes(Context context)
+	{
+		this.SMALL_TILE_SIZE = SizeConverter.GetTileWidth(context, Tile.TileSize.Small);
+		this.MEDIUM_TILE_SIZE = SizeConverter.GetTileWidth(context, Tile.TileSize.Medium);
+		this.WIDE_TILE_SIZE = SizeConverter.GetTileWidth(context, Tile.TileSize.MediumWide);
+		this.FULL_TILE_SIZE = SizeConverter.GetTilePanelFullWidth(context);
+		this.TILE_MARGIN = SizeConverter.GetTileMargin(context);
 	}
 	
 	@Override
 	public BaseTileViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
 	{
 		int layoutFileId = R.layout.tile;
-		if (viewType == FOLDER_CODE)
+		
+		if (viewType == FOLDER_TILE_CODE)
+			layoutFileId = R.layout.folder_tile;
+		if (viewType == TILE_FOLDER_CODE)
 			layoutFileId = R.layout.tile_folder;
 		
 		View itemView = LayoutInflater.from(parent.getContext()).inflate(layoutFileId, parent, false);
+		if (itemView == null)
+			return null;
 		
-		if (viewType != FOLDER_CODE)
+		if (viewType != TILE_FOLDER_CODE)
 		{
 			itemView.setOnClickListener(this.onClickListener);
 			itemView.setOnLongClickListener(this.onLongClickListener);
@@ -83,6 +108,9 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 	@Override
 	public void onBindViewHolder(BaseTileViewHolder baseHolder, int position)
 	{
+		if (baseHolder == null)
+			return;
+		
 		Tile tile = this.tileList.get(position);
 		
 		if (baseHolder.itemView != null)
@@ -131,7 +159,7 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 				params.gravity = Gravity.FILL;
 				holder.tileIconImageView.setLayoutParams(params);
 				
-				holder.tileLabel.setVisibility(View.INVISIBLE);
+				// holder.tileLabel.setVisibility(View.INVISIBLE);
 			}
 			else if (tile.getTileStyle() == Tile.TileStyle.LiveTile)
 			{
@@ -145,6 +173,30 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 				holder.tileIconImageView.setImageResource(tile.getIconId());
 			
 			holder.tileIconImageView.requestLayout();
+			
+			if (tile instanceof FolderTile)
+			{
+				FolderTile folderTile = (FolderTile)tile;
+				List<Tile> subTiles = folderTile.getSubTiles();
+				for (int i = 0; i < subTiles.size(); i++)
+				{
+					Tile subTile = subTiles.get(i);
+					
+					
+					if (folderTile.getTileSize() == Tile.TileSize.Small && i >= 3)
+						break;
+					if (folderTile.getTileSize() == Tile.TileSize.Medium && i >= 5)
+						break;
+					if (folderTile.getTileSize() == Tile.TileSize.MediumWide && i >= 11)
+						break;
+					if (folderTile.getTileSize() == Tile.TileSize.Large && i >= 23)
+						break;
+				}
+			}
+			else
+			{
+			
+			}
 		}
 		else
 		{
@@ -214,8 +266,11 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 	@Override
 	public int getItemViewType(int position)
 	{
-		if (this.tileList.get(position) instanceof TileFolder)
-			return FOLDER_CODE;
+		Tile tileBase = this.tileList.get(position);
+		if (tileBase instanceof TileFolder)
+			return TILE_FOLDER_CODE;
+		else if (tileBase.getTileType() == Tile.TileType.FolderTile)
+			return FOLDER_TILE_CODE;
 		else
 			return TILE_CODE;
 	}
@@ -245,6 +300,18 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 			super(itemView);
 			
 			this.tileIconImageView = itemView.findViewById(R.id.tile_icon);
+		}
+	}
+	
+	public class FolderTileViewHolder extends BaseTileViewHolder
+	{
+		private GridView folderTileGridView;
+		
+		public FolderTileViewHolder (View itemView)
+		{
+			super(itemView);
+			
+			this.folderTileGridView = itemView.findViewById(R.id.folder_tile_grid_view);
 		}
 	}
 	
@@ -304,7 +371,8 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 		}
 		else
 		{
-			spanSize = new SpanSize(6, 3);
+			TileFolder folderTile = (TileFolder)tile;
+			spanSize = new SpanSize(6, folderTile.GetTotalRowCount());
 		}
 		
 		SpanLayoutParams tileBoxLayoutParams = new SpanLayoutParams(spanSize);
@@ -312,7 +380,7 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 		tileBoxLayoutParams.height = GridLayout.LayoutParams.WRAP_CONTENT;
 		tileBoxLayoutParams.width = GridLayout.LayoutParams.MATCH_PARENT;
 		
-		int margin = 8;
+		int margin = TILE_MARGIN;
 		tileBoxLayoutParams.setMargins(margin, margin, margin, margin);
 		
 		return tileBoxLayoutParams;
@@ -326,8 +394,8 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 			{
 				case Small:
 				{
-					LinearLayout.LayoutParams tileBoxLayoutParams = new LinearLayout.LayoutParams(221, 221);
-					int margin = 8;
+					LinearLayout.LayoutParams tileBoxLayoutParams = new LinearLayout.LayoutParams(SMALL_TILE_SIZE, SMALL_TILE_SIZE);
+					int margin = TILE_MARGIN;
 					tileBoxLayoutParams.setMargins(margin, margin, margin, margin);
 					tileBoxLayoutParams.gravity = Gravity.CENTER_HORIZONTAL;
 					
@@ -335,8 +403,8 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 				}
 				case Medium:
 				{
-					LinearLayout.LayoutParams tileBoxLayoutParams = new LinearLayout.LayoutParams(458, 458);
-					int margin = 8;
+					LinearLayout.LayoutParams tileBoxLayoutParams = new LinearLayout.LayoutParams(MEDIUM_TILE_SIZE, MEDIUM_TILE_SIZE);
+					int margin = TILE_MARGIN;
 					tileBoxLayoutParams.setMargins(margin, margin, margin, margin);
 					tileBoxLayoutParams.gravity = Gravity.CENTER_HORIZONTAL;
 					
@@ -344,8 +412,8 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 				}
 				case MediumWide:
 				{
-					LinearLayout.LayoutParams tileBoxLayoutParams = new LinearLayout.LayoutParams(932, 458);
-					int margin = 8;
+					LinearLayout.LayoutParams tileBoxLayoutParams = new LinearLayout.LayoutParams(WIDE_TILE_SIZE, MEDIUM_TILE_SIZE);
+					int margin = TILE_MARGIN;
 					tileBoxLayoutParams.setMargins(margin, margin, margin, margin);
 					tileBoxLayoutParams.gravity = Gravity.CENTER_HORIZONTAL;
 					
@@ -353,8 +421,8 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 				}
 				case Large:
 				{
-					LinearLayout.LayoutParams tileBoxLayoutParams = new LinearLayout.LayoutParams(932, 932);
-					int margin = 8;
+					LinearLayout.LayoutParams tileBoxLayoutParams = new LinearLayout.LayoutParams(WIDE_TILE_SIZE, WIDE_TILE_SIZE);
+					int margin = TILE_MARGIN;
 					tileBoxLayoutParams.setMargins(margin, margin, margin, margin);
 					tileBoxLayoutParams.gravity = Gravity.CENTER_HORIZONTAL;
 					
@@ -364,8 +432,10 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 		}
 		else
 		{
-			LinearLayout.LayoutParams tileBoxLayoutParams = new LinearLayout.LayoutParams(1406, 695);
-			int margin = 8;
+			TileFolder folderTile = (TileFolder)tile;
+			int height = this.CalculateTotalRowHeight(folderTile.GetTotalRowCount());
+			LinearLayout.LayoutParams tileBoxLayoutParams = new LinearLayout.LayoutParams(FULL_TILE_SIZE, height);
+			int margin = TILE_MARGIN;
 			tileBoxLayoutParams.setMargins(margin, margin, margin, margin);
 			tileBoxLayoutParams.gravity = Gravity.CENTER_HORIZONTAL;
 			
@@ -373,5 +443,13 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 		}
 		
 		return null;
+	}
+	
+	private int CalculateTotalRowHeight(int rowCount)
+	{
+		if (rowCount <= 0)
+			return 0;
+		
+		return rowCount * SMALL_TILE_SIZE + (rowCount - 1) * (TILE_MARGIN * 2);
 	}
 }

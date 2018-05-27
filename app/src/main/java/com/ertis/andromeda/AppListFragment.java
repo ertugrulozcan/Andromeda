@@ -2,6 +2,7 @@ package com.ertis.andromeda;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import com.ertis.andromeda.adapters.AppMenuAdapter;
@@ -28,8 +30,11 @@ public class AppListFragment extends Fragment
 	private FrameLayout baseLayout;
 	private RecyclerView recyclerView;
 	private AppMenuAdapter menuItemAdapter;
+	private EditText searchTextBox;
 	
 	private boolean isEnabled = true;
+	
+	private static Typeface segoeTypeface;
 	
 	public AppListFragment()
 	{
@@ -58,6 +63,10 @@ public class AppListFragment extends Fragment
 		View view = inflater.inflate(R.layout.fragment_app_list, container, false);
 		baseLayout = (FrameLayout) view.findViewById(R.id.app_list_fragment_base_layout);
 		recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+		searchTextBox = (EditText) view.findViewById(R.id.searchTextBox);
+		
+		segoeTypeface = Typeface.createFromAsset(this.getActivity().getAssets(), "fonts/segoewp/segoe-wp.ttf");
+		searchTextBox.setTypeface(segoeTypeface);
 		
 		/*
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(view.getContext());

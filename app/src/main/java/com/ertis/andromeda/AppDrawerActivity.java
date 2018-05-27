@@ -26,6 +26,7 @@ import com.ertis.andromeda.adapters.AppMenuAdapter;
 import com.ertis.andromeda.adapters.TilesAdapter;
 import com.ertis.andromeda.helpers.Colors;
 import com.ertis.andromeda.managers.AppsLoader;
+import com.ertis.andromeda.managers.TileFolderManager;
 import com.ertis.andromeda.models.AppMenuItem;
 import com.ertis.andromeda.models.AppModel;
 import com.ertis.andromeda.models.Tile;
@@ -99,6 +100,7 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 				if (position == 1)
 				{
 					appListFragment.setBackgroundColor(max * 0x1000000);
+					int appCount = menuItemList.size();
 				}
 				else
 				{
@@ -197,7 +199,10 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 			// Back button. This calls finish() on this activity and pops the back stack.
 			//super.onBackPressed();
 			
-			slideUp.show();
+			if (TileFolderManager.Current.IsFolderOpened())
+				TileFolderManager.Current.CloseFolder();
+			else
+				slideUp.show();
 		}
 		else
 		{
@@ -271,19 +276,19 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 				
 				Tile.TileSize tileSize = Tile.TileSize.values()[tileTypeValue];
 				
+				int tileStyleValue = tileData.getInt("tileStyle");
+				if (tileStyleValue < 0 || tileStyleValue >= Tile.TileStyle.values().length)
+					tileStyleValue = 0;
+				
+				Tile.TileStyle tileStyle = Tile.TileStyle.values()[tileStyleValue];
+				
+				String tileBackgroundStr = tileData.getString("tileBackground");
+				ColorDrawable tileColor = Colors.rgb(tileBackgroundStr);
+				if (tileBackgroundStr == null || tileBackgroundStr.isEmpty())
+					tileColor = new ColorDrawable(getResources().getColor(R.color.colorTileBackground));
+				
 				if (!tileData.isNull("packageName"))
 				{
-					int tileStyleValue = tileData.getInt("tileStyle");
-					if (tileStyleValue < 0 || tileStyleValue >= Tile.TileStyle.values().length)
-						tileStyleValue = 0;
-					
-					Tile.TileStyle tileStyle = Tile.TileStyle.values()[tileStyleValue];
-					
-					String tileBackgroundStr = tileData.getString("tileBackground");
-					ColorDrawable tileColor = Colors.rgb(tileBackgroundStr);
-					if (tileBackgroundStr == null || tileBackgroundStr.isEmpty())
-						tileColor = new ColorDrawable(getResources().getColor(R.color.colorTileBackground));
-					
 					String appPackageName = tileData.getString("packageName");
 					for (int a = 0; a < appList.size(); a++)
 					{
@@ -318,6 +323,10 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 					String folderName = tileData.getString("folderName");
 					tile = new FolderTile(folderName, tileSize);
 					FolderTile folderTile = (FolderTile)tile;
+					
+					Resources res = getResources();
+					Drawable drawable = res.getDrawable(R.drawable.tile_folder_bg);
+					tile.setCustomIcon(drawable);
 					
 					JSONArray subTilesArray = tileData.getJSONArray("subTiles");
 					List<Tile> subTiles = this.ExtractTiles(subTilesArray, appList);
