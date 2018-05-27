@@ -313,7 +313,8 @@ public class StickyHeadersLinearLayoutManager<T extends RecyclerView.Adapter & S
 					
 					// Ensure sticky header is created, if absent, or bound, if being laid out or the position changed.
 					if (mStickyHeader == null) {
-						createStickyHeader(recycler, headerPos);
+						return;
+						//createStickyHeader(recycler, headerPos);
 					}
 					if (layout || getPosition(mStickyHeader) != headerPos) {
 						bindStickyHeader(recycler, headerPos);
