@@ -1,27 +1,27 @@
 {
   "tiles": [{
-    "packageName": "com.samsung.android.contacts",
+    "packageName": "com.android.contacts",
     "tileSize": 2,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
-    "packageName": "com.google.android.apps.messaging",
+    "packageName": "com.android.mms",
     "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
-    "packageName": "com.samsung.android.calendar",
+    "packageName": "com.android.calendar",
     "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
-    "packageName": "com.samsung.android.contacts",
+    "packageName": "com.android.contacts",
     "tileSize": 1,
     "tileStyle": 0,
-    "tileBackground": "5543B51F",
+    "tileBackground": "#5543B51F",
     "queryParams": "phoneDialer"
   }, {
     "packageName": "com.google.android.gm",
@@ -30,7 +30,7 @@
     "tileBackground": "#99DD4B39",
     "queryParams": ""
   }, {
-    "packageName": "ru.mail.mailapp",
+    "packageName": "com.android.email",
     "tileSize": 1,
     "tileStyle": 0,
     "tileBackground": "",
@@ -51,7 +51,7 @@
     "packageName": "com.twitter.android",
     "tileSize": 0,
     "tileStyle": 0,
-    "tileBackground": "#1DA1F2",
+    "tileBackground": "#AA1D1D1D",
     "queryParams": ""
   }, {
     "packageName": "com.instagram.android",
@@ -79,53 +79,24 @@
     "queryParams": ""
   }, {
     "packageName": "",
+    "tileType": 0,
     "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
-  }, {
-    "packageName": "com.android.vending",
-    "tileSize": 1,
-    "tileStyle": 0,
-    "tileBackground": "",
-    "queryParams": ""
-  }, {
-    "packageName": "com.sec.android.gallery3d",
-    "tileSize": 2,
-    "tileStyle": 0,
-    "tileBackground": "",
-    "queryParams": ""
-  }, {
-    "packageName": "com.spotify.music",
-    "tileSize": 1,
-    "tileStyle": 0,
-    "tileBackground": "#CC222326",
-    "queryParams": ""
-  }, {
-    "packageName": "com.google.android.youtube",
-    "tileSize": 1,
-    "tileStyle": 0,
-    "tileBackground": "#66FF0000",
-    "queryParams": ""
-  }, {
-    "packageName": "com.sec.android.app.camera",
-    "tileSize": 1,
-    "tileStyle": 0,
-    "tileBackground": "",
-    "queryParams": ""
-  }, {
-    "folderName": "Test folder",
+  },{
+    "folderName": "Office",
     "tileType": 1,
     "tileSize": 1,
-    "tileStyle": 0,
+    "tileStyle": 1,
     "tileBackground": "",
     "queryParams": "",
     "subTiles": [
       {
         "packageName": "com.microsoft.office.word",
-        "tileSize": 0,
+        "tileSize": 1,
         "tileStyle": 0,
-        "tileBackground": "2C5898",
+        "tileBackground": "#2C5898",
         "queryParams": ""
       }, {
         "packageName": "com.microsoft.office.excel",
@@ -148,35 +119,65 @@
       }
     ]
   }, {
-    "packageName": "com.aero.calculator",
-    "tileSize": 0,
+    "packageName": "com.miui.gallery",
+    "tileSize": 2,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
-    "packageName": "com.sec.android.app.clockpackage",
-    "tileSize": 0,
+    "packageName": "com.spotify.music",
+    "tileSize": 1,
+    "tileStyle": 0,
+    "tileBackground": "#CC222326",
+    "queryParams": ""
+  }, {
+    "packageName": "com.google.android.youtube",
+    "tileSize": 1,
+    "tileStyle": 0,
+    "tileBackground": "#66FF0000",
+    "queryParams": ""
+  }, {
+    "packageName": "com.android.camera",
+    "tileSize": 1,
     "tileStyle": 0,
     "tileBackground": "",
     "queryParams": ""
   }, {
-    "packageName": "com.android.settings",
-    "tileSize": 0,
-    "tileStyle": 0,
-    "tileBackground": "",
-    "queryParams": ""
-  }, {
-    "packageName": "",
-    "tileSize": 0,
-    "tileStyle": 0,
-    "tileBackground": "",
-    "queryParams": ""
-  }, {
-    "packageName": "com.evernote",
-    "tileSize": 0,
-    "tileStyle": 0,
-    "tileBackground": "",
-    "queryParams": ""
-  }
+      "packageName": "com.android.vending",
+      "tileSize": 1,
+      "tileStyle": 0,
+      "tileBackground": "",
+      "queryParams": ""
+    },{
+      "packageName": "com.miui.compass",
+      "tileSize": 0,
+      "tileStyle": 0,
+      "tileBackground": "",
+      "queryParams": ""
+    }, {
+      "packageName": "com.android.deskclock",
+      "tileSize": 0,
+      "tileStyle": 0,
+      "tileBackground": "",
+      "queryParams": ""
+    }, {
+      "packageName": "com.android.settings",
+      "tileSize": 0,
+      "tileStyle": 0,
+      "tileBackground": "",
+      "queryParams": ""
+    }, {
+      "packageName": "",
+      "tileSize": 0,
+      "tileStyle": 0,
+      "tileBackground": "",
+      "queryParams": ""
+    }, {
+      "packageName": "com.evernote",
+      "tileSize": 0,
+      "tileStyle": 0,
+      "tileBackground": "",
+      "queryParams": ""
+    }
   ]
 }
