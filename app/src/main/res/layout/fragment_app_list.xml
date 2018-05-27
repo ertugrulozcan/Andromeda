@@ -13,10 +13,13 @@
         android:orientation="vertical"
         android:layout_marginTop="32dp">
         <EditText
+            android:id="@+id/searchTextBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/search_box_style"
+            android:color="@color/colorForeground"
             android:textColor="@color/colorForeground"
+            android:textColorHint="@color/darker_gray"
             android:drawablePadding="8dp"
             android:hint="Search"
             android:layout_margin="8dp"

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android">
     <objectAnimator
-        android:valueFrom="-15"
+        android:valueFrom="0"
         android:valueTo="360"
         android:propertyName="rotationX"
-        android:interpolator="@android:interpolator/linear_out_slow_in"
+        android:interpolator="@android:interpolator/anticipate"
         android:duration="@integer/tile_flip_time_full"
         android:startOffset="@integer/tile_pre_flip_time" />
 </set>

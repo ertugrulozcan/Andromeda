@@ -23,21 +23,21 @@
             android:id="@+id/hour_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="76sp"
+            android:textSize="68sp"
             android:format24Hour="HH:mm" />
 
         <TextClock
             android:id="@+id/dayofweek_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="30sp"
+            android:textSize="26sp"
             android:format24Hour="EEEE" />
 
         <TextClock
             android:id="@+id/date_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="30sp"
+            android:textSize="26sp"
             android:format24Hour="MMMM dd" />
     </LinearLayout>
 
