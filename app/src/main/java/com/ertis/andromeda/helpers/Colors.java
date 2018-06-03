@@ -14,9 +14,9 @@ public class Colors
 			if (rgb.length() == 7)
 				rgb = "#FF" + rgb.substring(1);
 			
-			rgb = rgb.replaceFirst("^#","");
+			rgb = rgb.replaceFirst("^#", "");
 			
-			int color = (int)Long.parseLong(rgb, 16);
+			int color = (int) Long.parseLong(rgb, 16);
 			return new ColorDrawable(color);
 		}
 		catch (Exception ex)

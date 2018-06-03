@@ -1,15 +1,12 @@
 package com.ertis.andromeda.managers;
 
-import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.ertis.andromeda.AppDrawerFragment;
 import com.ertis.andromeda.adapters.TilesAdapter;
 import com.ertis.andromeda.listeners.TileClickListener;
-import com.ertis.andromeda.models.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.ertis.andromeda.models.FolderTile;
+import com.ertis.andromeda.models.TileFolder;
 
 public class TileFolderManager
 {
@@ -40,7 +37,7 @@ public class TileFolderManager
 			return;
 		
 		this.folderViewHolder = folderViewHolder;
-		this.folderTilesAdapter = new TilesAdapter(folderViewHolder.getFolderLayoutBase().getContext(), this.tileFolder.getSubTiles());
+		this.folderTilesAdapter = new TilesAdapter(folderViewHolder.getFolderLayoutBase().getContext(), this.tileFolder.getSubTiles(), null);
 		
 		TileClickListener tileClickListener = AppDrawerFragment.Current.GenerateTileClickListener(this.folderTilesAdapter);
 		this.folderTilesAdapter.setOnClickListener(tileClickListener);
@@ -111,7 +108,7 @@ public class TileFolderManager
 		}
 		catch (Exception ex)
 		{
-		
+
 		}
 	}
 	
@@ -136,7 +133,7 @@ public class TileFolderManager
 		}
 		finally
 		{
-		
+
 		}
 	}
 }

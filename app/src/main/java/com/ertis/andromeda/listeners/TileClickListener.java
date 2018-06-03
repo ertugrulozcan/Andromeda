@@ -56,7 +56,7 @@ public class TileClickListener implements View.OnClickListener, View.OnLongClick
 			}
 			else
 			{
-				FolderTile folderTile = (FolderTile)tile;
+				FolderTile folderTile = (FolderTile) tile;
 				TileFolderManager.Current.OnClickFolderTile(folderTile);
 			}
 		}

@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import com.ertis.andromeda.managers.AppsLoader;
+import com.ertis.andromeda.services.IAppService;
+import com.ertis.andromeda.services.ServiceLocator;
 
 /**
  * Created by ertugrulozcan on 19.10.2017.
@@ -13,11 +15,17 @@ import com.ertis.andromeda.managers.AppsLoader;
 
 public class PackageIntentReceiver extends BroadcastReceiver
 {
-	final AppsLoader mLoader;
+	private AppsLoader mLoader;
 	
-	public PackageIntentReceiver(AppsLoader loader)
+	public PackageIntentReceiver()
 	{
-		mLoader = loader;
+		IAppService appService = ServiceLocator.Current().GetInstance(IAppService.class);
+		if (appService == null)
+			return;
+		
+		mLoader = appService.GetAppLoader();
+		if (mLoader == null)
+			return;
 		
 		IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
 		filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
@@ -32,7 +40,8 @@ public class PackageIntentReceiver extends BroadcastReceiver
 		mLoader.getContext().registerReceiver(this, sdFilter);
 	}
 	
-	@Override public void onReceive(Context context, Intent intent)
+	@Override
+	public void onReceive(Context context, Intent intent)
 	{
 		// Tell the loader about the change.
 		mLoader.onContentChanged();

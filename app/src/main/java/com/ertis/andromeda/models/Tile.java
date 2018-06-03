@@ -23,6 +23,33 @@ public class Tile
 	private TileStyle style;
 	private String queryParams;
 	
+	public Tile(AppModel appModel, TileSize tileSize, ColorDrawable color)
+	{
+		this.type = TileType.AppTile;
+		this.setApplication(appModel);
+		this.setTileSize(tileSize);
+		this.setTileColor(color);
+		this.setTileStyle(TileStyle.Icon);
+	}
+	
+	public Tile(AppModel appModel, TileSize tileSize, ColorDrawable color, TileStyle style)
+	{
+		this.type = TileType.AppTile;
+		this.setApplication(appModel);
+		this.setTileSize(tileSize);
+		this.setTileColor(color);
+		this.setTileStyle(style);
+	}
+	
+	public static Tile CreateFakeTile(TileSize tileSize)
+	{
+		Tile tile = new Tile(null, tileSize, Colors.rgb("00000000"));
+		tile.setCaption("");
+		tile.setIcon(null);
+		
+		return tile;
+	}
+	
 	public void setCustomLabel(String customLabel)
 	{
 		this.customLabel = customLabel;
@@ -134,51 +161,18 @@ public class Tile
 		this.queryParams = queryParams;
 	}
 	
-	public Tile(AppModel appModel, TileSize tileSize, ColorDrawable color)
-	{
-		this.type = TileType.AppTile;
-		this.setApplication(appModel);
-		this.setTileSize(tileSize);
-		this.setTileColor(color);
-		this.setTileStyle(TileStyle.Icon);
-	}
-	
-	public Tile(AppModel appModel, TileSize tileSize, ColorDrawable color, TileStyle style)
-	{
-		this.type = TileType.AppTile;
-		this.setApplication(appModel);
-		this.setTileSize(tileSize);
-		this.setTileColor(color);
-		this.setTileStyle(style);
-	}
-	
-	public static Tile CreateFakeTile(TileSize tileSize)
-	{
-		Tile tile = new Tile(null, tileSize, Colors.rgb("00000000"));
-		tile.setCaption("");
-		tile.setIcon(null);
-		
-		return tile;
-	}
-	
 	public enum TileSize
 	{
-		Small,
-		Medium,
-		MediumWide,
-		Large
+		Small, Medium, MediumWide, Large
 	}
 	
 	public enum TileType
 	{
-		AppTile,
-		FolderTile
+		AppTile, FolderTile
 	}
 	
 	public enum TileStyle
 	{
-		Icon,
-		Image,
-		LiveTile,
+		Icon, Image, LiveTile,
 	}
 }

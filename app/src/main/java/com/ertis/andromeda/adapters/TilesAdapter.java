@@ -5,28 +5,32 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ertis.andromeda.R;
 import com.ertis.andromeda.helpers.SizeConverter;
+import com.ertis.andromeda.listeners.OnStartDragListener;
 import com.ertis.andromeda.managers.SpanLayoutParams;
 import com.ertis.andromeda.managers.SpanSize;
 import com.ertis.andromeda.managers.TileFolderManager;
-import com.ertis.andromeda.models.Tile;
 import com.ertis.andromeda.models.FolderTile;
+import com.ertis.andromeda.models.Tile;
 import com.ertis.andromeda.models.TileFolder;
+import com.ertis.andromeda.utilities.GridLineView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,32 +39,30 @@ import java.util.List;
  * Created by ertugrulozcan on 18.04.2018.
  */
 
-public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileViewHolder>
+public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileViewHolder> implements ItemTouchHelperAdapter
 {
+	private static Typeface segoeTypeface;
+	private final OnStartDragListener dragStartListener;
 	private int SMALL_TILE_SIZE = 221;
 	private int MEDIUM_TILE_SIZE = 458;
 	private int WIDE_TILE_SIZE = 932;
 	private int FULL_TILE_SIZE = 1406;
 	private int TILE_MARGIN = 8;
-	
 	private Context parentView;
 	private List<Tile> tileList;
 	private HashMap<View, Tile> tileViewDictionary;
-	
 	private View.OnClickListener onClickListener;
 	private View.OnLongClickListener onLongClickListener;
-	
-	private static Typeface segoeTypeface;
-	
 	private int TILE_CODE = 124;
 	private int FOLDER_TILE_CODE = 336;
 	private int TILE_FOLDER_CODE = 666;
 	
-	public TilesAdapter(Context context, List<Tile> tileList)
+	public TilesAdapter(Context context, List<Tile> tileList, OnStartDragListener dragStartListener)
 	{
 		this.parentView = context;
 		this.tileViewDictionary = new LinkedHashMap<>();
 		this.tileList = tileList;
+		this.dragStartListener = dragStartListener;
 		
 		this.SetTileSizes(context);
 		
@@ -95,7 +97,14 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 			itemView.setOnClickListener(this.onClickListener);
 			itemView.setOnLongClickListener(this.onLongClickListener);
 			
-			return new TileViewHolder(itemView);
+			if (viewType == TILE_CODE)
+			{
+				return new TileViewHolder(itemView);
+			}
+			else
+			{
+				return new FolderTileViewHolder(itemView);
+			}
 		}
 		else
 		{
@@ -106,7 +115,7 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 	}
 	
 	@Override
-	public void onBindViewHolder(BaseTileViewHolder baseHolder, int position)
+	public void onBindViewHolder(final BaseTileViewHolder baseHolder, int position)
 	{
 		if (baseHolder == null)
 			return;
@@ -124,64 +133,70 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 		
 		if (!(tile instanceof TileFolder))
 		{
-			TileViewHolder holder = (TileViewHolder)baseHolder;
-			
 			ColorDrawable tileColor = tile.getTileColor();
-			holder.tileBox.setBackground(tileColor);
+			baseHolder.tileBox.setBackground(tileColor);
 			
 			if (tile.getTileSize() != Tile.TileSize.Small)
-				holder.tileLabel.setText(tile.getCaption());
+				baseHolder.tileLabel.setText(tile.getCaption());
 			
-			if (tile.getTileSize() == Tile.TileSize.Small)
+			if (!(tile instanceof FolderTile))
 			{
-				holder.tileIconImageView.getLayoutParams().width = 90;
-				holder.tileIconImageView.getLayoutParams().height = 90;
+				TileViewHolder holder = (TileViewHolder) baseHolder;
+				
+				if (tile.getTileSize() == Tile.TileSize.Small)
+				{
+					holder.tileIconImageView.getLayoutParams().width = 90;
+					holder.tileIconImageView.getLayoutParams().height = 90;
+				}
+				else
+				{
+					holder.tileIconImageView.getLayoutParams().width = 130;
+					holder.tileIconImageView.getLayoutParams().height = 130;
+				}
+				
+				if (tile.getTileStyle() == Tile.TileStyle.Icon)
+				{
+					FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+					params.gravity = Gravity.CENTER;
+					params.width = holder.tileIconImageView.getLayoutParams().width;
+					params.height = holder.tileIconImageView.getLayoutParams().height;
+					holder.tileIconImageView.setLayoutParams(params);
+					
+					holder.tileLabel.setVisibility(View.VISIBLE);
+				}
+				else if (tile.getTileStyle() == Tile.TileStyle.Image)
+				{
+					FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+					params.gravity = Gravity.FILL;
+					holder.tileIconImageView.setLayoutParams(params);
+					
+					// holder.tileLabel.setVisibility(View.INVISIBLE);
+				}
+				else if (tile.getTileStyle() == Tile.TileStyle.LiveTile)
+				{
+
+				}
+				
+				Drawable icon = tile.getIcon();
+				if (icon != null)
+					holder.tileIconImageView.setImageDrawable(icon);
+				else
+					holder.tileIconImageView.setImageResource(tile.getIconId());
+				
+				holder.tileIconImageView.requestLayout();
 			}
 			else
 			{
-				holder.tileIconImageView.getLayoutParams().width = 130;
-				holder.tileIconImageView.getLayoutParams().height = 130;
-			}
-			
-			if (tile.getTileStyle() == Tile.TileStyle.Icon)
-			{
-				FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-				params.gravity = Gravity.CENTER;
-				params.width = holder.tileIconImageView.getLayoutParams().width;
-				params.height = holder.tileIconImageView.getLayoutParams().height;
-				holder.tileIconImageView.setLayoutParams(params);
+				FolderTileViewHolder folderTileViewHolder = (FolderTileViewHolder) baseHolder;
 				
-				holder.tileLabel.setVisibility(View.VISIBLE);
-			}
-			else if (tile.getTileStyle() == Tile.TileStyle.Image)
-			{
-				FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-				params.gravity = Gravity.FILL;
-				holder.tileIconImageView.setLayoutParams(params);
-				
-				// holder.tileLabel.setVisibility(View.INVISIBLE);
-			}
-			else if (tile.getTileStyle() == Tile.TileStyle.LiveTile)
-			{
-			
-			}
-			
-			Drawable icon = tile.getIcon();
-			if (icon != null)
-				holder.tileIconImageView.setImageDrawable(icon);
-			else
-				holder.tileIconImageView.setImageResource(tile.getIconId());
-			
-			holder.tileIconImageView.requestLayout();
-			
-			if (tile instanceof FolderTile)
-			{
-				FolderTile folderTile = (FolderTile)tile;
+				FolderTile folderTile = (FolderTile) tile;
 				List<Tile> subTiles = folderTile.getSubTiles();
+				
+				folderTileViewHolder.folderTileGridView.removeAllViews();
+				
 				for (int i = 0; i < subTiles.size(); i++)
 				{
 					Tile subTile = subTiles.get(i);
-					
 					
 					if (folderTile.getTileSize() == Tile.TileSize.Small && i >= 3)
 						break;
@@ -191,20 +206,57 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 						break;
 					if (folderTile.getTileSize() == Tile.TileSize.Large && i >= 23)
 						break;
+					
+					LayoutInflater inflater = (LayoutInflater) baseHolder.itemView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					LinearLayout thumbnailView = (LinearLayout) inflater.inflate(R.layout.folder_tile_thumbnail, null);
+					ImageView imageView = thumbnailView.findViewById(R.id.thumbnail_image);
+					
+					int thumbnailSize = SizeConverter.GetFolderTileThumbnailSize(baseHolder.itemView.getContext());
+					int thumbnailImageSize = (int) (thumbnailSize * 0.6f);
+					int thumbnailImageMargin = (int) (thumbnailSize * 0.2f);
+					
+					LinearLayout.LayoutParams thumbnailLayoutParams = new LinearLayout.LayoutParams(thumbnailSize, thumbnailSize);
+					thumbnailView.setLayoutParams(thumbnailLayoutParams);
+					thumbnailView.setBackgroundColor(subTile.getTileColor().getColor());
+					
+					LinearLayout.LayoutParams thumbnailImageLayoutParams = new LinearLayout.LayoutParams(thumbnailImageSize, thumbnailImageSize);
+					thumbnailImageLayoutParams.gravity = Gravity.CENTER;
+					thumbnailImageLayoutParams.setMargins(thumbnailImageMargin, thumbnailImageMargin, thumbnailImageMargin, thumbnailImageMargin);
+					imageView.setLayoutParams(thumbnailImageLayoutParams);
+					imageView.setImageDrawable(subTile.getIcon());
+					
+					////////////////////////////////////////////////////////////////////////////////////////////////////
+					
+					int parentTileSize = SizeConverter.GetTileWidth(baseHolder.itemView.getContext(), folderTile.getTileSize());
+					folderTileViewHolder.folderTileCover.getLayoutParams().height = (int) (parentTileSize * 2 / 3 + 1);
+					
+					////////////////////////////////////////////////////////////////////////////////////////////////////
+					
+					folderTileViewHolder.folderTileGridView.addView(thumbnailView, i);
 				}
-			}
-			else
-			{
-			
 			}
 		}
 		else
 		{
-			TileFolderViewHolder holder = (TileFolderViewHolder)baseHolder;
+			TileFolderViewHolder holder = (TileFolderViewHolder) baseHolder;
 			
 			if (tile.getTileSize() != Tile.TileSize.Small)
 				holder.tileLabel.setText(tile.getCaption());
 		}
+		
+		baseHolder.itemView.setOnTouchListener(new View.OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				if (dragStartListener != null && MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN)
+				{
+					dragStartListener.onStartDrag(baseHolder);
+				}
+				
+				return false;
+			}
+		});
 	}
 	
 	public void setOnClickListener(View.OnClickListener onClickListener)
@@ -246,7 +298,7 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 	{
 		if (this.parentView instanceof Activity)
 		{
-			Activity activity = (Activity)this.parentView;
+			Activity activity = (Activity) this.parentView;
 			RecyclerView recyclerView = activity.findViewById(R.id.recycler_view);
 			recyclerView.smoothScrollToPosition(index);
 		}
@@ -275,74 +327,25 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 			return TILE_CODE;
 	}
 	
-	public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder
+	@Override
+	public void onItemDismiss(int position)
 	{
-		protected LinearLayout tileLayout;
-		protected FrameLayout tileBox;
-		protected TextView tileLabel;
-		
-		public BaseTileViewHolder(View itemView)
-		{
-			super(itemView);
-			
-			this.tileLayout = itemView.findViewById(R.id.tile_layout);
-			this.tileBox = itemView.findViewById(R.id.tile_box);
-			this.tileLabel = itemView.findViewById(R.id.tileLabel);
-		}
+		tileList.remove(position);
+		notifyItemRemoved(position);
 	}
 	
-	public class TileViewHolder extends BaseTileViewHolder
+	@Override
+	public boolean onItemMove(int fromPosition, int toPosition)
 	{
-		private ImageView tileIconImageView;
-		
-		public TileViewHolder(View itemView)
-		{
-			super(itemView);
-			
-			this.tileIconImageView = itemView.findViewById(R.id.tile_icon);
-		}
-	}
-	
-	public class FolderTileViewHolder extends BaseTileViewHolder
-	{
-		private GridView folderTileGridView;
-		
-		public FolderTileViewHolder (View itemView)
-		{
-			super(itemView);
-			
-			this.folderTileGridView = itemView.findViewById(R.id.folder_tile_grid_view);
-		}
-	}
-	
-	public class TileFolderViewHolder extends BaseTileViewHolder
-	{
-		private View folderLayoutBase;
-		private RecyclerView recyclerView;
-		
-		public View getFolderLayoutBase()
-		{
-			return folderLayoutBase;
-		}
-		
-		public RecyclerView getRecyclerView()
-		{
-			return recyclerView;
-		}
-		
-		public TileFolderViewHolder(View itemView)
-		{
-			super(itemView);
-			this.folderLayoutBase = itemView;
-			
-			this.recyclerView = itemView.findViewById(R.id.folder_recycler_view);
-		}
+		Collections.swap(tileList, fromPosition, toPosition);
+		notifyItemMoved(fromPosition, toPosition);
+		return true;
 	}
 	
 	private SpanLayoutParams calculateTileBoxSpanLayoutParams(Tile tile)
 	{
 		SpanSize spanSize = new SpanSize(1, 1);
-		
+
 		if (!(tile instanceof TileFolder))
 		{
 			switch (tile.getTileSize())
@@ -371,18 +374,18 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 		}
 		else
 		{
-			TileFolder folderTile = (TileFolder)tile;
+			TileFolder folderTile = (TileFolder) tile;
 			spanSize = new SpanSize(6, folderTile.GetTotalRowCount());
 		}
-		
+
 		SpanLayoutParams tileBoxLayoutParams = new SpanLayoutParams(spanSize);
-		
+
 		tileBoxLayoutParams.height = GridLayout.LayoutParams.WRAP_CONTENT;
 		tileBoxLayoutParams.width = GridLayout.LayoutParams.MATCH_PARENT;
-		
+
 		int margin = TILE_MARGIN;
 		tileBoxLayoutParams.setMargins(margin, margin, margin, margin);
-		
+
 		return tileBoxLayoutParams;
 	}
 	
@@ -398,7 +401,7 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 					int margin = TILE_MARGIN;
 					tileBoxLayoutParams.setMargins(margin, margin, margin, margin);
 					tileBoxLayoutParams.gravity = Gravity.CENTER_HORIZONTAL;
-					
+
 					return tileBoxLayoutParams;
 				}
 				case Medium:
@@ -407,7 +410,7 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 					int margin = TILE_MARGIN;
 					tileBoxLayoutParams.setMargins(margin, margin, margin, margin);
 					tileBoxLayoutParams.gravity = Gravity.CENTER_HORIZONTAL;
-					
+
 					return tileBoxLayoutParams;
 				}
 				case MediumWide:
@@ -416,7 +419,7 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 					int margin = TILE_MARGIN;
 					tileBoxLayoutParams.setMargins(margin, margin, margin, margin);
 					tileBoxLayoutParams.gravity = Gravity.CENTER_HORIZONTAL;
-					
+
 					return tileBoxLayoutParams;
 				}
 				case Large:
@@ -425,23 +428,23 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 					int margin = TILE_MARGIN;
 					tileBoxLayoutParams.setMargins(margin, margin, margin, margin);
 					tileBoxLayoutParams.gravity = Gravity.CENTER_HORIZONTAL;
-					
+
 					return tileBoxLayoutParams;
 				}
 			}
 		}
 		else
 		{
-			TileFolder folderTile = (TileFolder)tile;
+			TileFolder folderTile = (TileFolder) tile;
 			int height = this.CalculateTotalRowHeight(folderTile.GetTotalRowCount());
 			LinearLayout.LayoutParams tileBoxLayoutParams = new LinearLayout.LayoutParams(FULL_TILE_SIZE, height);
 			int margin = TILE_MARGIN;
 			tileBoxLayoutParams.setMargins(margin, margin, margin, margin);
 			tileBoxLayoutParams.gravity = Gravity.CENTER_HORIZONTAL;
-			
+
 			return tileBoxLayoutParams;
 		}
-		
+
 		return null;
 	}
 	
@@ -449,7 +452,86 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 	{
 		if (rowCount <= 0)
 			return 0;
-		
+
 		return rowCount * SMALL_TILE_SIZE + (rowCount - 1) * (TILE_MARGIN * 2);
+	}
+	
+	public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder
+	{
+		protected View itemView;
+		protected LinearLayout tileLayout;
+		protected FrameLayout tileBox;
+		protected TextView tileLabel;
+
+		public BaseTileViewHolder(View itemView)
+		{
+			super(itemView);
+
+			this.itemView = itemView;
+			this.tileLayout = itemView.findViewById(R.id.tile_layout);
+			this.tileBox = itemView.findViewById(R.id.tile_box);
+			this.tileLabel = itemView.findViewById(R.id.tileLabel);
+		}
+
+		@Override
+		public void onItemSelected()
+		{
+
+		}
+
+		@Override
+		public void onItemClear()
+		{
+
+		}
+	}
+	
+	public class TileViewHolder extends BaseTileViewHolder
+	{
+		private ImageView tileIconImageView;
+
+		public TileViewHolder(View itemView)
+		{
+			super(itemView);
+
+			this.tileIconImageView = itemView.findViewById(R.id.tile_icon);
+		}
+	}
+	
+	public class FolderTileViewHolder extends BaseTileViewHolder
+	{
+		private GridLayout folderTileGridView;
+		private GridLineView folderTileCover;
+
+		public FolderTileViewHolder(View itemView)
+		{
+			super(itemView);
+
+			this.folderTileGridView = itemView.findViewById(R.id.folder_tile_grid_view);
+			this.folderTileCover = itemView.findViewById(R.id.folderTileGrid);
+		}
+	}
+	
+	public class TileFolderViewHolder extends BaseTileViewHolder
+	{
+		private RecyclerView recyclerView;
+
+		public TileFolderViewHolder(View itemView)
+		{
+			super(itemView);
+			this.itemView = itemView;
+
+			this.recyclerView = itemView.findViewById(R.id.folder_recycler_view);
+		}
+
+		public View getFolderLayoutBase()
+		{
+			return itemView;
+		}
+
+		public RecyclerView getRecyclerView()
+		{
+			return recyclerView;
+		}
 	}
 }

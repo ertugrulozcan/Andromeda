@@ -14,7 +14,8 @@ public class SlideAnimationUtil
 	 * @param context
 	 * @param view
 	 */
-	public static void slideInFromLeft(Context context, View view) {
+	public static void slideInFromLeft(Context context, View view)
+	{
 		runSimpleAnimation(context, view, R.anim.slide_from_left);
 	}
 	
@@ -24,7 +25,8 @@ public class SlideAnimationUtil
 	 * @param context
 	 * @param view
 	 */
-	public static void slideOutToLeft(Context context, View view) {
+	public static void slideOutToLeft(Context context, View view)
+	{
 		runSimpleAnimation(context, view, R.anim.slide_to_left);
 	}
 	
@@ -34,7 +36,8 @@ public class SlideAnimationUtil
 	 * @param context
 	 * @param view
 	 */
-	public static void slideInFromRight(Context context, View view) {
+	public static void slideInFromRight(Context context, View view)
+	{
 		runSimpleAnimation(context, view, R.anim.slide_from_right);
 	}
 	
@@ -44,7 +47,8 @@ public class SlideAnimationUtil
 	 * @param context
 	 * @param view
 	 */
-	public static void slideOutToRight(Context context, View view) {
+	public static void slideOutToRight(Context context, View view)
+	{
 		runSimpleAnimation(context, view, R.anim.slide_to_right);
 	}
 	
@@ -55,9 +59,8 @@ public class SlideAnimationUtil
 	 * @param view
 	 * @param animationId
 	 */
-	private static void runSimpleAnimation(Context context, View view, int animationId) {
-		view.startAnimation(AnimationUtils.loadAnimation(
-				context, animationId
-		));
+	private static void runSimpleAnimation(Context context, View view, int animationId)
+	{
+		view.startAnimation(AnimationUtils.loadAnimation(context, animationId));
 	}
 }

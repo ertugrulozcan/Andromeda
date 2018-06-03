@@ -8,6 +8,7 @@
     </item>
 
     <item
+        android:state_focused="false"
         android:bottom="2dp"
         android:left="1dp"
         android:right="1dp">

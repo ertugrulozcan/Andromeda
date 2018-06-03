@@ -5,6 +5,29 @@ import android.graphics.drawable.Drawable;
 public class AppMenuItem
 {
 	private AppModel app;
+	private boolean isHeaderItem = false;
+	private String headerCaption;
+	
+	public AppMenuItem(AppModel appModel)
+	{
+		this.isHeaderItem = false;
+		this.setApp(appModel);
+	}
+	
+	private AppMenuItem()
+	{
+		this.isHeaderItem = false;
+		this.setApp(null);
+	}
+	
+	public static AppMenuItem CreateHeaderMenuItem(String header)
+	{
+		AppMenuItem headerItem = new AppMenuItem();
+		headerItem.isHeaderItem = true;
+		headerItem.setHeader(header);
+		
+		return headerItem;
+	}
 	
 	public AppModel getApp()
 	{
@@ -32,40 +55,18 @@ public class AppMenuItem
 		return null;
 	}
 	
-	private boolean isHeaderItem = false;
 	public boolean isHeaderItem()
 	{
 		return this.isHeaderItem;
 	}
 	
-	private String headerCaption;
-	public void setHeader(String header)
-	{
-		headerCaption = header;
-	}
 	public String getHeader()
 	{
 		return headerCaption;
 	}
 	
-	public AppMenuItem(AppModel appModel)
+	public void setHeader(String header)
 	{
-		this.isHeaderItem = false;
-		this.setApp(appModel);
-	}
-	
-	private AppMenuItem()
-	{
-		this.isHeaderItem = false;
-		this.setApp(null);
-	}
-	
-	public static AppMenuItem CreateHeaderMenuItem(String header)
-	{
-		AppMenuItem headerItem = new AppMenuItem();
-		headerItem.isHeaderItem = true;
-		headerItem.setHeader(header);
-		
-		return headerItem;
+		headerCaption = header;
 	}
 }

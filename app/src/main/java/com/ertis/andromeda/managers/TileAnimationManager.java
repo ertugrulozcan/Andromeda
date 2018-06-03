@@ -1,8 +1,6 @@
 package com.ertis.andromeda.managers;
 
-import android.animation.Animator;
 import android.animation.AnimatorInflater;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.TimeInterpolator;
 import android.annotation.SuppressLint;
@@ -10,7 +8,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 
-import com.ertis.andromeda.AppDrawerFragment;
 import com.ertis.andromeda.R;
 import com.ertis.andromeda.adapters.TilesAdapter;
 import com.ertis.andromeda.models.Tile;
@@ -55,7 +52,7 @@ public class TileAnimationManager
 		tileFlipAnimation3.setStartDelay(tileFlipAnimation3.getStartDelay() + 2000);
 		
 		timer = new Timer();
-		timer.schedule(new TileAnimationManager.AnimationTask(), 100,3600);
+		timer.schedule(new TileAnimationManager.AnimationTask(), 100, 3600);
 	}
 	
 	public boolean isEnabled()
@@ -85,7 +82,7 @@ public class TileAnimationManager
 		if (this.parentContext == null || !(this.parentContext instanceof Activity))
 			return;
 		
-		Activity activity = (Activity)this.parentContext;
+		Activity activity = (Activity) this.parentContext;
 		
 		activity.runOnUiThread(new Runnable()
 		{
@@ -155,7 +152,9 @@ public class TileAnimationManager
 				System.err.println("AnimationTask error! : " + ex.getMessage());
 			}
 		}
-	};
+	}
+	
+	;
 	
 	class TileFlipInterpolator implements TimeInterpolator
 	{
@@ -164,8 +163,17 @@ public class TileAnimationManager
 		{
 			if (t == 1)
 				return 1.0f;
-			
+			/*
 			return (float)(Math.sin(3.6f * t - 2.0f) * 0.522f + 0.476f);
+			*/
+			if (t < 0.677f)
+			{
+				return (float) (Math.sin(5f * (t - 0.067f) - 2.0f) * 0.522f + 0.376f);
+			}
+			else
+			{
+				return (float) (Math.sin(t - 1.4f + (Math.PI / 2)) + 0.079f);
+			}
 		}
 	}
 }

@@ -29,7 +29,8 @@
                   android:label="@string/app_name"
                   android:launchMode="singleTask"
                   android:screenOrientation="portrait"
-                  android:theme="@style/AppTheme">
+                  android:theme="@style/AppTheme"
+                  android:windowSoftInputMode="stateHidden|adjustPan">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,8 +40,8 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="com.ertis.andromeda.listeners.AppInstallerListener">
-            <intent-filter android:priority="100">
+        <receiver android:name="com.ertis.andromeda.receivers.PackageIntentReceiver">
+            <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_INSTALL"/>
                 <action android:name="android.intent.action.PACKAGE_ADDED"/>
                 <action android:name="android.intent.action.PACKAGE_REMOVED"/>

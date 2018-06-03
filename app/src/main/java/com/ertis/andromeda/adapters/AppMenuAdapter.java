@@ -1,9 +1,9 @@
 package com.ertis.andromeda.adapters;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,24 +15,22 @@ import android.widget.TextView;
 
 import com.ertis.andromeda.R;
 import com.ertis.andromeda.models.AppMenuItem;
-import com.ertis.andromeda.models.Tile;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuItemViewHolder> implements StickyHeaders
 {
+	private static final int HEADER_ITEM = 123;
+	private static Typeface segoeTypeface;
 	private Context parentView;
 	private List<AppMenuItem> menuItemList;
 	private HashMap<View, AppMenuItem> menuItemViewDictionary;
-	
-	private static final int HEADER_ITEM = 123;
-	
-	private static Typeface segoeTypeface;
-	
 	private View.OnClickListener onClickListener;
+	
+	private int testItemCount = 0;
+	private AlertDialog.Builder dlgAlert;
 	
 	public AppMenuAdapter(Context context, List<AppMenuItem> menuItemList)
 	{
@@ -41,6 +39,8 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 		this.menuItemViewDictionary = new LinkedHashMap<>();
 		
 		segoeTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/segoewp/segoe-wp-light.ttf");
+		
+		this.dlgAlert = new AlertDialog.Builder(context);
 	}
 	
 	@Override
@@ -51,7 +51,7 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 			View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_header, parent, false);
 			if (itemView == null)
 				return null;
-				
+			
 			itemView.setOnClickListener(this.onClickListener);
 			
 			return new AppMenuAdapter.AppMenuItemViewHolder(itemView);
@@ -105,11 +105,6 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 		this.onClickListener = onClickListener;
 	}
 	
-	public List<AppMenuItem> getMenuItemList()
-	{
-		return menuItemList;
-	}
-	
 	public AppMenuItem getDataContext(View view)
 	{
 		if (this.menuItemViewDictionary.containsKey(view))
@@ -121,7 +116,21 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 	@Override
 	public int getItemCount()
 	{
+		if (testItemCount != 0 && this.menuItemList.size() > testItemCount)
+			this.ShowMessageBox("Error", "Tile count was changed! (" + this.menuItemList.size() + " > " + testItemCount + ")");
+		
+		testItemCount = this.menuItemList.size();
+		
 		return this.menuItemList.size();
+	}
+	
+	private void ShowMessageBox(String title, String message)
+	{
+		dlgAlert.setMessage(message);
+		dlgAlert.setTitle(title);
+		dlgAlert.setPositiveButton("Tamam", null);
+		dlgAlert.setCancelable(true);
+		dlgAlert.create().show();
 	}
 	
 	@Override

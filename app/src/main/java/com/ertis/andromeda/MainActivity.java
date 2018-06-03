@@ -1,11 +1,8 @@
 package com.ertis.andromeda;
 
-import android.content.Intent;
 import android.graphics.Typeface;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
+import android.support.v4.app.FragmentActivity;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -48,13 +45,13 @@ public class MainActivity extends FragmentActivity
 	{
 		Typeface segoeTypeface = Typeface.createFromAsset(getAssets(), "fonts/segoewp/segoe-wp-light.ttf");
 		
-		TextView hourTextView = (TextView)findViewById(R.id.hour_text);
+		TextView hourTextView = (TextView) findViewById(R.id.hour_text);
 		hourTextView.setTypeface(segoeTypeface);
 		
-		TextView dayOfWeeokTextView = (TextView)findViewById(R.id.dayofweek_text);
+		TextView dayOfWeeokTextView = (TextView) findViewById(R.id.dayofweek_text);
 		dayOfWeeokTextView.setTypeface(segoeTypeface);
 		
-		TextView dateTextView = (TextView)findViewById(R.id.date_text);
+		TextView dateTextView = (TextView) findViewById(R.id.date_text);
 		dateTextView.setTypeface(segoeTypeface);
 	}
 	

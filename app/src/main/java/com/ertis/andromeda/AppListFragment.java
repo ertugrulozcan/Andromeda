@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,22 +18,18 @@ import com.ertis.andromeda.adapters.AppMenuAdapter;
 import com.ertis.andromeda.adapters.StickyHeadersLinearLayoutManager;
 import com.ertis.andromeda.models.AppMenuItem;
 import com.ertis.andromeda.models.AppModel;
-import com.ertis.andromeda.models.Tile;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import com.ertis.andromeda.services.AppService;
+import com.ertis.andromeda.services.IAppService;
+import com.ertis.andromeda.services.ServiceLocator;
 
 public class AppListFragment extends Fragment
 {
+	private static Typeface segoeTypeface;
 	private FrameLayout baseLayout;
 	private RecyclerView recyclerView;
 	private AppMenuAdapter menuItemAdapter;
 	private EditText searchTextBox;
-	
 	private boolean isEnabled = true;
-	
-	private static Typeface segoeTypeface;
 	
 	public AppListFragment()
 	{
@@ -84,28 +79,35 @@ public class AppListFragment extends Fragment
 				if (!isEnabled)
 					return;
 
-				AppMenuItem menuItem = menuItemAdapter.getDataContext(view);
-				if (menuItem != null)
+				try
 				{
-					if (menuItem.isHeaderItem())
+					AppMenuItem menuItem = menuItemAdapter.getDataContext(view);
+					if (menuItem != null)
 					{
-						// Show jump letters fragment
-						JumpLetterFragment jumpLetterFragment = JumpLetterFragment.newInstance(menuItemAdapter.getMenuItemList(), recyclerView);
-						FragmentManager fm = getActivity().getSupportFragmentManager();
-						fm.beginTransaction()
-								.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-								.replace(R.id.contentLayout, jumpLetterFragment,"jumpLetterFragment")
-								.addToBackStack("jumpLetterFragment")
-								.commit();
-					}
-					else
-					{
-						AppModel app = menuItem.getApp();
-						if (app != null)
+						if (menuItem.isHeaderItem())
 						{
-							startNewActivity(getActivity(), app.getApplicationPackageName());
+							IAppService appService = ServiceLocator.Current().GetInstance(AppService.class);
+							if (appService == null)
+								return;
+							
+							// Show jump letters fragment
+							JumpLetterFragment jumpLetterFragment = JumpLetterFragment.newInstance(appService.GetMenuItemList(), recyclerView);
+							FragmentManager fm = getActivity().getSupportFragmentManager();
+							fm.beginTransaction().setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out).replace(R.id.contentLayout, jumpLetterFragment, "jumpLetterFragment").addToBackStack("jumpLetterFragment").commit();
+						}
+						else
+						{
+							AppModel app = menuItem.getApp();
+							if (app != null)
+							{
+								startNewActivity(getActivity(), app.getApplicationPackageName());
+							}
 						}
 					}
+				}
+				catch (Exception ex)
+				{
+
 				}
 			}
 		});

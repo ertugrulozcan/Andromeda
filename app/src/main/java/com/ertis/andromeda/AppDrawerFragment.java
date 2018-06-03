@@ -1,46 +1,30 @@
 package com.ertis.andromeda;
 
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.view.ContextThemeWrapper;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.ertis.andromeda.adapters.TileTouchHelperCallback;
 import com.ertis.andromeda.adapters.TilesAdapter;
+import com.ertis.andromeda.listeners.OnStartDragListener;
 import com.ertis.andromeda.listeners.TileClickListener;
 import com.ertis.andromeda.managers.SpannedGridLayoutManager;
 import com.ertis.andromeda.managers.TileAnimationManager;
 import com.ertis.andromeda.managers.TileFolderManager;
-import com.ertis.andromeda.models.AppModel;
-import com.ertis.andromeda.models.FolderTile;
-import com.ertis.andromeda.models.Tile;
-import com.ertis.andromeda.models.TileFolder;
 
-import java.util.List;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-
-public class AppDrawerFragment extends Fragment
+public class AppDrawerFragment extends Fragment implements OnStartDragListener
 {
 	public static AppDrawerFragment Current;
 	
 	private RecyclerView recyclerView;
 	private TilesAdapter tilesAdapter;
 	private TileAnimationManager tileAnimationManager;
+	private ItemTouchHelper itemTouchHelper;
 	
 	private boolean isEnabled = true;
 	
@@ -82,14 +66,24 @@ public class AppDrawerFragment extends Fragment
 		
 		TileClickListener tileClickListener = GenerateTileClickListener(this.tilesAdapter);
 		this.tilesAdapter.setOnClickListener(tileClickListener);
-		this.tilesAdapter.setOnLongClickListener(tileClickListener);
+		//this.tilesAdapter.setOnLongClickListener(tileClickListener);
 		
 		recyclerView.setAdapter(this.tilesAdapter);
+		
+		ItemTouchHelper.Callback callback = new TileTouchHelperCallback(tilesAdapter);
+		this.itemTouchHelper = new ItemTouchHelper(callback);
+		this.itemTouchHelper.attachToRecyclerView(recyclerView);
 		
 		this.tileAnimationManager = new TileAnimationManager(this.getActivity(), this.tilesAdapter);
 		this.tileAnimationManager.Start();
 		
 		return view;
+	}
+	
+	@Override
+	public void onStartDrag(RecyclerView.ViewHolder viewHolder)
+	{
+		this.itemTouchHelper.startDrag(viewHolder);
 	}
 	
 	public TileClickListener GenerateTileClickListener(TilesAdapter tilesAdapter)

@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
+import android.util.Log;
 
 import com.ertis.andromeda.models.AppModel;
 import com.ertis.andromeda.receivers.PackageIntentReceiver;
@@ -22,9 +22,21 @@ import java.util.List;
 
 public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>>
 {
-	private ArrayList<AppModel> mInstalledApps;
-	
+	/**
+	 * Perform alphabetical comparison of application entry objects.
+	 */
+	public static final Comparator<AppModel> ALPHA_COMPARATOR = new Comparator<AppModel>()
+	{
+		private final Collator sCollator = Collator.getInstance();
+		
+		@Override
+		public int compare(AppModel object1, AppModel object2)
+		{
+			return sCollator.compare(object1.getLabel(), object2.getLabel());
+		}
+	};
 	final PackageManager mPm;
+	private ArrayList<AppModel> mInstalledApps;
 	private PackageIntentReceiver mPackageObserver;
 	
 	public AppsLoader(Context context)
@@ -145,10 +157,10 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>>
 		// watch for changes in app install and uninstall operation
 		if (mPackageObserver == null)
 		{
-			mPackageObserver = new PackageIntentReceiver(this);
+			mPackageObserver = new PackageIntentReceiver();
 		}
 		
-		if (takeContentChanged() || mInstalledApps == null )
+		if (takeContentChanged() || mInstalledApps == null)
 		{
 			// If the data has changed since the last time it was loaded
 			// or is not currently available, start a load.
@@ -176,22 +188,29 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>>
 	@Override
 	protected void onReset()
 	{
-		// Ensure the loader is stopped
-		onStopLoading();
-		
-		// At this point we can release the resources associated with 'apps'
-		// if needed.
-		if (mInstalledApps != null)
+		try
 		{
-			onReleaseResources(mInstalledApps);
-			mInstalledApps = null;
+			// Ensure the loader is stopped
+			onStopLoading();
+			
+			// At this point we can release the resources associated with 'apps'
+			// if needed.
+			if (mInstalledApps != null)
+			{
+				onReleaseResources(mInstalledApps);
+				mInstalledApps = null;
+			}
+			
+			// Stop monitoring for changes.
+			if (mPackageObserver != null)
+			{
+				getContext().unregisterReceiver(mPackageObserver);
+				mPackageObserver = null;
+			}
 		}
-		
-		// Stop monitoring for changes.
-		if (mPackageObserver != null)
+		catch (Exception ex)
 		{
-			getContext().unregisterReceiver(mPackageObserver);
-			mPackageObserver = null;
+			Log.e("AppsLoader.onReset", ex.getMessage());
 		}
 	}
 	
@@ -205,19 +224,4 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>>
 	{
 		// do nothing
 	}
-	
-	
-	/**
-	 * Perform alphabetical comparison of application entry objects.
-	 */
-	public static final Comparator<AppModel> ALPHA_COMPARATOR = new Comparator<AppModel>()
-	{
-		private final Collator sCollator = Collator.getInstance();
-		
-		@Override
-		public int compare(AppModel object1, AppModel object2)
-		{
-			return sCollator.compare(object1.getLabel(), object2.getLabel());
-		}
-	};
 }

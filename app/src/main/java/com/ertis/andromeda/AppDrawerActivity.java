@@ -2,65 +2,43 @@ package com.ertis.andromeda;
 
 import android.animation.ObjectAnimator;
 import android.app.WallpaperManager;
-import android.content.res.Resources;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.Fragment;
-import android.app.LoaderManager;
-import android.content.Loader;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.BounceInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.ertis.andromeda.adapters.AppMenuAdapter;
-import com.ertis.andromeda.adapters.TilesAdapter;
-import com.ertis.andromeda.helpers.Colors;
-import com.ertis.andromeda.managers.AppsLoader;
 import com.ertis.andromeda.managers.TileFolderManager;
-import com.ertis.andromeda.models.AppMenuItem;
-import com.ertis.andromeda.models.AppModel;
-import com.ertis.andromeda.models.Tile;
-import com.ertis.andromeda.models.FolderTile;
+import com.ertis.andromeda.receivers.ScreenLockReceiver;
+import com.ertis.andromeda.receivers.WallpaperChangedReceiver;
+import com.ertis.andromeda.services.AppService;
+import com.ertis.andromeda.services.IAppService;
+import com.ertis.andromeda.services.ServiceLocator;
 import com.ertis.andromeda.slideup.SlideUp;
 import com.ertis.andromeda.slideup.SlideUpBuilder;
 import com.ertis.andromeda.utilities.TypefaceUtil;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-
-public class AppDrawerActivity extends FragmentActivity implements LoaderManager.LoaderCallbacks<ArrayList<AppModel>>
+public class AppDrawerActivity extends FragmentActivity
 {
+	private static final int NUM_PAGES = 2;
+	private IAppService appService;
 	private AppDrawerFragment appDrawerFragment;
 	private AppListFragment appListFragment;
-	
-	private TilesAdapter tilesAdapter;
-	private AppMenuAdapter menuItemAdapter;
-	
-	private List<Tile> tileList = new ArrayList<>();
-	private List<AppMenuItem> menuItemList = new ArrayList<>();
-	
-	private static final int NUM_PAGES = 2;
 	private FrameLayout baseLayout;
 	private ViewPager viewPager;
 	private PagerAdapter viewPagerAdapter;
@@ -69,6 +47,8 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 	private View sliderView;
 	
 	private ObjectAnimator bounceAnimation;
+	private ScreenLockReceiver screenStateReceiver;
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -78,13 +58,13 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		
 		TypefaceUtil.overrideFont(getApplicationContext(), "SANS", "fonts/segoewp/segoe-wp-light.ttf");
 		
-		this.tilesAdapter = new TilesAdapter(this, tileList);
-		this.appDrawerFragment = AppDrawerFragment.newInstance(tilesAdapter);
+		this.appService = new AppService(this);
+		ServiceLocator.Current().RegisterInstance(this.appService);
 		
-		this.menuItemAdapter = new AppMenuAdapter(this, this.menuItemList);
-		this.appListFragment = AppListFragment.newInstance(this.menuItemAdapter);
+		this.appDrawerFragment = AppDrawerFragment.newInstance(this.appService.GetTilesAdapter());
+		this.appListFragment = AppListFragment.newInstance(this.appService.GetMenuItemAdapter());
 		
-		this.viewPager = (ViewPager) findViewById(R.id.viewpager);
+		this.viewPager = findViewById(R.id.viewpager);
 		this.viewPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 		this.viewPager.setAdapter(this.viewPagerAdapter);
 		
@@ -100,11 +80,10 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 				if (position == 1)
 				{
 					appListFragment.setBackgroundColor(max * 0x1000000);
-					int appCount = menuItemList.size();
 				}
 				else
 				{
-					int aValue = (int)(max * positionOffset);
+					int aValue = (int) (max * positionOffset);
 					int colorValue = aValue * 0x1000000;
 					
 					appListFragment.setBackgroundColor(colorValue);
@@ -126,36 +105,32 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		
 		sliderView = this.findViewById(R.id.slideView);
 		
-		slideUp = new SlideUpBuilder(sliderView).withStartGravity(Gravity.TOP)
-				.withLoggingEnabled(true)
-				.withStartState(SlideUp.State.SHOWED)
-				.withListeners(new SlideUp.Listener.Events()
+		slideUp = new SlideUpBuilder(sliderView).withStartGravity(Gravity.TOP).withLoggingEnabled(true).withStartState(SlideUp.State.SHOWED).withListeners(new SlideUp.Listener.Events()
+		{
+			@Override
+			public void onSlide(float percent, boolean isShowOrHide)
+			{
+				if (percent == 0 && !isShowOrHide)
+					bounceAnimation.start();
+			}
+			
+			@Override
+			public void onVisibilityChanged(int visibility)
+			{
+				switch (visibility)
 				{
-					@Override
-					public void onSlide(float percent, boolean isShowOrHide)
-					{
-						if (percent == 0 && !isShowOrHide)
-							bounceAnimation.start();
-					}
-					
-					@Override
-					public void onVisibilityChanged(int visibility)
-					{
-						switch (visibility)
-						{
-							case View.GONE :
-								appDrawerFragment.Enable();
-								appListFragment.Enable();
-								break;
-							case View.VISIBLE :
-								appDrawerFragment.Disable();
-								appListFragment.Disable();
-								tilesAdapter.notifyDataSetChanged();
-								break;
-						}
-					}
-				})
-				.build();
+					case View.GONE:
+						appDrawerFragment.Enable();
+						appListFragment.Enable();
+						break;
+					case View.VISIBLE:
+						appDrawerFragment.Disable();
+						appListFragment.Disable();
+						appService.GetTilesAdapter().notifyDataSetChanged();
+						break;
+				}
+			}
+		}).build();
 		//.withSlideFromOtherView(anotherView)
 		//.withGesturesEnabled()
 		//.withHideSoftInputWhenDisplayed()
@@ -171,23 +146,33 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		appDrawerFragment.Disable();
 		appListFragment.Disable();
 		
+		this.RegisterToScreenLockBroadcast();
+		
 		bounceAnimation = CreateBounceAnimation(this.sliderView);
 		
 		this.setClockFonts();
 		
-		final WallpaperManager wallpaperManager = WallpaperManager.getInstance(this);
-		final Drawable wallpaperDrawable = wallpaperManager.getDrawable();
-		
-		this.baseLayout.setBackground(wallpaperDrawable);
-		this.sliderView.setBackground(wallpaperDrawable);
-		
-		// create the loader to load the apps list in background
-		getLoaderManager().initLoader(0, null, this);
+		this.SetWallpaper();
 		
 		// FullScreen
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 		
 		//this.loadFragment(appListFragment);
+	}
+	
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+		
+		try
+		{
+			unregisterReceiver(this.screenStateReceiver);
+		}
+		catch (Exception ex)
+		{
+			Log.e("onDestroy", ex.getMessage());
+		}
 	}
 	
 	@Override
@@ -211,6 +196,64 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 		}
 	}
 	
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+		
+		// this.HideKeyboard();
+	}
+	
+	private void HideKeyboard()
+	{
+		View view = this.getCurrentFocus();
+		if (view != null)
+		{
+			InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+		}
+	}
+	
+	public AppDrawerFragment getAppDrawerFragment()
+	{
+		return appDrawerFragment;
+	}
+	
+	public AppListFragment getAppListFragment()
+	{
+		return appListFragment;
+	}
+	
+	private void SetWallpaper()
+	{
+		this.RefreshWallpaper();
+		
+		IntentFilter filter = new IntentFilter("android.intent.action.WALLPAPER_CHANGED");
+		
+		WallpaperChangedReceiver wallpaperReceiver = new WallpaperChangedReceiver(this);
+		registerReceiver(wallpaperReceiver, filter);
+	}
+	
+	public void RefreshWallpaper()
+	{
+		final WallpaperManager wallpaperManager = WallpaperManager.getInstance(this);
+		final Drawable wallpaperDrawable = wallpaperManager.getDrawable();
+		
+		this.baseLayout.setBackground(wallpaperDrawable);
+		this.sliderView.setBackground(wallpaperDrawable);
+	}
+	
+	private void RegisterToScreenLockBroadcast()
+	{
+		if (this.screenStateReceiver == null)
+			this.screenStateReceiver = new ScreenLockReceiver(this.slideUp);
+		
+		IntentFilter screenStateFilter = new IntentFilter();
+		screenStateFilter.addAction(Intent.ACTION_SCREEN_ON);
+		screenStateFilter.addAction(Intent.ACTION_SCREEN_OFF);
+		registerReceiver(this.screenStateReceiver, screenStateFilter);
+	}
+	
 	private ObjectAnimator CreateBounceAnimation(View targetView)
 	{
 		ObjectAnimator animator = ObjectAnimator.ofFloat(targetView, "translationY", 0, -150, 0);
@@ -224,302 +267,14 @@ public class AppDrawerActivity extends FragmentActivity implements LoaderManager
 	{
 		Typeface segoeTypeface = Typeface.createFromAsset(getAssets(), "fonts/segoewp/segoe-wp-light.ttf");
 		
-		TextView hourTextView = (TextView)findViewById(R.id.hour_text);
+		TextView hourTextView = (TextView) findViewById(R.id.hour_text);
 		hourTextView.setTypeface(segoeTypeface);
 		
-		TextView dayOfWeeokTextView = (TextView)findViewById(R.id.dayofweek_text);
+		TextView dayOfWeeokTextView = (TextView) findViewById(R.id.dayofweek_text);
 		dayOfWeeokTextView.setTypeface(segoeTypeface);
 		
-		TextView dateTextView = (TextView)findViewById(R.id.date_text);
+		TextView dateTextView = (TextView) findViewById(R.id.date_text);
 		dateTextView.setTypeface(segoeTypeface);
-	}
-	
-	private void loadTiles(final ArrayList<AppModel> appList)
-	{
-		if (appList == null)
-		{
-			this.tileList.clear();
-			this.tilesAdapter.notifyDataSetChanged();
-			return;
-		}
-		
-		try
-		{
-			this.tileList.clear();
-			
-			String jsonStr = this.ReadTileLayoutsFromJsonResource();
-			this.tileList.addAll(this.ExtractTilesFromJson(jsonStr, appList));
-		}
-		catch (Exception ex)
-		{
-		
-		}
-		
-		this.tilesAdapter.notifyDataSetChanged();
-	}
-	
-	private List<Tile> ExtractTiles(JSONArray tiles, final ArrayList<AppModel> appList)
-	{
-		List<Tile> tileList = new ArrayList<>();
-		
-		try
-		{
-			for (int i = 0; i < tiles.length(); i++)
-			{
-				Tile tile = null;
-				
-				JSONObject tileData = tiles.getJSONObject(i);
-				
-				int tileTypeValue = tileData.getInt("tileSize");
-				if (tileTypeValue < 0 || tileTypeValue >= Tile.TileSize.values().length)
-					tileTypeValue = 0;
-				
-				Tile.TileSize tileSize = Tile.TileSize.values()[tileTypeValue];
-				
-				int tileStyleValue = tileData.getInt("tileStyle");
-				if (tileStyleValue < 0 || tileStyleValue >= Tile.TileStyle.values().length)
-					tileStyleValue = 0;
-				
-				Tile.TileStyle tileStyle = Tile.TileStyle.values()[tileStyleValue];
-				
-				String tileBackgroundStr = tileData.getString("tileBackground");
-				ColorDrawable tileColor = Colors.rgb(tileBackgroundStr);
-				if (tileBackgroundStr == null || tileBackgroundStr.isEmpty())
-					tileColor = new ColorDrawable(getResources().getColor(R.color.colorTileBackground));
-				
-				if (!tileData.isNull("packageName"))
-				{
-					String appPackageName = tileData.getString("packageName");
-					for (int a = 0; a < appList.size(); a++)
-					{
-						AppModel application = appList.get(a);
-						if (appPackageName.equals(application.getApplicationPackageName()))
-						{
-							tile = new Tile(application, tileSize, tileColor, tileStyle);
-							
-							continue;
-						}
-					}
-					
-					if (tile == null)
-					{
-						tile = Tile.CreateFakeTile(tileSize);
-					}
-					
-					String queryParams = tileData.getString("queryParams");
-					tile.setQueryParams(queryParams);
-					
-					if (queryParams.equals("phoneDialer"))
-					{
-						Resources res = getResources();
-						Drawable drawable = res.getDrawable(R.drawable.phone);
-						tile.setCustomIcon(drawable);
-						
-						tile.setCustomLabel("Phone");
-					}
-				}
-				else if (!tileData.isNull("folderName"))
-				{
-					String folderName = tileData.getString("folderName");
-					tile = new FolderTile(folderName, tileSize);
-					FolderTile folderTile = (FolderTile)tile;
-					
-					Resources res = getResources();
-					Drawable drawable = res.getDrawable(R.drawable.tile_folder_bg);
-					tile.setCustomIcon(drawable);
-					
-					JSONArray subTilesArray = tileData.getJSONArray("subTiles");
-					List<Tile> subTiles = this.ExtractTiles(subTilesArray, appList);
-					folderTile.AddTiles(subTiles);
-				}
-				
-				tileList.add(tile);
-			}
-			
-			return tileList;
-		}
-		catch (Exception ex)
-		{
-			return null;
-		}
-	}
-	
-	private List<Tile> ExtractTilesFromJson(String jsonStr, final ArrayList<AppModel> appList)
-	{
-		try
-		{
-			JSONObject jsonObj = new JSONObject(jsonStr);
-			JSONArray tiles = jsonObj.getJSONArray("tiles");
-			
-			return this.ExtractTiles(tiles, appList);
-		}
-		catch (Exception ex)
-		{
-			return null;
-		}
-	}
-	
-	private void loadMenuItemList(ArrayList<AppModel> appList)
-	{
-		if (appList == null)
-		{
-			this.menuItemList.clear();
-			this.menuItemAdapter.notifyDataSetChanged();
-			return;
-		}
-		
-		char lastHeaderChar = '?';
-		for (int i = 0; i < appList.size(); i++)
-		{
-			AppModel application = appList.get(i);
-			AppMenuItem item = new AppMenuItem(application);
-			
-			Character firstLetter = item.getLabel().charAt(0);
-			if (!Character.isLetterOrDigit(firstLetter))
-				firstLetter = '#';
-			
-			firstLetter = Character.toUpperCase(firstLetter);
-			
-			if (firstLetter != lastHeaderChar)
-			{
-				menuItemList.add(AppMenuItem.CreateHeaderMenuItem(firstLetter.toString()));
-				lastHeaderChar = firstLetter;
-			}
-			
-			menuItemList.add(item);
-		}
-		
-		this.menuItemAdapter.notifyDataSetChanged();
-	}
-	
-	private String ReadTileLayoutsFromJsonResource() throws IOException
-	{
-		InputStream is = getResources().openRawResource(R.raw.tiles_layout);
-		Writer writer = new StringWriter();
-		char[] buffer = new char[1024];
-		
-		try
-		{
-			Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-			int n;
-			while ((n = reader.read(buffer)) != -1)
-			{
-				writer.write(buffer, 0, n);
-			}
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-		finally
-		{
-			is.close();
-		}
-		
-		String jsonString = writer.toString();
-		return jsonString;
-	}
-	
-	private Tile.TileSize GetTileType(int index)
-	{
-		switch (index)
-		{
-			case 1 : return Tile.TileSize.Medium;
-			case 2 : return Tile.TileSize.Medium;
-			case 3 : return Tile.TileSize.Small;
-			case 4 : return Tile.TileSize.Small;
-			case 5 : return Tile.TileSize.Small;
-			case 6 : return Tile.TileSize.Small;
-			case 7 : return Tile.TileSize.Medium;
-			case 8 : return Tile.TileSize.MediumWide;
-			case 9 : return Tile.TileSize.Small;
-			case 10 : return Tile.TileSize.Small;
-			case 11 : return Tile.TileSize.Medium;
-			case 12 : return Tile.TileSize.Medium;
-			case 13 : return Tile.TileSize.Small;
-			case 14 : return Tile.TileSize.Small;
-			case 15 : return Tile.TileSize.MediumWide;
-			case 16 : return Tile.TileSize.Medium;
-			case 17 : return Tile.TileSize.Large;
-			case 18 : return Tile.TileSize.Medium;
-			case 19 : return Tile.TileSize.Small;
-			case 20 : return Tile.TileSize.Small;
-			case 21 : return Tile.TileSize.Small;
-			case 22 : return Tile.TileSize.Small;
-			
-			case 23 : return Tile.TileSize.Medium;
-			case 24 : return Tile.TileSize.Medium;
-			case 25 : return Tile.TileSize.Small;
-			case 26 : return Tile.TileSize.Small;
-			default:
-			{
-				return this.GetTileType(index - 26);
-			}
-		}
-	}
-	
-	private Tile.TileSize GetTileType2(int index)
-	{
-		switch (index)
-		{
-			case 1 : return Tile.TileSize.Medium;
-			case 2 : return Tile.TileSize.Small;
-			case 3 : return Tile.TileSize.Small;
-			case 4 : return Tile.TileSize.Small;
-			case 5 : return Tile.TileSize.Small;
-			case 6 : return Tile.TileSize.MediumWide;
-			case 7 : return Tile.TileSize.Small;
-			case 8 : return Tile.TileSize.Small;
-			case 9 : return Tile.TileSize.Medium;
-			case 10 : return Tile.TileSize.Medium;
-			case 11 : return Tile.TileSize.Medium;
-			case 12 : return Tile.TileSize.Medium;
-			case 13 : return Tile.TileSize.MediumWide;
-			case 14 : return Tile.TileSize.Small;
-			case 15 : return Tile.TileSize.Small;
-			case 16 : return Tile.TileSize.Medium;
-			case 17 : return Tile.TileSize.Medium;
-			case 18 : return Tile.TileSize.Small;
-			case 19 : return Tile.TileSize.Small;
-			case 20 : return Tile.TileSize.MediumWide;
-			case 21 : return Tile.TileSize.Medium;
-			case 22 : return Tile.TileSize.Large;
-			case 23 : return Tile.TileSize.Medium;
-			case 24 : return Tile.TileSize.Small;
-			case 25 : return Tile.TileSize.Small;
-			case 26 : return Tile.TileSize.Small;
-			
-			default:
-			{
-				return this.GetTileType2(index - 26);
-			}
-		}
-	}
-	
-	@Override
-	public Loader<ArrayList<AppModel>> onCreateLoader(int id, Bundle args)
-	{
-		return new AppsLoader(this);
-	}
-	
-	@Override
-	public void onLoadFinished(Loader<ArrayList<AppModel>> loader, ArrayList<AppModel> data)
-	{
-		this.loadTiles(data);
-		this.loadMenuItemList(data);
-	}
-	
-	@Override
-	public void onLoaderReset(Loader<ArrayList<AppModel>> loader)
-	{
-		this.loadTiles(null);
-		this.loadMenuItemList(null);
 	}
 	
 	private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter

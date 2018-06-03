@@ -14,12 +14,10 @@ public class AppModel
 {
 	private final Context mContext;
 	private final ApplicationInfo mInfo;
-	
+	private final File mApkFile;
 	private String mAppLabel;
 	private Drawable mIcon;
-	
 	private boolean mMounted;
-	private final File mApkFile;
 	
 	public AppModel(Context context, ApplicationInfo info)
 	{

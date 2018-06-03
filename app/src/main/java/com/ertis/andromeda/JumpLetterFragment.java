@@ -2,11 +2,8 @@ package com.ertis.andromeda;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -15,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
-import android.widget.TextView;
 
 import com.ertis.andromeda.models.AppMenuItem;
 
@@ -70,9 +66,9 @@ public class JumpLetterFragment extends Fragment
 		Typeface segoeTypeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/segoewp/segoe-wp-light.ttf");
 		
 		GridLayout keypadLayout = fragment.findViewById(R.id.keypadLayout);
-		for(int index=0; index<((ViewGroup)keypadLayout).getChildCount(); ++index)
+		for (int index = 0; index < ((ViewGroup) keypadLayout).getChildCount(); ++index)
 		{
-			View nextChild = ((ViewGroup)keypadLayout).getChildAt(index);
+			View nextChild = ((ViewGroup) keypadLayout).getChildAt(index);
 			
 			if (nextChild instanceof Button)
 			{
@@ -85,7 +81,7 @@ public class JumpLetterFragment extends Fragment
 				{
 					if (menuItem.isHeaderItem())
 					{
-						if(Character.toUpperCase(menuItem.getHeader().charAt(0)) == Character.toUpperCase(c.charAt(0)))
+						if (Character.toUpperCase(menuItem.getHeader().charAt(0)) == Character.toUpperCase(c.charAt(0)))
 						{
 							isFound = true;
 						}
@@ -109,7 +105,7 @@ public class JumpLetterFragment extends Fragment
 								pos++;
 								if (menuItem.isHeaderItem())
 								{
-									if(Character.toUpperCase(menuItem.getHeader().charAt(0)) == Character.toUpperCase(c.charAt(0)))
+									if (Character.toUpperCase(menuItem.getHeader().charAt(0)) == Character.toUpperCase(c.charAt(0)))
 									{
 										break;
 									}
@@ -128,12 +124,7 @@ public class JumpLetterFragment extends Fragment
 	
 	private void close()
 	{
-		getActivity()
-				.getSupportFragmentManager()
-				.beginTransaction()
-				.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-				.remove(self)
-				.commit();
+		getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out).remove(self).commit();
 	}
 	
 	@Override

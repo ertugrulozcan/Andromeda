@@ -14,6 +14,7 @@
         android:layout_marginTop="32dp">
         <EditText
             android:id="@+id/searchTextBox"
+            android:hint="Search"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/search_box_style"
@@ -21,10 +22,8 @@
             android:textColor="@color/colorForeground"
             android:textColorHint="@color/darker_gray"
             android:drawablePadding="8dp"
-            android:hint="Search"
             android:layout_margin="8dp"
             android:padding="8dp"
-            android:selectAllOnFocus="true"
             android:maxLines="1" />
 
         <android.support.v7.widget.RecyclerView
@@ -43,7 +42,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/contentLayout">
-
     </FrameLayout>
-
 </FrameLayout>
