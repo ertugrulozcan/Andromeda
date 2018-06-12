@@ -2,6 +2,8 @@ package com.ertis.andromeda.services;
 
 import android.app.LoaderManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
@@ -18,6 +20,8 @@ import com.ertis.andromeda.models.AppMenuItem;
 import com.ertis.andromeda.models.AppModel;
 import com.ertis.andromeda.models.FolderTile;
 import com.ertis.andromeda.models.Tile;
+import com.ertis.andromeda.receivers.ApplicationInstallationReceiver;
+import com.ertis.andromeda.receivers.WallpaperChangedReceiver;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,6 +35,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class AppService implements IAppService, LoaderManager.LoaderCallbacks<ArrayList<AppModel>>
@@ -51,11 +56,13 @@ public class AppService implements IAppService, LoaderManager.LoaderCallbacks<Ar
 		this.appDrawer = (AppDrawerActivity) context;
 		this.appModelList = new ArrayList<>();
 		
-		this.tilesAdapter = new TilesAdapter(this.appDrawer, tileList, this.appDrawer.getAppDrawerFragment());
+		this.tilesAdapter = new TilesAdapter(this.appDrawer, tileList);
 		this.menuItemAdapter = new AppMenuAdapter(this.appDrawer, this.menuItemList);
 		
 		// create the loader to load the apps list in background
 		this.appDrawer.getLoaderManager().initLoader(0, null, this);
+		
+		this.RegisterPackageInstallReceiver();
 	}
 	
 	public AppsLoader GetAppLoader()
@@ -112,6 +119,23 @@ public class AppService implements IAppService, LoaderManager.LoaderCallbacks<Ar
 		this.loadMenuItemList(null);
 	}
 	
+	private void RegisterPackageInstallReceiver()
+	{
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+		filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+		filter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
+		filter.addAction(Intent.ACTION_PACKAGE_INSTALL);
+		filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+		filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+		filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+		filter.addDataScheme("package");
+		
+		ApplicationInstallationReceiver applicationInstallationReceiver = new ApplicationInstallationReceiver(this);
+		
+		this.appDrawer.registerReceiver(applicationInstallationReceiver, filter);
+	}
+	
 	private void loadTiles(final ArrayList<AppModel> appList)
 	{
 		if (appList == null)
@@ -134,6 +158,204 @@ public class AppService implements IAppService, LoaderManager.LoaderCallbacks<Ar
 		}
 		
 		this.tilesAdapter.notifyDataSetChanged();
+	}
+	
+	public void OnPackageInstalled(String packageName)
+	{
+		// Find application instance and index
+		ArrayList<AppModel> appModelList = this.appLoader.loadApplications(this.appDrawer);
+		
+		int index = -1;
+		for (int i = 0; i < appModelList.size(); i++)
+		{
+			index = i;
+			
+			String itemPackageName = appModelList.get(i).getApplicationPackageName();
+			if (itemPackageName != null && itemPackageName.equals(packageName))
+				break;
+		}
+		
+		if (index >= 0)
+		{
+			AppMenuItem appMenuItem = new AppMenuItem(appModelList.get(index));
+			Character headerLetter = this.GetHeaderLetter(appMenuItem);
+			
+			// Firstly, if already exist menu item, remove (for update)
+			int updatedIndex = -1;
+			int counter = 0;
+			for (AppMenuItem item : this.menuItemList)
+			{
+				counter++;
+				
+				if (item.isHeaderItem())
+					continue;
+				
+				String itemPackageName = item.getApp().getApplicationPackageName();
+				String menuItemPackageName = appMenuItem.getApp().getApplicationPackageName();
+				
+				if (itemPackageName != null && menuItemPackageName != null && itemPackageName.equals(menuItemPackageName))
+				{
+					updatedIndex = counter;
+					break;
+				}
+			}
+			
+			if (updatedIndex >= 0)
+				this.menuItemList.remove(updatedIndex);
+			
+			// Add mennu item and if necessary (is not exist) add header menu item
+			if (!this.HasHeaderMenuItem(appMenuItem))
+			{
+				int headerIndex = 0;
+				for (AppMenuItem item : this.menuItemList)
+				{
+					if (item.isHeaderItem())
+					{
+						int headerAscii = (int)item.getHeader().charAt(0);
+						if (headerAscii < (int)headerLetter)
+							headerIndex++;
+						else
+							break;
+					}
+				}
+				
+				this.menuItemList.add(index + headerIndex, AppMenuItem.CreateHeaderMenuItem(headerLetter.toString()));
+				this.menuItemAdapter.notifyItemInserted(headerIndex);
+			}
+			
+			int headerCount = 0;
+			for (int i = 0; i < this.menuItemList.size(); i++)
+			{
+				AppMenuItem item = this.menuItemList.get(i);
+				if (item.isHeaderItem())
+				{
+					headerCount++;
+					
+					if (item.getHeader().equals(headerLetter.toString()))
+						break;
+				}
+			}
+			
+			index += headerCount;
+			
+			this.menuItemList.add(index, appMenuItem);
+			this.menuItemAdapter.notifyItemInserted(index);
+		}
+	}
+	
+	public void OnPackageRemoved(String packageName)
+	{
+		// Find application instance and index
+		AppMenuItem removedAppMenuItem = null;
+		for (int i = 0; i < this.menuItemList.size(); i++)
+		{
+			AppMenuItem item = this.menuItemList.get(i);
+			String itemPackageName = item.getApp().getApplicationPackageName();
+			
+			if (itemPackageName != null && itemPackageName.equals(packageName))
+			{
+				removedAppMenuItem = item;
+				break;
+			}
+		}
+		
+		if (removedAppMenuItem != null)
+		{
+			this.menuItemList.remove(removedAppMenuItem);
+			
+			Character headerLetter = this.GetHeaderLetter(removedAppMenuItem);
+			if (!this.IsNeedHeader(headerLetter))
+			{
+				int headerIndex = this.FindHeaderIndex(headerLetter);
+				if (headerIndex >= 0)
+					this.menuItemList.remove(headerIndex);
+			}
+		}
+	}
+	
+	private boolean HasHeaderMenuItem(AppMenuItem appMenuItem)
+	{
+		Character headerLetter = this.GetHeaderLetter(appMenuItem);
+		
+		for (AppMenuItem item : this.menuItemList)
+		{
+			if (item.isHeaderItem() && item.getHeader().equals(headerLetter.toString()))
+				return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean IsNeedHeader(Character headerLetter)
+	{
+		for (AppMenuItem item : this.menuItemList)
+		{
+			if (!item.isHeaderItem())
+			{
+				Character firstLetter = this.GetHeaderLetter(item);
+				if (firstLetter == headerLetter)
+					return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private int FindHeaderIndex(Character headerLetter)
+	{
+		int index = -1;
+		for (AppMenuItem item : this.menuItemList)
+		{
+			index++;
+			if (item.isHeaderItem())
+			{
+				Character firstLetter = this.GetHeaderLetter(item);
+				if (firstLetter == headerLetter)
+					return index;
+			}
+		}
+		
+		return -1;
+	}
+	
+	private char GetHeaderLetter(AppMenuItem appMenuItem)
+	{
+		Character firstLetter = appMenuItem.getLabel().charAt(0);
+		if (!Character.isLetterOrDigit(firstLetter))
+			firstLetter = '#';
+		
+		firstLetter = Character.toUpperCase(firstLetter);
+		
+		return firstLetter;
+	}
+	
+	private void loadMenuItemList(ArrayList<AppModel> appList)
+	{
+		if (appList == null)
+		{
+			this.menuItemList.clear();
+			this.menuItemAdapter.notifyDataSetChanged();
+			return;
+		}
+		
+		char lastHeaderChar = '?';
+		for (int i = 0; i < appList.size(); i++)
+		{
+			AppModel application = appList.get(i);
+			AppMenuItem item = new AppMenuItem(application);
+			
+			Character firstLetter = this.GetHeaderLetter(item);
+			
+			if (firstLetter != lastHeaderChar)
+			{
+				this.menuItemList.add(AppMenuItem.CreateHeaderMenuItem(firstLetter.toString()));
+				lastHeaderChar = firstLetter;
+			}
+			
+			this.menuItemList.add(item);
+		}
+		
+		this.menuItemAdapter.notifyDataSetChanged();
 	}
 	
 	private List<Tile> ExtractTiles(JSONArray tiles, final ArrayList<AppModel> appList)
@@ -235,39 +457,6 @@ public class AppService implements IAppService, LoaderManager.LoaderCallbacks<Ar
 		{
 			return null;
 		}
-	}
-	
-	private void loadMenuItemList(ArrayList<AppModel> appList)
-	{
-		if (appList == null)
-		{
-			this.menuItemList.clear();
-			this.menuItemAdapter.notifyDataSetChanged();
-			return;
-		}
-		
-		char lastHeaderChar = '?';
-		for (int i = 0; i < appList.size(); i++)
-		{
-			AppModel application = appList.get(i);
-			AppMenuItem item = new AppMenuItem(application);
-			
-			Character firstLetter = item.getLabel().charAt(0);
-			if (!Character.isLetterOrDigit(firstLetter))
-				firstLetter = '#';
-			
-			firstLetter = Character.toUpperCase(firstLetter);
-			
-			if (firstLetter != lastHeaderChar)
-			{
-				this.menuItemList.add(AppMenuItem.CreateHeaderMenuItem(firstLetter.toString()));
-				lastHeaderChar = firstLetter;
-			}
-			
-			this.menuItemList.add(item);
-		}
-		
-		this.menuItemAdapter.notifyDataSetChanged();
 	}
 	
 	private String ReadTileLayoutsFromJsonResource() throws IOException

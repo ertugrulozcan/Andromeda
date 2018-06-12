@@ -34,12 +34,20 @@ public class AppModel
 	
 	public String getApplicationPackageName()
 	{
-		return getAppInfo().packageName;
+		ApplicationInfo appInfo = getAppInfo();
+		if (appInfo == null)
+			return null;
+		
+		return appInfo.packageName;
 	}
 	
 	public String getApplicationClassName()
 	{
-		return getAppInfo().className;
+		ApplicationInfo appInfo = getAppInfo();
+		if (appInfo == null)
+			return null;
+		
+		return appInfo.className;
 	}
 	
 	public String getLabel()

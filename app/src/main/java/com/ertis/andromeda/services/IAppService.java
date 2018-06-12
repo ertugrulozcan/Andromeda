@@ -22,4 +22,8 @@ public interface IAppService
 	TilesAdapter GetTilesAdapter();
 	
 	AppMenuAdapter GetMenuItemAdapter();
+	
+	void OnPackageInstalled(String packageName);
+	
+	void OnPackageRemoved(String packageName);
 }
