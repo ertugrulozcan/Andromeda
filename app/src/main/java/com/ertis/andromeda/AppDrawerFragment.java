@@ -66,7 +66,7 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 		
 		TileClickListener tileClickListener = GenerateTileClickListener(this.tilesAdapter);
 		this.tilesAdapter.setOnClickListener(tileClickListener);
-		//this.tilesAdapter.setOnLongClickListener(tileClickListener);
+		this.tilesAdapter.setOnLongClickListener(tileClickListener);
 		
 		recyclerView.setAdapter(this.tilesAdapter);
 		
@@ -83,6 +83,9 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 	@Override
 	public void onStartDrag(RecyclerView.ViewHolder viewHolder)
 	{
+		if (viewHolder instanceof TilesAdapter.TileFolderViewHolder)
+			return;
+		
 		this.itemTouchHelper.startDrag(viewHolder);
 	}
 	

@@ -23,7 +23,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.ertis.andromeda.adapters.TilesAdapter;
 import com.ertis.andromeda.managers.TileFolderManager;
+import com.ertis.andromeda.managers.TileOrderManager;
 import com.ertis.andromeda.receivers.ScreenLockReceiver;
 import com.ertis.andromeda.receivers.WallpaperChangedReceiver;
 import com.ertis.andromeda.services.AppService;
@@ -42,6 +44,7 @@ public class AppDrawerActivity extends FragmentActivity
 	private FrameLayout baseLayout;
 	private ViewPager viewPager;
 	private PagerAdapter viewPagerAdapter;
+	private TileOrderManager tileOrderManager;
 	
 	private SlideUp slideUp;
 	private View sliderView;
@@ -61,8 +64,12 @@ public class AppDrawerActivity extends FragmentActivity
 		this.appService = new AppService(this);
 		ServiceLocator.Current().RegisterInstance(this.appService);
 		
-		this.appDrawerFragment = AppDrawerFragment.newInstance(this.appService.GetTilesAdapter());
+		TilesAdapter tilesAdapter = this.appService.GetTilesAdapter();
+		this.appDrawerFragment = AppDrawerFragment.newInstance(tilesAdapter);
 		this.appListFragment = AppListFragment.newInstance(this.appService.GetMenuItemAdapter());
+		
+		this.tileOrderManager = new TileOrderManager(this, this.appDrawerFragment, tilesAdapter);
+		ServiceLocator.Current().RegisterInstance(this.tileOrderManager);
 		
 		this.viewPager = findViewById(R.id.viewpager);
 		this.viewPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());

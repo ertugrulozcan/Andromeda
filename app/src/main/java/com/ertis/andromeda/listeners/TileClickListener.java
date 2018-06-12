@@ -8,25 +8,34 @@ import android.support.v7.widget.PopupMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.ertis.andromeda.AppDrawerFragment;
 import com.ertis.andromeda.R;
 import com.ertis.andromeda.adapters.TilesAdapter;
 import com.ertis.andromeda.managers.TileFolderManager;
+import com.ertis.andromeda.managers.TileOrderManager;
 import com.ertis.andromeda.models.AppModel;
 import com.ertis.andromeda.models.FolderTile;
 import com.ertis.andromeda.models.Tile;
+import com.ertis.andromeda.models.TileFolder;
+import com.ertis.andromeda.services.AppService;
+import com.ertis.andromeda.services.IAppService;
+import com.ertis.andromeda.services.ServiceLocator;
 
 public class TileClickListener implements View.OnClickListener, View.OnLongClickListener
 {
-	private AppDrawerFragment fragment;
-	private TilesAdapter tilesAdapter;
+	private final AppDrawerFragment fragment;
+	private final TilesAdapter tilesAdapter;
+	private final TileOrderManager tileOrderManager;
 	
 	public TileClickListener(AppDrawerFragment fragment, TilesAdapter tilesAdapter)
 	{
 		this.fragment = fragment;
 		this.tilesAdapter = tilesAdapter;
+		
+		this.tileOrderManager = ServiceLocator.Current().GetInstance(TileOrderManager.class);
 	}
 	
 	@Override
@@ -65,6 +74,21 @@ public class TileClickListener implements View.OnClickListener, View.OnLongClick
 	@Override
 	public boolean onLongClick(View view)
 	{
+		Tile tile = this.tilesAdapter.getDataContext(view);
+		if (tile != null)
+		{
+			if (!(tile instanceof TileFolder))
+			{
+				if (this.tileOrderManager != null)
+					this.tileOrderManager.setEditMode(true);
+				
+				return true;
+			}
+		}
+		
+		return false;
+		
+		/*
 		Context wrapper = new ContextThemeWrapper(fragment.getActivity(), R.style.PopupMenuStyle);
 		final PopupMenu popup = new PopupMenu(wrapper, view);
 		MenuInflater menuInflater = popup.getMenuInflater();
@@ -86,6 +110,7 @@ public class TileClickListener implements View.OnClickListener, View.OnLongClick
 		popup.show();
 		
 		return true;
+		*/
 	}
 	
 	public void startNewActivity(Context context, String packageName)

@@ -4,6 +4,9 @@ import android.graphics.Canvas;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
+import com.ertis.andromeda.managers.TileOrderManager;
+import com.ertis.andromeda.services.ServiceLocator;
+
 public class TileTouchHelperCallback extends ItemTouchHelper.Callback
 {
 	public static final float ALPHA_FULL = 1.0f;
@@ -51,6 +54,21 @@ public class TileTouchHelperCallback extends ItemTouchHelper.Callback
 	@Override
 	public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder source, RecyclerView.ViewHolder target)
 	{
+		if (source instanceof TilesAdapter.BaseTileViewHolder && target instanceof TilesAdapter.BaseTileViewHolder)
+		{
+			if (source instanceof TilesAdapter.TileFolderViewHolder)
+				return false;
+			
+			// Notify the adapter of the move
+			mAdapter.onItemMove(source.getAdapterPosition(), target.getAdapterPosition());
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
+		/*
 		if (source.getItemViewType() != target.getItemViewType())
 		{
 			return false;
@@ -59,6 +77,8 @@ public class TileTouchHelperCallback extends ItemTouchHelper.Callback
 		// Notify the adapter of the move
 		mAdapter.onItemMove(source.getAdapterPosition(), target.getAdapterPosition());
 		return true;
+		
+		*/
 	}
 	
 	@Override
@@ -114,6 +134,10 @@ public class TileTouchHelperCallback extends ItemTouchHelper.Callback
 			ItemTouchHelperViewHolder itemViewHolder = (ItemTouchHelperViewHolder) viewHolder;
 			itemViewHolder.onItemClear();
 		}
+		
+		TileOrderManager tileOrderManager = ServiceLocator.Current().GetInstance(TileOrderManager.class);
+		if (tileOrderManager != null)
+			tileOrderManager.setEditMode(false);
 	}
 }
 

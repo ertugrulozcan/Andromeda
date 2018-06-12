@@ -37,11 +37,11 @@ public class TileFolderManager
 			return;
 		
 		this.folderViewHolder = folderViewHolder;
-		this.folderTilesAdapter = new TilesAdapter(folderViewHolder.getFolderLayoutBase().getContext(), this.tileFolder.getSubTiles(), null);
+		this.folderTilesAdapter = new TilesAdapter(folderViewHolder.getFolderLayoutBase().getContext(), this.tileFolder.getSubTiles());
 		
 		TileClickListener tileClickListener = AppDrawerFragment.Current.GenerateTileClickListener(this.folderTilesAdapter);
 		this.folderTilesAdapter.setOnClickListener(tileClickListener);
-		this.folderTilesAdapter.setOnLongClickListener(tileClickListener);
+		//this.folderTilesAdapter.setOnLongClickListener(tileClickListener);
 		
 		RecyclerView recyclerView = this.folderViewHolder.getRecyclerView();
 		SpannedGridLayoutManager spannedGridLayoutManager = new SpannedGridLayoutManager(SpannedGridLayoutManager.Orientation.VERTICAL, 6);

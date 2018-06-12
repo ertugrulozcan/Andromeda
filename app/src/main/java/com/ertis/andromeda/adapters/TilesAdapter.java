@@ -24,9 +24,11 @@ import com.ertis.andromeda.listeners.OnStartDragListener;
 import com.ertis.andromeda.managers.SpanLayoutParams;
 import com.ertis.andromeda.managers.SpanSize;
 import com.ertis.andromeda.managers.TileFolderManager;
+import com.ertis.andromeda.managers.TileOrderManager;
 import com.ertis.andromeda.models.FolderTile;
 import com.ertis.andromeda.models.Tile;
 import com.ertis.andromeda.models.TileFolder;
+import com.ertis.andromeda.services.ServiceLocator;
 import com.ertis.andromeda.utilities.GridLineView;
 
 import java.util.ArrayList;
@@ -42,31 +44,41 @@ import java.util.List;
 public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileViewHolder> implements ItemTouchHelperAdapter
 {
 	private static Typeface segoeTypeface;
-	private final OnStartDragListener dragStartListener;
+	
+	private int TILE_CODE = 124;
+	private int FOLDER_TILE_CODE = 336;
+	private int TILE_FOLDER_CODE = 666;
+	
 	private int SMALL_TILE_SIZE = 221;
 	private int MEDIUM_TILE_SIZE = 458;
 	private int WIDE_TILE_SIZE = 932;
 	private int FULL_TILE_SIZE = 1406;
 	private int TILE_MARGIN = 8;
+	
+	private TileOrderManager tileOrderManager;
+	
 	private Context parentView;
 	private List<Tile> tileList;
 	private HashMap<View, Tile> tileViewDictionary;
+	
 	private View.OnClickListener onClickListener;
 	private View.OnLongClickListener onLongClickListener;
-	private int TILE_CODE = 124;
-	private int FOLDER_TILE_CODE = 336;
-	private int TILE_FOLDER_CODE = 666;
+	private OnStartDragListener dragStartListener;
 	
-	public TilesAdapter(Context context, List<Tile> tileList, OnStartDragListener dragStartListener)
+	public TilesAdapter(Context context, List<Tile> tileList)
 	{
 		this.parentView = context;
 		this.tileViewDictionary = new LinkedHashMap<>();
 		this.tileList = tileList;
-		this.dragStartListener = dragStartListener;
 		
 		this.SetTileSizes(context);
 		
 		segoeTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/segoewp/segoe-wp.ttf");
+	}
+	
+	public void setDragStartListener(OnStartDragListener dragStartListener)
+	{
+		this.dragStartListener = dragStartListener;
 	}
 	
 	private void SetTileSizes(Context context)
@@ -76,6 +88,14 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 		this.WIDE_TILE_SIZE = SizeConverter.GetTileWidth(context, Tile.TileSize.MediumWide);
 		this.FULL_TILE_SIZE = SizeConverter.GetTilePanelFullWidth(context);
 		this.TILE_MARGIN = SizeConverter.GetTileMargin(context);
+	}
+	
+	public TileOrderManager getTileOrderManager()
+	{
+		if (this.tileOrderManager == null)
+			this.tileOrderManager = ServiceLocator.Current().GetInstance(TileOrderManager.class);
+		
+		return tileOrderManager;
 	}
 	
 	@Override
@@ -235,6 +255,39 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 					folderTileViewHolder.folderTileGridView.addView(thumbnailView, i);
 				}
 			}
+			
+			if (this.getTileOrderManager().isEditMode())
+			{
+				baseHolder.onEditMode();
+			}
+			
+			/*
+			baseHolder.itemView.setOnTouchListener(new View.OnTouchListener()
+			{
+				@Override
+				public boolean onTouch(View v, MotionEvent event)
+				{
+					if(event.getAction() == MotionEvent.ACTION_DOWN)
+					{
+						tileClickTime = (Long) System.currentTimeMillis();
+					}
+					else if(event.getAction() == MotionEvent.ACTION_UP)
+					{
+						if(((Long) System.currentTimeMillis() - tileClickTime) > 4000)
+						{
+							if (dragStartListener != null && MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN)
+							{
+								dragStartListener.onStartDrag(baseHolder);
+							}
+							
+							return true;
+						}
+					}
+					
+					return false;
+				}
+			});
+			*/
 		}
 		else
 		{
@@ -243,20 +296,6 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 			if (tile.getTileSize() != Tile.TileSize.Small)
 				holder.tileLabel.setText(tile.getCaption());
 		}
-		
-		baseHolder.itemView.setOnTouchListener(new View.OnTouchListener()
-		{
-			@Override
-			public boolean onTouch(View v, MotionEvent event)
-			{
-				if (dragStartListener != null && MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN)
-				{
-					dragStartListener.onStartDrag(baseHolder);
-				}
-				
-				return false;
-			}
-		});
 	}
 	
 	public void setOnClickListener(View.OnClickListener onClickListener)
@@ -339,6 +378,7 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 	{
 		Collections.swap(tileList, fromPosition, toPosition);
 		notifyItemMoved(fromPosition, toPosition);
+		
 		return true;
 	}
 	
@@ -483,6 +523,17 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 		public void onItemClear()
 		{
 
+		}
+		
+		private void setOpacity(float value)
+		{
+			this.tileLayout.setAlpha(value);
+		}
+		
+		public void onEditMode()
+		{
+			this.setOpacity(0.7f);
+			this.tileLayout.setPadding(27,27,27,27);
 		}
 	}
 	

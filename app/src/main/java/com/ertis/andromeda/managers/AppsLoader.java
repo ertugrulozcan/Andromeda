@@ -7,6 +7,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import com.ertis.andromeda.models.AppMenuItem;
 import com.ertis.andromeda.models.AppModel;
 import com.ertis.andromeda.receivers.PackageIntentReceiver;
 
@@ -22,6 +23,11 @@ import java.util.List;
 
 public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>>
 {
+	
+	final PackageManager mPm;
+	private ArrayList<AppModel> mInstalledApps;
+	private PackageIntentReceiver mPackageObserver;
+	
 	/**
 	 * Perform alphabetical comparison of application entry objects.
 	 */
@@ -35,9 +41,6 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>>
 			return sCollator.compare(object1.getLabel(), object2.getLabel());
 		}
 	};
-	final PackageManager mPm;
-	private ArrayList<AppModel> mInstalledApps;
-	private PackageIntentReceiver mPackageObserver;
 	
 	public AppsLoader(Context context)
 	{
@@ -53,7 +56,45 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>>
 		indent.addCategory(Intent.CATEGORY_LAUNCHER);
 		
 		final Context context = getContext();
+		return this.loadApplications(context);
+	}
+	
+	public AppModel GiveAppModel(String packageName)
+	{
+		final Context context = getContext();
+		ArrayList<AppModel> appList = this.loadApplications(context);
 		
+		for (int i = 0; i < appList.size(); i++)
+		{
+			AppModel app = appList.get(i);
+			if (app.getApplicationPackageName().equals(packageName))
+			{
+				return app;
+			}
+		}
+		
+		return null;
+	}
+	
+	public int IndexOfApp(String packageName)
+	{
+		final Context context = getContext();
+		ArrayList<AppModel> appList = this.loadApplications(context);
+		
+		for (int i = 0; i < appList.size(); i++)
+		{
+			AppModel app = appList.get(i);
+			if (app.getApplicationPackageName().equals(packageName))
+			{
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+	
+	public ArrayList<AppModel> loadApplications(Context context)
+	{
 		// retrieve the list of installed applications
 		List<ApplicationInfo> apps = mPm.getInstalledApplications(0);
 		
@@ -77,37 +118,8 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>>
 			}
 		}
 		
-		/*
-		List<ResolveInfo> resolves = mPm.queryIntentActivities(indent,0);
-		ArrayList<AppModel> items = new ArrayList<AppModel>(resolves.size());
-		for (int i = 0; i < resolves.size(); i++)
-		{
-			ApplicationInfo applicationInfo = resolves.get(i).activityInfo.applicationInfo;
-			AppModel app = new AppModel(context, applicationInfo);
-			app.loadLabel(context);
-			items.add(app);
-		}
-		*/
-		
-		/*
-		List<String> packageNames = new ArrayList<>();
-		for (int i = 0; i < items.size(); i++)
-			packageNames.add(items.get(i).getApplicationPackageName());
-		*/
-		
 		// sort the list
 		Collections.sort(items, ALPHA_COMPARATOR);
-		
-		StringBuilder stringBuilder = new StringBuilder();
-		for (int i = 0; i < items.size(); i++)
-		{
-			AppModel app = items.get(i);
-			String appName = app.getLabel();
-			String packageName = app.getApplicationPackageName();
-			stringBuilder.append((i + 1) + ". " + appName + " - " + packageName + "\n");
-		}
-		
-		String appsString = stringBuilder.toString();
 		
 		return items;
 	}
