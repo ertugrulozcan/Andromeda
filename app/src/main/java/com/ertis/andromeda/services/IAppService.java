@@ -26,4 +26,10 @@ public interface IAppService
 	void OnPackageInstalled(String packageName);
 	
 	void OnPackageRemoved(String packageName);
+	
+	void UninstallPackage(AppMenuItem appMenuItem);
+	
+	void PinToHome(AppMenuItem appMenuItem);
+	
+	void UnpinTile(Tile tile);
 }

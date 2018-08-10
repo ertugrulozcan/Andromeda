@@ -3,6 +3,7 @@ package com.ertis.andromeda;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
@@ -13,7 +14,9 @@ import com.ertis.andromeda.adapters.TileTouchHelperCallback;
 import com.ertis.andromeda.adapters.TilesAdapter;
 import com.ertis.andromeda.listeners.OnStartDragListener;
 import com.ertis.andromeda.listeners.TileClickListener;
+import com.ertis.andromeda.managers.SpanSize;
 import com.ertis.andromeda.managers.SpannedGridLayoutManager;
+import com.ertis.andromeda.managers.SpannedGridLayoutManager2;
 import com.ertis.andromeda.managers.TileAnimationManager;
 import com.ertis.andromeda.managers.TileFolderManager;
 
@@ -63,6 +66,34 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 		SpannedGridLayoutManager spannedGridLayoutManager = new SpannedGridLayoutManager(SpannedGridLayoutManager.Orientation.VERTICAL, 6);
 		spannedGridLayoutManager.setItemOrderIsStable(true);
 		recyclerView.setLayoutManager(spannedGridLayoutManager);
+		
+		/*
+		SpannedGridLayoutManager2.GridSpanLookup gridSpanLookup = new SpannedGridLayoutManager2.GridSpanLookup()
+		{
+			@Override
+			public SpannedGridLayoutManager2.SpanInfo getSpanInfo(int position)
+			{
+				SpanSize orgSpanSize = tilesAdapter.GetItemSpanSize(position);
+				return new SpannedGridLayoutManager2.SpanInfo(orgSpanSize.getWidth(), orgSpanSize.getHeight());
+			}
+		};
+		
+		SpannedGridLayoutManager2 spannedGridLayoutManager = new SpannedGridLayoutManager2(gridSpanLookup, 6, 1f);
+		recyclerView.setLayoutManager(spannedGridLayoutManager);
+		*/
+		
+		/*
+		GridLayoutManager gridLayoutManager = new GridLayoutManager(this.getContext(), 6, GridLayoutManager.VERTICAL, false);
+		gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup()
+		{
+			@Override
+			public int getSpanSize(int position)
+			{
+				return tilesAdapter.GetItemColumnSpanSize(position);
+			}
+		});
+		recyclerView.setLayoutManager(gridLayoutManager);
+		*/
 		
 		TileClickListener tileClickListener = GenerateTileClickListener(this.tilesAdapter);
 		this.tilesAdapter.setOnClickListener(tileClickListener);
@@ -125,5 +156,15 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 	public void onDetach()
 	{
 		super.onDetach();
+	}
+	
+	public void ScrollToTop()
+	{
+		this.recyclerView.smoothScrollToPosition(0);
+	}
+	
+	public void ScrollToBottom()
+	{
+		this.recyclerView.smoothScrollToPosition(this.tilesAdapter.getItemCount() - 1);
 	}
 }

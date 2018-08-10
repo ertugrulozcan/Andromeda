@@ -10,5 +10,7 @@
     <color name="blackDarkShadow">#DD000000</color>
     <color name="colorTileBackground">#A3194084</color>
     <color name="popupBackground">#2B2B2B</color>
+    <color name="popupForeground">#FFFFFF</color>
+    <color name="popupSelectedItemBackground">#404040</color>
     <color name="darker_gray">#999999</color>
 </resources>

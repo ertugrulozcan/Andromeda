@@ -2,6 +2,13 @@
     <string name="app_name">Andromeda</string>
     <string name="app_description">Andromeda - Windows 10 Mobile Launcher</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="pin_to_home">Pin to home</string>
+    <string name="uninstall">Uninstall</string>
+
+    <string name="unpin">Unpin from home</string>
+    <string name="resize">Resize</string>
+    <string name="small">Small</string>
+    <string name="medium">Medium</string>
+    <string name="wide">Wide</string>
+    <string name="large">Large</string>
 </resources>

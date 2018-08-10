@@ -141,24 +141,25 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 			return;
 		
 		Tile tile = this.tileList.get(position);
+		if (tile == null)
+			return;
 		
-		if (baseHolder.itemView != null)
+		tile.setViewHolder(baseHolder);
+		
+		if (baseHolder.itemView != null && !this.tileViewDictionary.containsKey(baseHolder.itemView))
 		{
 			this.tileViewDictionary.put(baseHolder.itemView, tile);
 		}
 		
-		baseHolder.tileBox.setLayoutParams(this.calculateTileBoxLayoutParams(tile));
-		baseHolder.tileLayout.setLayoutParams(this.calculateTileBoxSpanLayoutParams(tile));
-		baseHolder.tileLabel.setTypeface(segoeTypeface);
-		
 		if (!(tile instanceof TileFolder))
 		{
-			ColorDrawable tileColor = tile.getTileColor();
-			baseHolder.tileBox.setBackground(tileColor);
-			
 			if (tile.getTileSize() != Tile.TileSize.Small)
 				baseHolder.tileLabel.setText(tile.getCaption());
 			
+			ColorDrawable tileColor = tile.getTileColor();
+			baseHolder.tileBox.setBackground(tileColor);
+			
+			// IsTile
 			if (!(tile instanceof FolderTile))
 			{
 				TileViewHolder holder = (TileViewHolder) baseHolder;
@@ -167,11 +168,15 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 				{
 					holder.tileIconImageView.getLayoutParams().width = 90;
 					holder.tileIconImageView.getLayoutParams().height = 90;
+					holder.tileLabel.clearAnimation();
+					holder.tileLabel.setVisibility(View.INVISIBLE);
 				}
 				else
 				{
 					holder.tileIconImageView.getLayoutParams().width = 130;
 					holder.tileIconImageView.getLayoutParams().height = 130;
+					holder.tileLabel.clearAnimation();
+					holder.tileLabel.setVisibility(View.VISIBLE);
 				}
 				
 				if (tile.getTileStyle() == Tile.TileStyle.Icon)
@@ -181,16 +186,12 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 					params.width = holder.tileIconImageView.getLayoutParams().width;
 					params.height = holder.tileIconImageView.getLayoutParams().height;
 					holder.tileIconImageView.setLayoutParams(params);
-					
-					holder.tileLabel.setVisibility(View.VISIBLE);
 				}
 				else if (tile.getTileStyle() == Tile.TileStyle.Image)
 				{
 					FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
 					params.gravity = Gravity.FILL;
 					holder.tileIconImageView.setLayoutParams(params);
-					
-					// holder.tileLabel.setVisibility(View.INVISIBLE);
 				}
 				else if (tile.getTileStyle() == Tile.TileStyle.LiveTile)
 				{
@@ -205,6 +206,7 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 				
 				holder.tileIconImageView.requestLayout();
 			}
+			// IsFolder
 			else
 			{
 				FolderTileViewHolder folderTileViewHolder = (FolderTileViewHolder) baseHolder;
@@ -245,21 +247,25 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 					imageView.setLayoutParams(thumbnailImageLayoutParams);
 					imageView.setImageDrawable(subTile.getIcon());
 					
-					////////////////////////////////////////////////////////////////////////////////////////////////////
-					
 					int parentTileSize = SizeConverter.GetTileWidth(baseHolder.itemView.getContext(), folderTile.getTileSize());
 					folderTileViewHolder.folderTileCover.getLayoutParams().height = (int) (parentTileSize * 2 / 3 + 1);
-					
-					////////////////////////////////////////////////////////////////////////////////////////////////////
 					
 					folderTileViewHolder.folderTileGridView.addView(thumbnailView, i);
 				}
 			}
 			
+			
+			baseHolder.tileBox.setLayoutParams(this.calculateTileBoxLayoutParams(tile));
+			baseHolder.tileLayout.setLayoutParams(this.calculateTileBoxSpanLayoutParams(tile));
+			baseHolder.tileLabel.setTypeface(segoeTypeface);
+			baseHolder.tileBox.requestLayout();
+			
+			/*
 			if (this.getTileOrderManager().isEditMode())
 			{
 				baseHolder.onEditMode();
 			}
+			*/
 			
 			/*
 			baseHolder.itemView.setOnTouchListener(new View.OnTouchListener()
@@ -358,6 +364,7 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 	public int getItemViewType(int position)
 	{
 		Tile tileBase = this.tileList.get(position);
+		
 		if (tileBase instanceof TileFolder)
 			return TILE_FOLDER_CODE;
 		else if (tileBase.getTileType() == Tile.TileType.FolderTile)
@@ -380,6 +387,58 @@ public class TilesAdapter extends RecyclerView.Adapter<TilesAdapter.BaseTileView
 		notifyItemMoved(fromPosition, toPosition);
 		
 		return true;
+	}
+	
+	public int GetItemColumnSpanSize(int position)
+	{
+		Tile tile = this.tileList.get(position);
+		switch (tile.getTileSize())
+		{
+			case Small:
+			{
+				return 1;
+			}
+			case Medium:
+			{
+				return 2;
+			}
+			case MediumWide:
+			{
+				return 4;
+			}
+			case Large:
+			{
+				return 4;
+			}
+		}
+		
+		return 6;
+	}
+	
+	public SpanSize GetItemSpanSize(int position)
+	{
+		Tile tile = this.tileList.get(position);
+		switch (tile.getTileSize())
+		{
+			case Small:
+			{
+				return new SpanSize(1, 1);
+			}
+			case Medium:
+			{
+				return new SpanSize(2, 2);
+			}
+			case MediumWide:
+			{
+				return new SpanSize(4, 2);
+			}
+			case Large:
+			{
+				return new SpanSize(4, 4);
+			}
+		}
+		
+		return new SpanSize(6, 2);
 	}
 	
 	private SpanLayoutParams calculateTileBoxSpanLayoutParams(Tile tile)

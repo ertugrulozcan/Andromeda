@@ -221,6 +221,11 @@ public class AppDrawerActivity extends FragmentActivity
 		}
 	}
 	
+	public void SwipeToHome()
+	{
+		this.viewPager.setCurrentItem(0);
+	}
+	
 	public AppDrawerFragment getAppDrawerFragment()
 	{
 		return appDrawerFragment;

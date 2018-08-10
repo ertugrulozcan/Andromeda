@@ -3,6 +3,7 @@ package com.ertis.andromeda.models;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 
+import com.ertis.andromeda.adapters.TilesAdapter;
 import com.ertis.andromeda.helpers.Colors;
 
 /**
@@ -23,6 +24,8 @@ public class Tile
 	private TileStyle style;
 	private String queryParams;
 	
+	private TilesAdapter.BaseTileViewHolder viewHolder;
+	
 	public Tile(AppModel appModel, TileSize tileSize, ColorDrawable color)
 	{
 		this.type = TileType.AppTile;
@@ -41,6 +44,7 @@ public class Tile
 		this.setTileStyle(style);
 	}
 	
+	/*
 	public static Tile CreateFakeTile(TileSize tileSize)
 	{
 		Tile tile = new Tile(null, tileSize, Colors.rgb("00000000"));
@@ -49,6 +53,7 @@ public class Tile
 		
 		return tile;
 	}
+	*/
 	
 	public void setCustomLabel(String customLabel)
 	{
@@ -159,6 +164,17 @@ public class Tile
 	public void setQueryParams(String queryParams)
 	{
 		this.queryParams = queryParams;
+	}
+	
+	
+	public TilesAdapter.BaseTileViewHolder getViewHolder()
+	{
+		return viewHolder;
+	}
+	
+	public void setViewHolder(TilesAdapter.BaseTileViewHolder viewHolder)
+	{
+		this.viewHolder = viewHolder;
 	}
 	
 	public enum TileSize

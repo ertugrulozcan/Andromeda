@@ -30,7 +30,7 @@
     "tileBackground": "#99DD4B39",
     "queryParams": ""
   }, {
-    "packageName": "com.android.email",
+    "packageName": "com.microsoft.office.outlook",
     "tileSize": 1,
     "tileStyle": 0,
     "tileBackground": "",
@@ -73,13 +73,6 @@
     "queryParams": ""
   }, {
     "packageName": "com.onedio.androidside",
-    "tileSize": 0,
-    "tileStyle": 0,
-    "tileBackground": "",
-    "queryParams": ""
-  }, {
-    "packageName": "",
-    "tileType": 0,
     "tileSize": 0,
     "tileStyle": 0,
     "tileBackground": "",
@@ -148,7 +141,13 @@
       "tileStyle": 0,
       "tileBackground": "",
       "queryParams": ""
-    },{
+  }, {
+    "packageName": "com.evernote",
+    "tileSize": 0,
+    "tileStyle": 0,
+    "tileBackground": "",
+    "queryParams": ""
+  },{
       "packageName": "com.miui.compass",
       "tileSize": 0,
       "tileStyle": 0,
@@ -162,18 +161,6 @@
       "queryParams": ""
     }, {
       "packageName": "com.android.settings",
-      "tileSize": 0,
-      "tileStyle": 0,
-      "tileBackground": "",
-      "queryParams": ""
-    }, {
-      "packageName": "",
-      "tileSize": 0,
-      "tileStyle": 0,
-      "tileBackground": "",
-      "queryParams": ""
-    }, {
-      "packageName": "com.evernote",
       "tileSize": 0,
       "tileStyle": 0,
       "tileBackground": "",

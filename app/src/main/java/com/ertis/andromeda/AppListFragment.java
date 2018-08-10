@@ -2,13 +2,20 @@ package com.ertis.andromeda;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.view.ContextThemeWrapper;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -21,6 +28,10 @@ import com.ertis.andromeda.models.AppModel;
 import com.ertis.andromeda.services.AppService;
 import com.ertis.andromeda.services.IAppService;
 import com.ertis.andromeda.services.ServiceLocator;
+import com.skydoves.powermenu.MenuAnimation;
+import com.skydoves.powermenu.OnMenuItemClickListener;
+import com.skydoves.powermenu.PowerMenu;
+import com.skydoves.powermenu.PowerMenuItem;
 
 public class AppListFragment extends Fragment
 {
@@ -112,6 +123,18 @@ public class AppListFragment extends Fragment
 			}
 		});
 		
+		this.menuItemAdapter.setOnLongClickListener(new View.OnLongClickListener()
+		{
+			@Override
+			public boolean onLongClick(final View view)
+			{
+				PowerMenu powerMenu = GivePopupMenu(view);
+				powerMenu.showAsAnchorLeftTop(view);
+				
+				return true;
+			}
+		});
+		
 		//recyclerView.addItemDecoration(new AppListMenuItemDecoration(this, LinearLayoutManager.VERTICAL, 16));
 		recyclerView.setAdapter(this.menuItemAdapter);
 		
@@ -161,5 +184,76 @@ public class AppListFragment extends Fragment
 	{
 		if (this.baseLayout != null)
 			this.baseLayout.setBackgroundColor(color);
+	}
+	
+	private PowerMenu GivePopupMenu(final View view)
+	{
+		Context context = view.getContext();
+		
+		final String menuItemTitle1 = getResources().getString(R.string.pin_to_home);
+		final String menuItemTitle2 = getResources().getString(R.string.uninstall);
+		
+		final PowerMenu powerMenu = new PowerMenu.Builder(context)
+				.addItem(new PowerMenuItem(menuItemTitle1, false))
+				.addItem(new PowerMenuItem(menuItemTitle2, false))
+				.setAnimation(MenuAnimation.SHOWUP_TOP_LEFT)
+				.setMenuShadow(10f)
+				.setMenuRadius(0f)
+				.setTextColor(context.getResources().getColor(R.color.popupForeground))
+				.setSelectedTextColor(context.getResources().getColor(R.color.colorForeground))
+				.setMenuColor(context.getResources().getColor(R.color.popupBackground))
+				.setSelectedMenuColor(context.getResources().getColor(R.color.popupSelectedItemBackground))
+				.setWidth(700)
+				.build();
+		
+		powerMenu.setOnMenuItemClickListener(new OnMenuItemClickListener<PowerMenuItem>()
+             {
+                 @Override
+                 public void onItemClick(int position, PowerMenuItem item)
+                 {
+                     IAppService appService = ServiceLocator.Current().GetInstance(AppService.class);
+                     if (appService == null)
+                         return;
+
+                     if (item.title.equals(menuItemTitle1))
+                     {
+	                     AppMenuItem appMenuItem = menuItemAdapter.getDataContext(view);
+	                     if (appMenuItem != null)
+	                     {
+		                     FragmentActivity activity = getActivity();
+		                     if (activity instanceof AppDrawerActivity)
+		                     {
+			                     AppDrawerActivity appDrawerActivity = (AppDrawerActivity)activity;
+			                     appDrawerActivity.SwipeToHome();
+		                     }
+		
+		                     appService.PinToHome(appMenuItem);
+	                     }
+                     }
+                     else if (item.title.equals(menuItemTitle2))
+	                 {
+		                 AppMenuItem appMenuItem = menuItemAdapter.getDataContext(view);
+		                 if (appMenuItem != null)
+		                 {
+			                 appService.UninstallPackage(appMenuItem);
+		                 }
+	                 }
+
+                     powerMenu.dismiss();
+                 }
+             }
+		);
+		
+		return powerMenu;
+	}
+	
+	public void ScrollToTop()
+	{
+		this.recyclerView.smoothScrollToPosition(0);
+	}
+	
+	public void ScrollToBottom()
+	{
+		this.recyclerView.smoothScrollToPosition(this.menuItemAdapter.getItemCount() - 1);
 	}
 }

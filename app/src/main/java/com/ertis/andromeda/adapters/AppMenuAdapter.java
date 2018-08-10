@@ -28,6 +28,7 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 	private List<AppMenuItem> menuItemList;
 	private HashMap<View, AppMenuItem> menuItemViewDictionary;
 	private View.OnClickListener onClickListener;
+	private View.OnLongClickListener onLongClickListener;
 	
 	private int testItemCount = 0;
 	private AlertDialog.Builder dlgAlert;
@@ -63,6 +64,7 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 				return null;
 			
 			itemView.setOnClickListener(this.onClickListener);
+			itemView.setOnLongClickListener(this.onLongClickListener);
 			
 			return new AppMenuAdapter.AppMenuItemViewHolder(itemView);
 		}
@@ -105,6 +107,11 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 		this.onClickListener = onClickListener;
 	}
 	
+	public void setOnLongClickListener(View.OnLongClickListener onLongClickListener)
+	{
+		this.onLongClickListener = onLongClickListener;
+	}
+	
 	public AppMenuItem getDataContext(View view)
 	{
 		if (this.menuItemViewDictionary.containsKey(view))
@@ -113,13 +120,23 @@ public class AppMenuAdapter extends RecyclerView.Adapter<AppMenuAdapter.AppMenuI
 		return null;
 	}
 	
+	public AppMenuItem getDataContext(int position)
+	{
+		if (this.menuItemViewDictionary.size() < position && position >= 0)
+			return this.menuItemViewDictionary.get(position);
+		
+		return null;
+	}
+	
 	@Override
 	public int getItemCount()
 	{
+		/*
 		if (testItemCount != 0 && this.menuItemList.size() > testItemCount)
 			this.ShowMessageBox("Error", "Tile count was changed! (" + this.menuItemList.size() + " > " + testItemCount + ")");
 		
 		testItemCount = this.menuItemList.size();
+		*/
 		
 		return this.menuItemList.size();
 	}

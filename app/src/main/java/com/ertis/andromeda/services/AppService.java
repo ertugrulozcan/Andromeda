@@ -8,6 +8,7 @@ import android.content.Loader;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.ertis.andromeda.AppDrawerActivity;
@@ -162,48 +163,18 @@ public class AppService implements IAppService, LoaderManager.LoaderCallbacks<Ar
 	
 	public void OnPackageInstalled(String packageName)
 	{
-		// Find application instance and index
+		// Load appList
 		ArrayList<AppModel> appModelList = this.appLoader.loadApplications(this.appDrawer);
 		
-		int index = -1;
-		for (int i = 0; i < appModelList.size(); i++)
-		{
-			index = i;
-			
-			String itemPackageName = appModelList.get(i).getApplicationPackageName();
-			if (itemPackageName != null && itemPackageName.equals(packageName))
-				break;
-		}
+		// Find application instance and index
+		int index = this.IndexOfApplication(packageName, appModelList);
 		
 		if (index >= 0)
 		{
 			AppMenuItem appMenuItem = new AppMenuItem(appModelList.get(index));
 			Character headerLetter = this.GetHeaderLetter(appMenuItem);
 			
-			// Firstly, if already exist menu item, remove (for update)
-			int updatedIndex = -1;
-			int counter = 0;
-			for (AppMenuItem item : this.menuItemList)
-			{
-				counter++;
-				
-				if (item.isHeaderItem())
-					continue;
-				
-				String itemPackageName = item.getApp().getApplicationPackageName();
-				String menuItemPackageName = appMenuItem.getApp().getApplicationPackageName();
-				
-				if (itemPackageName != null && menuItemPackageName != null && itemPackageName.equals(menuItemPackageName))
-				{
-					updatedIndex = counter;
-					break;
-				}
-			}
-			
-			if (updatedIndex >= 0)
-				this.menuItemList.remove(updatedIndex);
-			
-			// Add mennu item and if necessary (is not exist) add header menu item
+			// Add menu item and if necessary (is not exist) add header menu item
 			if (!this.HasHeaderMenuItem(appMenuItem))
 			{
 				int headerIndex = 0;
@@ -220,8 +191,13 @@ public class AppService implements IAppService, LoaderManager.LoaderCallbacks<Ar
 				}
 				
 				this.menuItemList.add(index + headerIndex, AppMenuItem.CreateHeaderMenuItem(headerLetter.toString()));
-				this.menuItemAdapter.notifyItemInserted(headerIndex);
+				this.NotifyInsertMenuItemRange(headerIndex);
 			}
+			
+			// Firstly, if already exist menu item, remove (for update)
+			int updatedIndex = this.IndexOfMenuItem(packageName);
+			if (updatedIndex > -1)
+				this.menuItemList.remove(updatedIndex);
 			
 			int headerCount = 0;
 			for (int i = 0; i < this.menuItemList.size(); i++)
@@ -239,7 +215,12 @@ public class AppService implements IAppService, LoaderManager.LoaderCallbacks<Ar
 			index += headerCount;
 			
 			this.menuItemList.add(index, appMenuItem);
-			this.menuItemAdapter.notifyItemInserted(index);
+			this.NotifyInsertMenuItemRange(index);
+		}
+		
+		synchronized(this.menuItemAdapter)
+		{
+			this.menuItemAdapter.notifyDataSetChanged();
 		}
 	}
 	
@@ -247,14 +228,20 @@ public class AppService implements IAppService, LoaderManager.LoaderCallbacks<Ar
 	{
 		// Find application instance and index
 		AppMenuItem removedAppMenuItem = null;
+		int removedIndex = -1;
+		
 		for (int i = 0; i < this.menuItemList.size(); i++)
 		{
 			AppMenuItem item = this.menuItemList.get(i);
+			if (item.isHeaderItem())
+				continue;
+			
 			String itemPackageName = item.getApp().getApplicationPackageName();
 			
 			if (itemPackageName != null && itemPackageName.equals(packageName))
 			{
 				removedAppMenuItem = item;
+				removedIndex = i;
 				break;
 			}
 		}
@@ -262,15 +249,77 @@ public class AppService implements IAppService, LoaderManager.LoaderCallbacks<Ar
 		if (removedAppMenuItem != null)
 		{
 			this.menuItemList.remove(removedAppMenuItem);
+			this.NotifyRemoveMenuItemRange(removedIndex);
 			
 			Character headerLetter = this.GetHeaderLetter(removedAppMenuItem);
 			if (!this.IsNeedHeader(headerLetter))
 			{
 				int headerIndex = this.FindHeaderIndex(headerLetter);
 				if (headerIndex >= 0)
+				{
 					this.menuItemList.remove(headerIndex);
+					this.NotifyRemoveMenuItemRange(headerIndex);
+				}
 			}
 		}
+		
+		synchronized(this.menuItemAdapter)
+		{
+			this.menuItemAdapter.notifyDataSetChanged();
+		}
+	}
+	
+	private void NotifyInsertMenuItemRange(int index)
+	{
+		int start = index - 2;
+		if (start < 0)
+			start = 0;
+		
+		synchronized(this.menuItemAdapter)
+		{
+			this.menuItemAdapter.notifyItemRangeInserted(start, 4);
+		}
+	}
+	
+	private void NotifyRemoveMenuItemRange(int index)
+	{
+		int start = index - 2;
+		if (start < 0)
+			start = 0;
+		
+		synchronized(this.menuItemAdapter)
+		{
+			this.menuItemAdapter.notifyItemRangeRemoved(start, 4);
+		}
+	}
+	
+	private int IndexOfApplication(String packageName, ArrayList<AppModel> appModelList)
+	{
+		int index = -1;
+		for (int i = 0; i < appModelList.size(); i++)
+		{
+			index = i;
+			
+			String itemPackageName = appModelList.get(i).getApplicationPackageName();
+			if (itemPackageName != null && itemPackageName.equals(packageName))
+				break;
+		}
+		
+		return index;
+	}
+	
+	private int IndexOfMenuItem(String packageName)
+	{
+		for (int i = 0; i < this.menuItemList.size(); i++)
+		{
+			AppMenuItem menuItem = this.menuItemList.get(i);
+			if (!menuItem.isHeaderItem() && menuItem.getApp().getApplicationPackageName().equals(packageName))
+			{
+				return i;
+			}
+		}
+		
+		return -1;
 	}
 	
 	private boolean HasHeaderMenuItem(AppMenuItem appMenuItem)
@@ -358,6 +407,49 @@ public class AppService implements IAppService, LoaderManager.LoaderCallbacks<Ar
 		this.menuItemAdapter.notifyDataSetChanged();
 	}
 	
+	public void UninstallPackage(AppMenuItem appMenuItem)
+	{
+		String packageName = appMenuItem.getApp().getApplicationPackageName();
+		
+		Intent intent = new Intent(Intent.ACTION_DELETE);
+		intent.setData(Uri.parse("package:" + packageName));
+		this.appDrawer.startActivity(intent);
+	}
+	
+	public void PinToHome(AppMenuItem appMenuItem)
+	{
+		for (int i = 0; i < this.tileList.size(); i++)
+		{
+			Tile tile = this.tileList.get(i);
+			AppModel app = tile.getApplication();
+			if (app == null)
+				continue;
+			
+			String appPackageName = app.getApplicationPackageName();
+			
+			AppModel app2 = appMenuItem.getApp();
+			if (app2 == null)
+				continue;
+			
+			String appPackageName2 = app2.getApplicationPackageName();
+			
+			if (appPackageName != null && appPackageName2 != null && appPackageName.equals(appPackageName2))
+				return;
+		}
+		
+		this.tileList.add(new Tile(appMenuItem.getApp(), Tile.TileSize.Medium, new ColorDrawable(this.appDrawer.getResources().getColor(R.color.colorTileBackground))));
+		this.tilesAdapter.notifyItemInserted(this.tileList.size() - 1);
+		
+		this.appDrawer.getAppDrawerFragment().ScrollToBottom();
+	}
+	
+	public void UnpinTile(Tile tile)
+	{
+		int index = this.tileList.indexOf(tile);
+		this.tileList.remove(index);
+		this.tilesAdapter.notifyItemRemoved(index);
+	}
+	
 	private List<Tile> ExtractTiles(JSONArray tiles, final ArrayList<AppModel> appList)
 	{
 		List<Tile> tileList = new ArrayList<>();
@@ -401,21 +493,26 @@ public class AppService implements IAppService, LoaderManager.LoaderCallbacks<Ar
 						}
 					}
 					
+					/*
 					if (tile == null)
 					{
 						tile = Tile.CreateFakeTile(tileSize);
 					}
+					*/
 					
-					String queryParams = tileData.getString("queryParams");
-					tile.setQueryParams(queryParams);
-					
-					if (queryParams.equals("phoneDialer"))
+					if (tile != null)
 					{
-						Resources res = this.appDrawer.getResources();
-						Drawable drawable = res.getDrawable(R.drawable.phone);
-						tile.setCustomIcon(drawable);
+						String queryParams = tileData.getString("queryParams");
+						tile.setQueryParams(queryParams);
 						
-						tile.setCustomLabel("Phone");
+						if (queryParams.equals("phoneDialer"))
+						{
+							Resources res = this.appDrawer.getResources();
+							Drawable drawable = res.getDrawable(R.drawable.phone);
+							tile.setCustomIcon(drawable);
+							
+							tile.setCustomLabel("Phone");
+						}
 					}
 				}
 				else if (!tileData.isNull("folderName"))
@@ -491,133 +588,5 @@ public class AppService implements IAppService, LoaderManager.LoaderCallbacks<Ar
 		
 		String jsonString = writer.toString();
 		return jsonString;
-	}
-	
-	private Tile.TileSize GetTileType(int index)
-	{
-		switch (index)
-		{
-			case 1:
-				return Tile.TileSize.Medium;
-			case 2:
-				return Tile.TileSize.Medium;
-			case 3:
-				return Tile.TileSize.Small;
-			case 4:
-				return Tile.TileSize.Small;
-			case 5:
-				return Tile.TileSize.Small;
-			case 6:
-				return Tile.TileSize.Small;
-			case 7:
-				return Tile.TileSize.Medium;
-			case 8:
-				return Tile.TileSize.MediumWide;
-			case 9:
-				return Tile.TileSize.Small;
-			case 10:
-				return Tile.TileSize.Small;
-			case 11:
-				return Tile.TileSize.Medium;
-			case 12:
-				return Tile.TileSize.Medium;
-			case 13:
-				return Tile.TileSize.Small;
-			case 14:
-				return Tile.TileSize.Small;
-			case 15:
-				return Tile.TileSize.MediumWide;
-			case 16:
-				return Tile.TileSize.Medium;
-			case 17:
-				return Tile.TileSize.Large;
-			case 18:
-				return Tile.TileSize.Medium;
-			case 19:
-				return Tile.TileSize.Small;
-			case 20:
-				return Tile.TileSize.Small;
-			case 21:
-				return Tile.TileSize.Small;
-			case 22:
-				return Tile.TileSize.Small;
-			
-			case 23:
-				return Tile.TileSize.Medium;
-			case 24:
-				return Tile.TileSize.Medium;
-			case 25:
-				return Tile.TileSize.Small;
-			case 26:
-				return Tile.TileSize.Small;
-			default:
-			{
-				return this.GetTileType(index - 26);
-			}
-		}
-	}
-	
-	private Tile.TileSize GetTileType2(int index)
-	{
-		switch (index)
-		{
-			case 1:
-				return Tile.TileSize.Medium;
-			case 2:
-				return Tile.TileSize.Small;
-			case 3:
-				return Tile.TileSize.Small;
-			case 4:
-				return Tile.TileSize.Small;
-			case 5:
-				return Tile.TileSize.Small;
-			case 6:
-				return Tile.TileSize.MediumWide;
-			case 7:
-				return Tile.TileSize.Small;
-			case 8:
-				return Tile.TileSize.Small;
-			case 9:
-				return Tile.TileSize.Medium;
-			case 10:
-				return Tile.TileSize.Medium;
-			case 11:
-				return Tile.TileSize.Medium;
-			case 12:
-				return Tile.TileSize.Medium;
-			case 13:
-				return Tile.TileSize.MediumWide;
-			case 14:
-				return Tile.TileSize.Small;
-			case 15:
-				return Tile.TileSize.Small;
-			case 16:
-				return Tile.TileSize.Medium;
-			case 17:
-				return Tile.TileSize.Medium;
-			case 18:
-				return Tile.TileSize.Small;
-			case 19:
-				return Tile.TileSize.Small;
-			case 20:
-				return Tile.TileSize.MediumWide;
-			case 21:
-				return Tile.TileSize.Medium;
-			case 22:
-				return Tile.TileSize.Large;
-			case 23:
-				return Tile.TileSize.Medium;
-			case 24:
-				return Tile.TileSize.Small;
-			case 25:
-				return Tile.TileSize.Small;
-			case 26:
-				return Tile.TileSize.Small;
-			
-			default:
-			{
-				return this.GetTileType2(index - 26);
-			}
-		}
 	}
 }
