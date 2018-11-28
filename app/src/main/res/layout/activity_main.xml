@@ -1,63 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<com.aero.andromeda.blur.BlurDrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:context=".MainActivity"
     android:fitsSystemWindows="true"
-    tools:context=".MainActivity">
+    app:blurRadius="25"
+    app:downScaleFactor="3"
+    android:id="@+id/drawer_layout">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="bottom"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="90dp">
-        <TextClock
-            android:id="@+id/hour_text"
+        android:layout_height="match_parent"
+        android:id="@+id/baseLayout">
+
+        <FrameLayout
+            android:id="@+id/baseLayoutCover"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="68sp"
-            android:format24Hour="HH:mm" />
+            android:layout_height="match_parent"
+            android:background="#BB000000"
+            android:visibility="invisible">
+        </FrameLayout>
 
-        <TextClock
-            android:id="@+id/dayofweek_text"
+        <android.support.v4.view.ViewPager
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/viewpager"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="26sp"
-            android:format24Hour="EEEE" />
+            android:layout_height="match_parent" />
 
-        <TextClock
-            android:id="@+id/date_text"
+        <LinearLayout
+            android:id="@+id/slideView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="26sp"
-            android:format24Hour="MMMM dd" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <include layout="@layout/lock_screen" />
+        </LinearLayout>
+    </FrameLayout>
 
-
-    <!--
-    <GridLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <ImageButton
-            android:id="@+id/homeButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@color/transparent"
-            android:src="@drawable/circle_icon"/>
-    </GridLayout>
-    -->
-</android.support.constraint.ConstraintLayout>
+    <fragment
+        android:id="@+id/navigation_drawer"
+        android:name="com.aero.andromeda.NavigationDrawerFragment"
+        android:layout_width="@dimen/navigation_drawer_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        tools:layout="@layout/fragment_navigation_drawer" />
+</com.aero.andromeda.blur.BlurDrawerLayout>

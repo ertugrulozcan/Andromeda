@@ -1,4 +1,5 @@
 <resources>
+
     <style name="JumpListButtonStyle">
         <item name="android:textSize">40sp</item>
         <item name="android:background">@drawable/jump_list_button_selector</item>
@@ -12,8 +13,16 @@
         <item name="android:itemBackground">@color/popupBackground</item>
     </style>
 
+    <style name="SwitchStyle" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorControlActivated">#4343FF</item>
+        <item name="colorSwitchThumbNormal">@color/darker_gray</item>
+        <item name="android:colorForeground">#898989</item>
+    </style>
+
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:fontFamily">@font/segoe_wp_semilight</item>
+        <item name="fontFamily">@font/segoe_wp_semilight</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -21,5 +30,27 @@
         <item name="android:textColor">@color/colorForeground</item>
         <item name="android:typeface">sans</item>
         <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
+        <!-- <item name="colorButtonNormal">#FF0000</item> -->
+
+        <!-- You can also set colorControlNormal, colorControlActivated
+             colorControlHighlight, and colorSwitchThumbNormal. -->
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="NoTitleBar" parent="AppTheme">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.Launcher">
+        <item name="colorPrimaryDark">@color/splashScreenBackground</item>
+        <item name="android:windowBackground">@drawable/splash_screen</item>
     </style>
 </resources>

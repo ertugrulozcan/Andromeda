@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tile_layout"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minWidth="49.5dp"
+    android:minHeight="49.5dp"
+    android:clickable="true"
+    android:clipToPadding="false"
+    android:clipChildren="false">
+
+    <FrameLayout
+        android:id="@+id/tile_box"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
+        android:clipToPadding="false"
+        android:clipChildren="false">
+
+        <FrameLayout
+            android:id="@+id/tileInnerBox"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <FrameLayout
+                android:id="@+id/tileContentLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/tileSecondViewLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+            </FrameLayout>
+
+            <RelativeLayout
+                android:id="@+id/tileCountBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|right">
+                <TextView
+                    android:id="@+id/tileCountBadgeTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"
+                    android:textSize="12sp"
+                    android:background="@drawable/circle"
+                    android:layout_gravity="center"
+                    android:textAlignment="center"
+                    android:layout_margin="4dp"
+                    android:padding="2.5dp"
+                    android:width="20dp"
+                    android:height="20dp" />
+            </RelativeLayout>
+        </FrameLayout>
+
+        <ImageButton
+            android:id="@+id/tileMenuUnpinButton"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="top|right"
+            android:background="@color/transparent"
+            android:src="@drawable/tile_menu_unpin_button"
+            android:scaleType="fitXY" />
+
+        <ImageButton
+            android:id="@+id/tileMenuButton"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="bottom|right"
+            android:background="@color/transparent"
+            android:src="@drawable/tile_menu_button"
+            android:scaleType="fitXY" />
+    </FrameLayout>
+</LinearLayout>

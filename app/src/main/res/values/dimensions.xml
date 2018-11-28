@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="folder_preview_tile_size">113px</dimen>
-    <dimen name="folder_preview_icon_size">72px</dimen>
-    <dimen name="folder_preview_icon_margin">18px</dimen>
-    <dimen name="folder_preview_tile_margin">114px</dimen>
-</resources>

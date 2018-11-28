@@ -1,9 +1,22 @@
 <resources>
     <string name="app_name">Andromeda</string>
-    <string name="app_description">Andromeda - Windows 10 Mobile Launcher</string>
+    <string name="app_description">Ertuğrul Özcan</string>
+    <string name="notification_service_label">Andromeda Notification Service</string>
+    <string name="test">Test</string>
 
     <string name="pin_to_home">Pin to home</string>
     <string name="uninstall">Uninstall</string>
+    <string name="info">Info</string>
+
+    <string name="settings">Settings</string>
+    <string name="settingsUpperCase">SETTINGS</string>
+    <string name="settingsLowerCase">settings</string>
+
+    <string name="ui">Intercafe</string>
+    <string name="interfaceUpperCase">INTERFACE</string>
+    <string name="interfaceLowerCase">interface</string>
+
+    <string name="show_more_tiles">Show more tiles</string>
 
     <string name="unpin">Unpin from home</string>
     <string name="resize">Resize</string>
@@ -11,4 +24,17 @@
     <string name="medium">Medium</string>
     <string name="wide">Wide</string>
     <string name="large">Large</string>
+
+    <string name="notification_listener_service">"Notification Listener Service"</string>
+    <string name="notification_listener_service_explanation">"For the the app. to work you need to enable the Notification Listener Service. Enable it now?"</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Ertuğrul Özcan</string>
+    <string name="nav_header_subtitle">ertugrul.ozcan@matriksdata.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="all_apps">All apps</string>
 </resources>

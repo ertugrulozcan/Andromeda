@@ -14,36 +14,42 @@
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal">
 
-        <GridLayout
-            android:id="@+id/folder_tile_grid_view"
-            android:layout_centerHorizontal="true"
-            android:layout_centerInParent="true"
-            android:useDefaultMargins="true"
+        <FrameLayout
+            android:id="@+id/tileInnerBox"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:columnCount="3"
-            android:rowCount="3"
-            android:orientation="horizontal"
-            android:numColumns="3"
-            android:verticalSpacing="1dp"
-            android:horizontalSpacing="1dp"
-            android:stretchMode="columnWidth"
-            android:gravity="top|fill" />
+            android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tileLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:layout_gravity="bottom|left"
-            android:layout_marginLeft="4dp"
-            android:layout_marginBottom="3dp" />
+            <GridLayout
+                android:id="@+id/folder_tile_grid_view"
+                android:layout_centerHorizontal="true"
+                android:layout_centerInParent="true"
+                android:useDefaultMargins="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="3"
+                android:rowCount="3"
+                android:orientation="horizontal"
+                android:numColumns="3"
+                android:verticalSpacing="1dp"
+                android:horizontalSpacing="1dp"
+                android:stretchMode="columnWidth"
+                android:gravity="top|fill" />
 
-        <com.ertis.andromeda.utilities.GridLineView
-            android:id="@+id/folderTileGrid"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="fill|top"
-            android:layout_gravity="fill|top" />
+            <TextView
+                android:id="@+id/tileLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:layout_gravity="bottom|left"
+                android:layout_marginLeft="4dp"
+                android:layout_marginBottom="3dp" />
+
+            <com.aero.andromeda.utilities.GridLineView
+                android:id="@+id/folderTileGrid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="fill|top"
+                android:layout_gravity="fill|top" />
+        </FrameLayout>
     </FrameLayout>
 </LinearLayout>

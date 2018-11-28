@@ -2,169 +2,201 @@
   "tiles": [{
     "packageName": "com.android.contacts",
     "tileSize": 2,
-    "tileStyle": 0,
-    "tileBackground": "",
+    "tileType": 0,
+    "tileBackground": "#5543B51F",
+    "iconName": "contacts_icon",
     "queryParams": ""
   }, {
     "packageName": "com.android.mms",
     "tileSize": 0,
-    "tileStyle": 0,
-    "tileBackground": "",
+    "tileType": 0,
+    "tileBackground": "#CC8C0496",
+    "iconName": "messages_icon",
     "queryParams": ""
   }, {
     "packageName": "com.android.calendar",
     "tileSize": 0,
-    "tileStyle": 0,
+    "tileType": 0,
     "tileBackground": "",
+    "iconName": "",
     "queryParams": ""
   }, {
     "packageName": "com.android.contacts",
     "tileSize": 1,
-    "tileStyle": 0,
-    "tileBackground": "#5543B51F",
+    "tileType": 0,
+    "tileBackground": "",
+    "iconName": "phone_icon",
     "queryParams": "phoneDialer"
   }, {
     "packageName": "com.google.android.gm",
     "tileSize": 1,
-    "tileStyle": 0,
+    "tileType": 0,
     "tileBackground": "#99DD4B39",
+    "iconName": "gmail_icon",
     "queryParams": ""
   }, {
     "packageName": "com.microsoft.office.outlook",
     "tileSize": 1,
-    "tileStyle": 0,
-    "tileBackground": "",
+    "tileType": 0,
+    "tileBackground": "#0072C6",
+    "iconName": "outlook_icon",
     "queryParams": ""
   }, {
     "packageName": "com.whatsapp",
     "tileSize": 1,
-    "tileStyle": 0,
+    "tileType": 0,
     "tileBackground": "#CD232F3C",
+    "iconName": "whatsapp_icon",
     "queryParams": ""
   }, {
     "packageName": "com.android.chrome",
     "tileSize": 1,
-    "tileStyle": 0,
+    "tileType": 0,
     "tileBackground": "",
+    "iconName": "chrome_icon",
     "queryParams": ""
   }, {
     "packageName": "com.twitter.android",
     "tileSize": 0,
-    "tileStyle": 0,
-    "tileBackground": "#AA1D1D1D",
+    "tileType": 0,
+    "tileBackground": "#359BED",
+    "iconName": "twitter_icon",
     "queryParams": ""
   }, {
     "packageName": "com.instagram.android",
     "tileSize": 0,
-    "tileStyle": 0,
+    "tileType": 0,
     "tileBackground": "",
+    "iconName": "",
     "queryParams": ""
   }, {
     "packageName": "com.snapchat.android",
     "tileSize": 0,
-    "tileStyle": 0,
+    "tileType": 0,
     "tileBackground": "",
+    "iconName": "",
     "queryParams": ""
   }, {
     "packageName": "com.linkedin.android",
     "tileSize": 0,
-    "tileStyle": 0,
+    "tileType": 0,
     "tileBackground": "#FF007BB5",
+    "iconName": "",
     "queryParams": ""
   }, {
     "packageName": "com.onedio.androidside",
     "tileSize": 0,
-    "tileStyle": 0,
-    "tileBackground": "",
+    "tileType": 0,
+    "tileBackground": "#BB1D1D1D",
+    "iconName": "",
     "queryParams": ""
   },{
     "folderName": "Office",
-    "tileType": 1,
     "tileSize": 1,
-    "tileStyle": 1,
+    "tileType": 3,
     "tileBackground": "",
     "queryParams": "",
     "subTiles": [
       {
         "packageName": "com.microsoft.office.word",
         "tileSize": 1,
-        "tileStyle": 0,
+        "tileType": 0,
         "tileBackground": "#2C5898",
+        "iconName": "word_icon",
         "queryParams": ""
       }, {
         "packageName": "com.microsoft.office.excel",
         "tileSize": 0,
-        "tileStyle": 0,
+        "tileType": 0,
         "tileBackground": "#207347",
+        "iconName": "excel_icon",
         "queryParams": ""
       },{
         "packageName": "com.microsoft.office.powerpoint",
         "tileSize": 0,
-        "tileStyle": 0,
+        "tileType": 0,
         "tileBackground": "#D04727",
+        "iconName": "powerpoint_icon",
         "queryParams": ""
       }, {
         "packageName": "com.microsoft.office.onenote",
         "tileSize": 0,
-        "tileStyle": 0,
+        "tileType": 0,
         "tileBackground": "#7719AA",
+        "iconName": "onenote_icon",
         "queryParams": ""
       }
     ]
   }, {
     "packageName": "com.miui.gallery",
     "tileSize": 2,
-    "tileStyle": 0,
-    "tileBackground": "",
+    "tileType": 0,
+    "tileBackground": "#BB008299",
+    "iconName": "gallery_icon",
     "queryParams": ""
   }, {
     "packageName": "com.spotify.music",
     "tileSize": 1,
-    "tileStyle": 0,
-    "tileBackground": "#CC222326",
+    "tileType": 0,
+    "tileBackground": "#DD222326",
+    "iconName": "spotify_icon",
     "queryParams": ""
   }, {
     "packageName": "com.google.android.youtube",
     "tileSize": 1,
-    "tileStyle": 0,
-    "tileBackground": "#66FF0000",
+    "tileType": 0,
+    "tileBackground": "#BCC8312B",
+    "iconName": "youtube_icon",
     "queryParams": ""
   }, {
     "packageName": "com.android.camera",
     "tileSize": 1,
-    "tileStyle": 0,
+    "tileType": 0,
     "tileBackground": "",
+    "iconName": "",
     "queryParams": ""
   }, {
-      "packageName": "com.android.vending",
-      "tileSize": 1,
-      "tileStyle": 0,
-      "tileBackground": "",
-      "queryParams": ""
+    "packageName": "com.android.vending",
+    "tileSize": 1,
+    "tileType": 0,
+    "tileBackground": "#77019601",
+    "iconName": "appstore_icon",
+    "queryParams": ""
+  }, {
+    "packageName": "com.google.android.apps.maps",
+    "tileSize": 1,
+    "tileType": 0,
+    "tileBackground": "#7A8C0095",
+    "iconName": "maps_icon",
+    "queryParams": ""
   }, {
     "packageName": "com.evernote",
     "tileSize": 0,
-    "tileStyle": 0,
-    "tileBackground": "",
+    "tileType": 0,
+    "tileBackground": "#7AC142",
+    "iconName": "evernote_icon",
     "queryParams": ""
   },{
-      "packageName": "com.miui.compass",
-      "tileSize": 0,
-      "tileStyle": 0,
-      "tileBackground": "",
-      "queryParams": ""
-    }, {
-      "packageName": "com.android.deskclock",
-      "tileSize": 0,
-      "tileStyle": 0,
-      "tileBackground": "",
-      "queryParams": ""
-    }, {
-      "packageName": "com.android.settings",
-      "tileSize": 0,
-      "tileStyle": 0,
-      "tileBackground": "",
-      "queryParams": ""
-    }
+    "packageName": "com.miui.compass",
+    "tileSize": 0,
+    "tileType": 0,
+    "tileBackground": "",
+    "iconName": "",
+    "queryParams": ""
+  }, {
+    "packageName": "com.android.deskclock",
+    "tileSize": 0,
+    "tileType": 0,
+    "tileBackground": "",
+    "iconName": "",
+    "queryParams": ""
+  }, {
+    "packageName": "com.android.settings",
+    "tileSize": 0,
+    "tileType": 0,
+    "tileBackground": "",
+    "iconName": "settings_icon",
+    "queryParams": ""
+  }
   ]
 }

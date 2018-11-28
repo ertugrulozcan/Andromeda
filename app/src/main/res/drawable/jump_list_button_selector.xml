@@ -9,26 +9,26 @@
 
     <!-- Default color -->
     <item android:state_enabled="true"
-          android:state_pressed="false"
-          android:color="#FFFFFFFF"
-          android:textSize="40sp">
+        android:state_pressed="false"
+        android:color="#FFFFFFFF"
+        android:textSize="40sp">
         <shape android:shape="rectangle">
             <stroke android:width="1dip" android:color="#EEEEEE" />
         </shape>
     </item>
 
     <item android:state_enabled="true"
-          android:state_pressed="true"
-          android:color="#FFFF0000"
-          android:textSize="40sp">
+        android:state_pressed="true"
+        android:color="#FFFF0000"
+        android:textSize="40sp">
         <shape android:shape="rectangle">
             <stroke android:width="1dip" android:color="#EEEEEE" />
         </shape>
     </item>
 
     <item android:state_enabled="false"
-          android:color="#77CCCCCC"
-          android:textSize="40sp">
+        android:color="#77CCCCCC"
+        android:textSize="40sp">
         <shape android:shape="rectangle">
             <stroke android:width="0dip" android:color="#EEEEEE" />
         </shape>
