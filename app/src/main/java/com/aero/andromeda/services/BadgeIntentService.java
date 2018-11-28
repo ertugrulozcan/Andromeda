@@ -9,7 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import com.aero.andromeda.Badges.ShortcutBadger;
+import com.aero.andromeda.badges.ShortcutBadger;
 import com.aero.andromeda.R;
 import com.aero.andromeda.services.interfaces.IBadgeIntentService;
 

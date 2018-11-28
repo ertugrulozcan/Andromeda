@@ -1,4 +1,4 @@
-package com.aero.andromeda.Badges;
+package com.aero.andromeda.badges;
 
 import android.app.Notification;
 import android.content.ComponentName;

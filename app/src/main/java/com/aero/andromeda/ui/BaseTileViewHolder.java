@@ -232,12 +232,6 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		return itemView;
 	}
 	
-	
-	public LinearLayout getTileLayout()
-	{
-		return tileLayout;
-	}
-	
 	@Override
 	public void onItemSelected()
 	{
