@@ -21,11 +21,12 @@
 
             <GridLayout
                 android:id="@+id/folder_tile_grid_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipChildren="false"
                 android:layout_centerHorizontal="true"
                 android:layout_centerInParent="true"
                 android:useDefaultMargins="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:columnCount="3"
                 android:rowCount="3"
                 android:orientation="horizontal"

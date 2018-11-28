@@ -73,6 +73,10 @@ public class TileFolderManager
 	
 	public void OnClickFolderTile(FolderTile folderTile)
 	{
+		FolderAnimationManager folderAnimationManager = ServiceLocator.Current().GetInstance(FolderAnimationManager.class);
+		if (folderAnimationManager.isAnimatedNow())
+			return;
+		
 		if (!this.IsFolderOpened())
 		{
 			this.OpenFolder(folderTile);
