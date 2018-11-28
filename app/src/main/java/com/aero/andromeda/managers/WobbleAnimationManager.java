@@ -55,8 +55,10 @@ public class WobbleAnimationManager
 		for (int i = 0; i < getChildCount(); i++)
 		{
 			TileBase tile = this.tilesAdapter.getItem(i);
+			boolean isSelectedTile = TileOrderManager.Current().IsSelectedTile(i);
 			
 			if (tile == null ||
+				isSelectedTile ||
 				tile instanceof Folder ||
 				tile instanceof FolderTile ||
 				tile instanceof FakeTile ||
@@ -64,7 +66,7 @@ public class WobbleAnimationManager
 				tile.getTileType() == TileBase.TileType.TilesFooter ||
 				tile.getTileType() == TileBase.TileType.FolderTile ||
 				tile.getTileType() == TileBase.TileType.Folder)
-				return;
+				continue;
 			
 			View v = getChildAt(i);
 			if (v != null)

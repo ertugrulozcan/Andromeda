@@ -38,4 +38,18 @@ public class Colors
 			return new ColorDrawable(0x00000000);
 		}
 	}
+	
+	public static ColorDrawable clearAlpha(ColorDrawable drawable)
+	{
+		try
+		{
+			String hexColor = String.format("#55%06X", (0xFFFFFF & drawable.getColor()));
+			
+			return rgb(hexColor);
+		}
+		catch (Exception ex)
+		{
+			return drawable;
+		}
+	}
 }

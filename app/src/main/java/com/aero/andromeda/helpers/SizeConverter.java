@@ -35,7 +35,7 @@ public class SizeConverter
 		UISettings uiSettings = settingsService.getUISettings();
 		
 		this.LAYOUT_WIDTH = uiSettings.getLayoutWidth();
-		this.TILE_MARGIN = 14;
+		this.TILE_MARGIN = 12;
 		this.SCREEN_WIDTH = 1440;
 		this.FULL_TILE_SIZE = SCREEN_WIDTH - 2 * TILE_MARGIN;
 		this.SMALL_TILE_SIZE = (FULL_TILE_SIZE - (LAYOUT_WIDTH - 1) * TILE_MARGIN) / LAYOUT_WIDTH;

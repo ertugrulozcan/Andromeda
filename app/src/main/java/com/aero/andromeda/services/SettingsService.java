@@ -27,6 +27,6 @@ public class SettingsService implements ISettingsService
 		SizeConverter.Init(ServiceLocator.Current().GetInstance(MainActivity.class));
 		
 		AppDrawerFragment appDrawerFragment = ServiceLocator.Current().GetInstance(AppDrawerFragment.class);
-		appDrawerFragment.RefreshLayout();
+		appDrawerFragment.RefreshLayout(true);
 	}
 }

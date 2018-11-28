@@ -58,13 +58,25 @@ public class TileAnimationManager
 	private void UnloadAnimations()
 	{
 		if (tileFlipAnimation1 != null)
+		{
+			tileFlipAnimation1.end();
+			tileFlipAnimation1.setupStartValues();
 			tileFlipAnimation1.cancel();
+		}
 		
 		if (tileFlipAnimation2 != null)
+		{
+			tileFlipAnimation2.end();
+			tileFlipAnimation2.setupStartValues();
 			tileFlipAnimation2.cancel();
+		}
 		
 		if (tileFlipAnimation3 != null)
+		{
+			tileFlipAnimation3.end();
+			tileFlipAnimation3.setupStartValues();
 			tileFlipAnimation3.cancel();
+		}
 		
 		tileFlipAnimation1 = null;
 		tileFlipAnimation2 = null;

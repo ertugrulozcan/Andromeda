@@ -39,29 +39,36 @@ public class TileOrderManager
 		this.mainActivity = ServiceLocator.Current().GetInstance(MainActivity.class);
 	}
 	
-	public void EnterEditMode()
+	public void EnterEditMode(BaseTileViewHolder selectedViewHolder)
 	{
 		Andromeda.isEditMode = true;
 		this.selectTileViewHolder = null;
-		this.tileAnimationManager.Stop();
+		
 		this.mainActivity.LockNavigationDrawer();
 		this.mainActivity.LockViewPager();
-		this.appDrawerFragment.RefreshLayout();
 		ServiceLocator.Current().GetInstance(MainActivity.class).CoverDarkBackground();
 		
+		this.SelectTile(selectedViewHolder);
+		
+		this.tileAnimationManager.Stop();
 		WobbleAnimationManager.Current(this.tilesAdapter).startWobbleAnimation();
+		
+		this.appDrawerFragment.RefreshLayout(false);
 	}
 	
 	public void ExitEditMode()
 	{
 		Andromeda.isEditMode = false;
 		this.selectTileViewHolder = null;
-		WobbleAnimationManager.Current(this.tilesAdapter).stopWobble(true);
-		this.tileAnimationManager.Start();
+		
 		this.mainActivity.UnlockNavigationDrawer();
 		this.mainActivity.UnlockViewPager();
-		this.appDrawerFragment.RefreshLayout();
 		ServiceLocator.Current().GetInstance(MainActivity.class).UncoverDarkBackground();
+		
+		this.appDrawerFragment.RefreshLayout(false);
+		
+		WobbleAnimationManager.Current(this.tilesAdapter).stopWobble(true);
+		this.tileAnimationManager.Start();
 	}
 	
 	public void SelectTile(BaseTileViewHolder tileHolder)
@@ -91,6 +98,22 @@ public class TileOrderManager
 			return false;
 		
 		return this.selectTileViewHolder.equals(tileHolder);
+	}
+	
+	public boolean IsSelectedTile(int tileIndex)
+	{
+		if (!Andromeda.isEditMode)
+			return false;
+		
+		if (this.selectTileViewHolder == null || tileIndex < 0 || tileIndex >= this.tilesAdapter.getItemCount())
+			return false;
+		
+		int selectedTileIndex = this.tilesAdapter.getItemIndex(this.selectTileViewHolder.getTile());
+		
+		if (selectedTileIndex < 0)
+			return false;
+		
+		return tileIndex == selectedTileIndex;
 	}
 	
 	public void RefreshSelectedTileHolder(BaseTileViewHolder tileHolder)

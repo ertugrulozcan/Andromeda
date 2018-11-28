@@ -162,27 +162,37 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 		this.recyclerView.smoothScrollToPosition(tilesAdapter.getItemCount() - 1);
 	}
 	
-	public void RefreshLayout()
+	public void RefreshLayout(boolean aggressiveRefresh)
 	{
-		ISettingsService settingsService = ServiceLocator.Current().GetInstance(ISettingsService.class);
-		UISettings uiSettings = settingsService.getUISettings();
-		
 		TileFolderManager.Current.CloseFolder();
 		
-		if (this.gridLayoutManager.getSpanCount() != uiSettings.getLayoutWidth())
+		if (aggressiveRefresh)
 		{
-			this.gridLayoutManager = new TilesLayoutManager(TilesLayoutManager.Orientation.VERTICAL, uiSettings.getLayoutWidth());
-			this.gridLayoutManager.setItemOrderIsStable(true);
+			ISettingsService settingsService = ServiceLocator.Current().GetInstance(ISettingsService.class);
+			UISettings uiSettings = settingsService.getUISettings();
+			
+			if (this.gridLayoutManager.getSpanCount() != uiSettings.getLayoutWidth())
+			{
+				this.gridLayoutManager = new TilesLayoutManager(TilesLayoutManager.Orientation.VERTICAL, uiSettings.getLayoutWidth());
+				this.gridLayoutManager.setItemOrderIsStable(true);
+			}
+			
+			this.recyclerView.setAdapter(null);
+			this.recyclerView.setLayoutManager(null);
+			this.recyclerView.setAdapter(this.tilesAdapter);
+			this.recyclerView.setLayoutManager(this.gridLayoutManager);
+			
+			synchronized (this.recyclerView)
+			{
+				this.tilesAdapter.notifyDataSetChanged();
+			}
 		}
-		
-		this.recyclerView.setAdapter(null);
-		this.recyclerView.setLayoutManager(null);
-		this.recyclerView.setAdapter(this.tilesAdapter);
-		this.recyclerView.setLayoutManager(this.gridLayoutManager);
-		
-		synchronized (this.recyclerView)
+		else
 		{
-			this.tilesAdapter.notifyDataSetChanged();
+			synchronized (this.recyclerView)
+			{
+				this.tilesAdapter.notifyDataSetChanged();
+			}
 		}
 	}
 }

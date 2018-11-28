@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
@@ -15,6 +14,7 @@ import android.widget.TextView;
 import com.aero.andromeda.Andromeda;
 import com.aero.andromeda.AppDrawerFragment;
 import com.aero.andromeda.R;
+import com.aero.andromeda.helpers.Colors;
 import com.aero.andromeda.helpers.OnStartDragListener;
 import com.aero.andromeda.helpers.SizeConverter;
 import com.aero.andromeda.managers.TileOrderManager;
@@ -34,7 +34,7 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 	private static long ID_COUNTER = 1;
 	private long id = -1;
 	
-	private final float UNSELECTED_ALPHA = 0.35f;
+	private final float UNSELECTED_ALPHA = 0.5f;
 	
 	private TileBase bindedTile = null;
 	
@@ -43,6 +43,7 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 	protected FrameLayout tileBox;
 	protected FrameLayout tileInnerBox;
 	protected FrameLayout tileContentLayout;
+	protected FrameLayout tileBackgroundCover;
 	protected RelativeLayout tileCountBadge;
 	protected TextView tileCountBadgeTextView;
 	protected ImageButton tileMenuButton;
@@ -59,6 +60,7 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		this.tileBox = itemView.findViewById(R.id.tile_box);
 		this.tileInnerBox = itemView.findViewById(R.id.tileInnerBox);
 		this.tileContentLayout = itemView.findViewById(R.id.tileContentLayout);
+		this.tileBackgroundCover = itemView.findViewById(R.id.tileBackgroundCover);
 		this.tileCountBadge = itemView.findViewById(R.id.tileCountBadge);
 		this.tileCountBadgeTextView = itemView.findViewById(R.id.tileCountBadgeTextView);
 		this.tileMenuButton = itemView.findViewById(R.id.tileMenuButton);
@@ -102,6 +104,8 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		return this.id;
 	}
 	
+	protected abstract void setLayoutProperties(final TileBase tile);
+	
 	public void bindViewHolder(final TileBase tile, int index, final OnStartDragListener dragStartListener)
 	{
 		this.bindedTile = tile;
@@ -121,56 +125,6 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		TileOrderManager.Current().RefreshSelectedTileHolder(this);
 	}
 	
-	private void setEditModeProperties(final TileBase tile)
-	{
-		if (tile == null)
-			return;
-		
-		if (Andromeda.isEditMode)
-		{
-			if (this.tileInnerBox != null)
-				this.tileInnerBox.setAlpha(UNSELECTED_ALPHA);
-		}
-		else
-		{
-			if (this.tileInnerBox != null)
-				this.tileInnerBox.setAlpha(1.0f);
-		}
-		
-		this.setTileMenuButtons();
-		this.setTileScale(tile);
-	}
-	
-	private void setTileMenuButtons()
-	{
-		if (Andromeda.isEditMode)
-		{
-			if (this.tileMenuButton != null)
-			{
-				if (TileOrderManager.Current().IsSelectedTile(this))
-					this.tileMenuButton.setVisibility(View.VISIBLE);
-				else
-					this.tileMenuButton.setVisibility(View.INVISIBLE);
-			}
-			
-			if (this.tileMenuUnpinButton != null)
-			{
-				if (TileOrderManager.Current().IsSelectedTile(this))
-					this.tileMenuUnpinButton.setVisibility(View.VISIBLE);
-				else
-					this.tileMenuUnpinButton.setVisibility(View.INVISIBLE);
-			}
-		}
-		else
-		{
-			if (this.tileMenuButton != null)
-				this.tileMenuButton.setVisibility(View.INVISIBLE);
-			
-			if (this.tileMenuUnpinButton != null)
-				this.tileMenuUnpinButton.setVisibility(View.INVISIBLE);
-		}
-	}
-	
 	private void setTileSizes(final TileBase tile)
 	{
 		this.tileInnerBox.setLayoutParams(this.calculateTileBoxLayoutParams(tile));
@@ -178,8 +132,6 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		
 		this.tileLayout.requestLayout();
 	}
-	
-	protected abstract void setLayoutProperties(final TileBase tile);
 	
 	private void setClickListener(final TileBase tile, final OnStartDragListener dragStartListener)
 	{
@@ -218,8 +170,7 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 				}
 				else
 				{
-					TileOrderManager.Current().EnterEditMode();
-					TileOrderManager.Current().SelectTile(BaseTileViewHolder.this);
+					TileOrderManager.Current().EnterEditMode(BaseTileViewHolder.this);
 					
 					return true;
 				}
@@ -232,52 +183,129 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		return itemView;
 	}
 	
+	public TileBase getTile()
+	{
+		return this.bindedTile;
+	}
+	
 	@Override
 	public void onItemSelected()
 	{
-		if (this.tileInnerBox != null)
-			this.tileInnerBox.setAlpha(1.0f);
-		
-		this.setTileMenuButtons();
-		this.setTileScale(this.bindedTile);
-		
-		AppDrawerFragment appDrawerFragment = ServiceLocator.Current().GetInstance(AppDrawerFragment.class);
-		View container = appDrawerFragment.GetContainer(this.itemView);
-		if (container != null)
-		{
-			ViewParent parent = container.getParent();
-			if (parent != null)
-			{
-				if (parent instanceof View)
-				{
-					View parentView = (View)parent;
-					parentView.setZ(10000);
-					parentView.bringToFront();
-					parentView.invalidate();
-				}
-			}
-		}
+		this.setEditModeProperties(this.bindedTile, true);
 	}
 	
 	@Override
 	public void onItemUnselected()
 	{
-		if (this.tileInnerBox != null)
-			this.tileInnerBox.setAlpha(UNSELECTED_ALPHA);
-		
-		this.setTileMenuButtons();
-		this.setTileScale(this.bindedTile);
+		this.setEditModeProperties(this.bindedTile, false);
 	}
 	
 	@Override
 	public void onItemClear()
 	{
-	
+		this.setEditModeProperties(this.bindedTile);
 	}
 	
-	private void setTileScale(final TileBase tile)
+	private void setEditModeProperties(final TileBase tile)
 	{
-		if (this.tileInnerBox == null)
+		boolean isSelectedTile = TileOrderManager.Current().IsSelectedTile(this);
+		this.setEditModeProperties(tile, isSelectedTile);
+	}
+	
+	private void setEditModeProperties(final TileBase tile, boolean isSelectedTile)
+	{
+		if (tile == null)
+			return;
+		
+		this.setTileMenuButtons(isSelectedTile);
+		this.setTileScale(tile, isSelectedTile);
+		this.setTileOpacity(tile, isSelectedTile);
+		this.setZIndexForSelectedTileHolder(isSelectedTile);
+	}
+	
+	private void setZIndexForSelectedTileHolder(boolean isSelectedTile)
+	{
+		if (isSelectedTile)
+		{
+			AppDrawerFragment appDrawerFragment = ServiceLocator.Current().GetInstance(AppDrawerFragment.class);
+			View container = appDrawerFragment.GetContainer(this.itemView);
+			if (container != null)
+			{
+				container.setZ(10000);
+				container.bringToFront();
+				container.invalidate();
+			}
+		}
+	}
+	
+	private void setTileMenuButtons(boolean isSelectedTile)
+	{
+		if (Andromeda.isEditMode)
+		{
+			if (this.tileMenuButton != null)
+			{
+				if (isSelectedTile)
+					this.tileMenuButton.setVisibility(View.VISIBLE);
+				else
+					this.tileMenuButton.setVisibility(View.INVISIBLE);
+			}
+			
+			if (this.tileMenuUnpinButton != null)
+			{
+				if (isSelectedTile)
+					this.tileMenuUnpinButton.setVisibility(View.VISIBLE);
+				else
+					this.tileMenuUnpinButton.setVisibility(View.INVISIBLE);
+			}
+		}
+		else
+		{
+			if (this.tileMenuButton != null)
+				this.tileMenuButton.setVisibility(View.INVISIBLE);
+			
+			if (this.tileMenuUnpinButton != null)
+				this.tileMenuUnpinButton.setVisibility(View.INVISIBLE);
+		}
+	}
+	
+	private void setTileOpacity(final TileBase tile, boolean isSelectedTile)
+	{
+		if (tile == null)
+			return;
+		
+		if (Andromeda.isEditMode)
+		{
+			if (this.tileInnerBox != null)
+			{
+				if (isSelectedTile)
+				{
+					this.tileInnerBox.setAlpha(1.0f);
+					
+					if (this.tileBackgroundCover != null && this.bindedTile != null)
+						this.tileBackgroundCover.setBackground(Colors.clearAlpha(this.bindedTile.getTileColor()));
+				}
+				else
+				{
+					this.tileInnerBox.setAlpha(UNSELECTED_ALPHA);
+					
+					if (this.tileBackgroundCover != null && this.bindedTile != null)
+						this.tileBackgroundCover.setBackground(Colors.TRANSPARENT);
+				}
+			}
+		}
+		else
+		{
+			if (this.tileInnerBox != null)
+				this.tileInnerBox.setAlpha(1.0f);
+			
+			if (this.tileBackgroundCover != null && this.bindedTile != null)
+				this.tileBackgroundCover.setBackground(Colors.TRANSPARENT);
+		}
+	}
+	
+	private void setTileScale(final TileBase tile, boolean isSelectedTile)
+	{
+		if (tile == null || this.tileInnerBox == null)
 			return;
 		
 		if (Andromeda.isEditMode)
@@ -287,7 +315,7 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 				return;
 			}
 			
-			if (TileOrderManager.Current().IsSelectedTile(this))
+			if (isSelectedTile)
 			{
 				switch (tile.getTileSize())
 				{

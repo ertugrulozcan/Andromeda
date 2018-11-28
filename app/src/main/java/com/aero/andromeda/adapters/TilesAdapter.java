@@ -21,6 +21,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class TilesAdapter extends RecyclerView.Adapter<BaseTileViewHolder> implements ItemTouchHelperAdapter
 {
@@ -244,6 +247,15 @@ public class TilesAdapter extends RecyclerView.Adapter<BaseTileViewHolder> imple
 	public List<View> getTileViewList()
 	{
 		return new ArrayList<>(this.tileViewDictionary.keySet());
+	}
+	
+	public View getTileView(int index)
+	{
+		List<View> viewSet = this.getTileViewList();
+		if (index >= 0 && index < viewSet.size())
+			return viewSet.get(index);
+		else
+			return null;
 	}
 	
 	private void OnTileViewHolderChanged(TileBase tile, View newView)
