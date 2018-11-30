@@ -106,4 +106,14 @@ public class SizeConverter
 		
 		return (deviceWidth / LAYOUT_WIDTH) * 2 / 3 + 10;
 	}
+	
+	public float GetTileSizeProportion()
+	{
+		return (float)6 / (float)this.LAYOUT_WIDTH;
+	}
+	
+	public int GetTileCornerButtonSize()
+	{
+		return (int)(70 * this.GetTileSizeProportion());
+	}
 }
