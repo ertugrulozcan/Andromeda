@@ -14,6 +14,8 @@ import com.aero.andromeda.models.tiles.Folder;
 import com.aero.andromeda.models.tiles.FolderTile;
 import com.aero.andromeda.models.tiles.TileBase;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,7 +40,7 @@ public class WobbleAnimationManager
 		this.tilesAdapter = tilesAdapter;
 	}
 	
-	private List<ObjectAnimator> mWobbleAnimators = new LinkedList<ObjectAnimator>();
+	private HashMap<View, ObjectAnimator> viewAnimatorDictionary = new HashMap<>();
 	
 	private int getChildCount()
 	{
@@ -50,15 +52,26 @@ public class WobbleAnimationManager
 		return this.tilesAdapter.getTileViewList().get(index);
 	}
 	
-	public void startWobbleAnimation()
+	public void startWobble(View view)
+	{
+		if (this.viewAnimatorDictionary.containsKey(view))
+		{
+			Animator wobbleAnimator = this.viewAnimatorDictionary.get(view);
+			wobbleAnimator.start();
+		}
+		else
+		{
+			this.animateWobble(view);
+		}
+	}
+	
+	public void startWobble()
 	{
 		for (int i = 0; i < getChildCount(); i++)
 		{
 			TileBase tile = this.tilesAdapter.getItem(i);
-			boolean isSelectedTile = TileOrderManager.Current().IsSelectedTile(i);
 			
 			if (tile == null ||
-				isSelectedTile ||
 				tile instanceof Folder ||
 				tile instanceof FolderTile ||
 				tile instanceof FakeTile ||
@@ -79,8 +92,19 @@ public class WobbleAnimationManager
 		}
 	}
 	
+	public void stopWobble(View view)
+	{
+		if (this.viewAnimatorDictionary.containsKey(view))
+		{
+			Animator wobbleAnimator = this.viewAnimatorDictionary.get(view);
+			wobbleAnimator.cancel();
+			view.setRotation(0);
+		}
+	}
+	
 	public void stopWobble(boolean resetRotation)
 	{
+		List<Animator> mWobbleAnimators = new ArrayList(this.viewAnimatorDictionary.values());
 		for (Animator wobbleAnimator : mWobbleAnimators)
 		{
 			wobbleAnimator.cancel();
@@ -102,24 +126,32 @@ public class WobbleAnimationManager
 	private void restartWobble()
 	{
 		stopWobble(false);
-		startWobbleAnimation();
+		startWobble();
 	}
 	
 	private void animateWobble(View v)
 	{
-		ObjectAnimator animator = createBaseWobble(v);
-		animator.setFloatValues(-2, 2);
+		if (!this.viewAnimatorDictionary.containsKey(v))
+		{
+			ObjectAnimator animator = createBaseWobble(v);
+			animator.setFloatValues(-3, 3);
+			this.viewAnimatorDictionary.put(v, animator);
+		}
 		
-		mWobbleAnimators.add(animator);
+		ObjectAnimator animator = this.viewAnimatorDictionary.get(v);
 		animator.start();
 	}
 	
 	private void animateWobbleInverse(View v)
 	{
-		ObjectAnimator animator = createBaseWobble(v);
-		animator.setFloatValues(2, -2);
+		if (!this.viewAnimatorDictionary.containsKey(v))
+		{
+			ObjectAnimator animator = createBaseWobble(v);
+			animator.setFloatValues(3, -3);
+			this.viewAnimatorDictionary.put(v, animator);
+		}
 		
-		mWobbleAnimators.add(animator);
+		ObjectAnimator animator = this.viewAnimatorDictionary.get(v);
 		animator.start();
 	}
 	

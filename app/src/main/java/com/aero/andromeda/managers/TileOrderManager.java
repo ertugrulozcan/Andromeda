@@ -48,10 +48,10 @@ public class TileOrderManager
 		this.mainActivity.LockViewPager();
 		ServiceLocator.Current().GetInstance(MainActivity.class).CoverDarkBackground();
 		
-		this.SelectTile(selectedViewHolder);
-		
 		this.tileAnimationManager.Stop();
-		WobbleAnimationManager.Current(this.tilesAdapter).startWobbleAnimation();
+		WobbleAnimationManager.Current(this.tilesAdapter).startWobble();
+		
+		this.SelectTile(selectedViewHolder);
 		
 		this.appDrawerFragment.RefreshLayout(false);
 	}
@@ -80,12 +80,17 @@ public class TileOrderManager
 				BaseTileViewHolder unselectedTileHolder = this.selectTileViewHolder;
 				this.selectTileViewHolder = null;
 				unselectedTileHolder.onItemUnselected();
+				
+				WobbleAnimationManager.Current(this.tilesAdapter).startWobble(unselectedTileHolder.getItemView());
 			}
 			
 			this.selectTileViewHolder = tileHolder;
 			
 			if (this.selectTileViewHolder != null)
+			{
 				this.selectTileViewHolder.onItemSelected();
+				WobbleAnimationManager.Current(this.tilesAdapter).stopWobble(this.selectTileViewHolder.getItemView());
+			}
 		}
 	}
 	
