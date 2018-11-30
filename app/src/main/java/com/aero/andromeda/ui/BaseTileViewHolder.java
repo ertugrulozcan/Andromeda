@@ -130,6 +130,21 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		this.tileInnerBox.setLayoutParams(this.calculateTileBoxLayoutParams(tile));
 		this.tileLayout.setLayoutParams(this.calculateTileBoxSpanLayoutParams(tile));
 		
+		int tileCornerButtonSize = SizeConverter.Current.GetTileCornerButtonSize();
+		if (this.tileMenuUnpinButton != null)
+		{
+			FrameLayout.LayoutParams tileCornerButtonLayoutParams = new FrameLayout.LayoutParams(tileCornerButtonSize, tileCornerButtonSize);
+			tileCornerButtonLayoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
+			this.tileMenuUnpinButton.setLayoutParams(tileCornerButtonLayoutParams);
+		}
+		
+		if (this.tileMenuButton != null)
+		{
+			FrameLayout.LayoutParams tileCornerButtonLayoutParams = new FrameLayout.LayoutParams(tileCornerButtonSize, tileCornerButtonSize);
+			tileCornerButtonLayoutParams.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+			this.tileMenuButton.setLayoutParams(tileCornerButtonLayoutParams);
+		}
+		
 		this.tileLayout.requestLayout();
 	}
 	
@@ -154,7 +169,7 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 			@Override
 			public boolean onLongClick(View v)
 			{
-				if (tile.getTileType() == TileBase.TileType.TilesHeader || tile.getTileType() == TileBase.TileType.TilesFooter)
+				if (tile.getTileType() == TileBase.TileType.TilesHeader || tile.getTileType() == TileBase.TileType.TilesFooter || tile instanceof FakeTile)
 				{
 					return false;
 				}
@@ -308,6 +323,8 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		if (tile == null || this.tileInnerBox == null)
 			return;
 		
+		float ratio = SizeConverter.Current.GetTileSizeProportion();
+		
 		if (Andromeda.isEditMode)
 		{
 			if (tile.getTileType() == TileBase.TileType.TilesHeader || tile.getTileType() == TileBase.TileType.TilesFooter)
@@ -321,32 +338,32 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 				{
 					case Small:
 					{
-						this.tileInnerBox.setPivotX(0.0f);
-						this.tileInnerBox.setPivotY(72.0f);
+						this.tileInnerBox.setPivotX(0.0f * ratio);
+						this.tileInnerBox.setPivotY(72.0f * ratio);
 						this.tileInnerBox.setScaleX(0.82f);
 						this.tileInnerBox.setScaleY(0.82f);
 					}
 					break;
 					case Medium:
 					{
-						this.tileInnerBox.setPivotX(145.0f);
-						this.tileInnerBox.setPivotY(155.0f);
+						this.tileInnerBox.setPivotX(145.0f * ratio);
+						this.tileInnerBox.setPivotY(155.0f * ratio);
 						this.tileInnerBox.setScaleX(0.87f);
 						this.tileInnerBox.setScaleY(0.87f);
 					}
 					break;
 					case MediumWide:
 					{
-						this.tileInnerBox.setPivotX(330.0f);
-						this.tileInnerBox.setPivotY(168.0f);
+						this.tileInnerBox.setPivotX(330.0f * ratio);
+						this.tileInnerBox.setPivotY(168.0f * ratio);
 						this.tileInnerBox.setScaleX(0.92f);
 						this.tileInnerBox.setScaleY(0.87f);
 					}
 					break;
 					case Large:
 					{
-						this.tileInnerBox.setPivotX(330.0f);
-						this.tileInnerBox.setPivotY(330.0f);
+						this.tileInnerBox.setPivotX(330.0f * ratio);
+						this.tileInnerBox.setPivotY(330.0f * ratio);
 						this.tileInnerBox.setScaleX(0.92f);
 						this.tileInnerBox.setScaleY(0.92f);
 					}
@@ -359,32 +376,32 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 				{
 					case Small:
 					{
-						this.tileInnerBox.setPivotX(0.0f);
-						this.tileInnerBox.setPivotY(72.0f);
+						this.tileInnerBox.setPivotX(0.0f * ratio);
+						this.tileInnerBox.setPivotY(72.0f * ratio);
 						this.tileInnerBox.setScaleX(0.95f);
 						this.tileInnerBox.setScaleY(0.95f);
 					}
 					break;
 					case Medium:
 					{
-						this.tileInnerBox.setPivotX(145.0f);
-						this.tileInnerBox.setPivotY(155.0f);
+						this.tileInnerBox.setPivotX(145.0f * ratio);
+						this.tileInnerBox.setPivotY(155.0f * ratio);
 						this.tileInnerBox.setScaleX(0.95f);
 						this.tileInnerBox.setScaleY(0.95f);
 					}
 					break;
 					case MediumWide:
 					{
-						this.tileInnerBox.setPivotX(330.0f);
-						this.tileInnerBox.setPivotY(168.0f);
+						this.tileInnerBox.setPivotX(330.0f * ratio);
+						this.tileInnerBox.setPivotY(168.0f * ratio);
 						this.tileInnerBox.setScaleX(0.95f);
 						this.tileInnerBox.setScaleY(0.95f);
 					}
 					break;
 					case Large:
 					{
-						this.tileInnerBox.setPivotX(330.0f);
-						this.tileInnerBox.setPivotY(330.0f);
+						this.tileInnerBox.setPivotX(330.0f * ratio);
+						this.tileInnerBox.setPivotY(330.0f * ratio);
 						this.tileInnerBox.setScaleX(0.95f);
 						this.tileInnerBox.setScaleY(0.95f);
 					}
