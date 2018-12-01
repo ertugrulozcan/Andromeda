@@ -3,7 +3,6 @@ package com.aero.andromeda.managers;
 import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.os.Parcelable;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -12,7 +11,9 @@ import android.view.ViewGroup;
 
 import com.aero.andromeda.helpers.BoundsHelper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class TilesLayoutManager extends RecyclerView.LayoutManager
 {

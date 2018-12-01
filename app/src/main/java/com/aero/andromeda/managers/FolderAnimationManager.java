@@ -1,11 +1,12 @@
 package com.aero.andromeda.managers;
 
-import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.app.Activity;
-import android.content.Context;
+import android.animation.TimeInterpolator;
 import android.view.View;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.OvershootInterpolator;
 
 import com.aero.andromeda.helpers.SizeConverter;
 import com.aero.andromeda.models.tiles.Folder;
@@ -21,330 +22,233 @@ import java.util.List;
 
 public class FolderAnimationManager
 {
-	private Context parentContext;
+	public static FolderAnimationManager Current;
 	
-	private int tileDelaySpan = 100;
-	private int folderDelaySpan = 120;
-	private int animTime;
-	
-	private boolean isAnimated = false;
-	
-	private Folder openingFolder = null;
-	private Folder closingFolder = null;
-	private int openFolderAnimationCounter = 0;
-	private int closeFolderAnimationCounter = 0;
-	
-	private AnimatorListenerAdapter openFolderAnimationListener;
-	private AnimatorListenerAdapter closeFolderAnimationListener;
-	
-	private List<FolderAnimationListener> listeners = new ArrayList<>();
-	
-	public FolderAnimationManager(Context context)
+	private FolderAnimationManager()
 	{
-		this.parentContext = context;
-		this.setEventListeners();
+		Current = this;
 	}
 	
-	private void setEventListeners()
+	public static FolderAnimationManager Init()
 	{
-		this.openFolderAnimationListener = new AnimatorListenerAdapter()
-		{
-			@Override
-			public void onAnimationEnd(Animator animation)
-			{
-				openFolderAnimationCounter++;
-				if (openingFolder != null)
-				{
-					if (openFolderAnimationCounter == openingFolder.getSubTiles().size() - 1)
-					{
-						for (FolderAnimationListener hl : listeners)
-							hl.OpenFolderAnimationEnded();
-					}
-				}
-				else
-				{
-					for (FolderAnimationListener hl : listeners)
-						hl.OpenFolderAnimationEnded();
-				}
-			}
-		};
+		return new FolderAnimationManager();
+	}
+	
+	private final long OPEN_THUMBNAIL_ANIMATION_DURATION = 400;
+	private final long OPEN_THUMBNAIL_ANIMATION_DELAY = 120;
+	private final long OPEN_TILE_ANIMATION_DURATION = 200;
+	private final long OPEN_TILE_ANIMATION_DELAY = 200;
+	private final long CLOSE_THUMBNAIL_ANIMATION_DURATION = 400;
+	private final long CLOSE_THUMBNAIL_ANIMATION_DELAY = 120;
+	private final long CLOSE_TILE_ANIMATION_DURATION = 350;
+	private final long CLOSE_TILE_ANIMATION_DELAY = 200;
+	private final float TILE_START_POSITION = -(SizeConverter.Current.GetTileWidth(TileBase.TileSize.Medium) + 10);
+	
+	
+	public void OpenFolder(FolderTile folderTile, Folder folder, AnimatorListenerAdapter afterOpened)
+	{
+		AnimatorSet thumbnailsOpenAnimation = this.GenerateAnimationOpenFolderThumbnails(folderTile);
+		AnimatorSet tilesOpenAnimation = this.GenerateAnimationOpenFolderTiles(folder);
 		
-		this.closeFolderAnimationListener = new AnimatorListenerAdapter()
-		{
-			@Override
-			public void onAnimationEnd(Animator animation)
-			{
-				closeFolderAnimationCounter++;
-				if (closingFolder != null)
-				{
-					if (closeFolderAnimationCounter > closingFolder.getSubTiles().size() - 2)
-					{
-						for (FolderAnimationListener hl : listeners)
-							hl.CloseFolderAnimationEnded();
-					}
-				}
-				else
-				{
-					for (FolderAnimationListener hl : listeners)
-						hl.CloseFolderAnimationEnded();
-				}
-			}
-		};
+		thumbnailsOpenAnimation.playTogether(tilesOpenAnimation);
+		if (afterOpened != null)
+			thumbnailsOpenAnimation.addListener(afterOpened);
+		
+		thumbnailsOpenAnimation.start();
 	}
 	
-	public void addAnimationListener(FolderAnimationListener listener)
+	public void CloseFolder(FolderTile folderTile, Folder folder, AnimatorListenerAdapter afterOpened)
 	{
-		this.listeners.add(listener);
+		AnimatorSet tilesCloseAnimation = this.GenerateAnimationCloseFolderTiles(folder);
+		AnimatorSet thumbnailsCloseAnimation = this.GenerateAnimationCloseFolderThumbnails(folderTile);
+		
+		tilesCloseAnimation.playTogether(thumbnailsCloseAnimation);
+		if (afterOpened != null)
+			tilesCloseAnimation.addListener(afterOpened);
+		
+		tilesCloseAnimation.start();
 	}
 	
-	public boolean isAnimatedNow()
+	private AnimatorSet GenerateAnimationOpenFolderThumbnails(FolderTile folderTile)
 	{
-		synchronized (this.parentContext)
+		AnimatorSet animatorSet = new AnimatorSet();
+		
+		List<View> thumbnailViews = this.GetThumbnailList(folderTile);
+		Collections.reverse(thumbnailViews);
+		
+		long delay = 0;
+		for (View view : thumbnailViews)
 		{
-			return false;//this.isAnimated;
+			ObjectAnimator animation = this.GenerateThumbnailDownAnimation(view);
+			animation.setStartDelay(delay);
+			animatorSet.play(animation);
+			delay += OPEN_THUMBNAIL_ANIMATION_DELAY;
 		}
+		
+		return animatorSet;
 	}
 	
-	public void AnimateOpenFolder(FolderTile folderTile)
+	private AnimatorSet GenerateAnimationOpenFolderTiles(Folder folder)
 	{
-		synchronized (this.parentContext)
+		AnimatorSet animatorSet = new AnimatorSet();
+		
+		List<View> tileViews = this.GetTileViewList(folder);
+		long delay = 0;
+		for (View view : tileViews)
 		{
-			this.isAnimated = true;
+			view.setTranslationY(TILE_START_POSITION);
+			view.setAlpha(0.0f);
 			
-			BaseTileViewHolder viewHolderBase = folderTile.getParentViewHolder();
-			if (viewHolderBase instanceof FolderTileViewHolder)
-			{
-				FolderTileViewHolder folderTileViewHolder = (FolderTileViewHolder)viewHolderBase;
-				List<View> subTileViews = new ArrayList<>(folderTileViewHolder.getSubTileViewList());
-				Collections.reverse(subTileViews);
-				
-				int maxThumbnailCountOnRow = this.getTileCountOnSingleRow(folderTile);
-				this.animTime = tileDelaySpan;// subTileViews.size() * this.tileDelaySpan;
-				
-				long delay = 0;
-				for (int i = 0; i < subTileViews.size(); i++)
-				{
-					View view = subTileViews.get(i);
-					int rowNo = (subTileViews.size() - i - 1) / maxThumbnailCountOnRow;
-					delay += tileDelaySpan;
-					this.AnimateOpenFolder(view, rowNo, delay);
-				}
-			}
-			
-			this.isAnimated = false;
+			ObjectAnimator animation = this.GenerateTileDownAnimation(view);
+			animation.setStartDelay(delay);
+			animatorSet.play(animation);
+			animatorSet.playTogether(this.GenerateAlphaAnimation(view, false));
+			delay += OPEN_TILE_ANIMATION_DELAY;
 		}
+		
+		return animatorSet;
 	}
 	
-	private void AnimateOpenFolder(final View tileView, final int rowNo, final long delay)
+	private ObjectAnimator GenerateThumbnailDownAnimation(View view)
 	{
-		if (tileView == null)
-			return;
+		float translationDistance = SizeConverter.Current.GetTileWidth(TileBase.TileSize.Medium) * 2 / 3;
+		ObjectAnimator animation = ObjectAnimator.ofFloat(view, "translationY", translationDistance);
+		animation.setDuration(OPEN_THUMBNAIL_ANIMATION_DURATION);
+		animation.setInterpolator(new AnticipateInterpolator());
+		return animation;
+	}
+	
+	private ObjectAnimator GenerateTileDownAnimation(View view)
+	{
+		ObjectAnimator animation = ObjectAnimator.ofFloat(view, "translationY", TILE_START_POSITION, 0f);
+		animation.setDuration(OPEN_TILE_ANIMATION_DURATION);
+		animation.setInterpolator(new OvershootInterpolator());
+		return animation;
+	}
+	
+	private AnimatorSet GenerateAnimationCloseFolderThumbnails(FolderTile folderTile)
+	{
+		AnimatorSet animatorSet = new AnimatorSet();
 		
-		if (this.parentContext == null || !(this.parentContext instanceof Activity))
-			return;
-		
-		synchronized (this.parentContext)
+		List<View> thumbnailViews = this.GetThumbnailList(folderTile);
+		long delay = 0;
+		for (View view : thumbnailViews)
 		{
-			this.isAnimated = true;
-			
-			final int thumbnailSize = (SizeConverter.Current.GetTileWidth(TileBase.TileSize.Medium) - 2) / 3;
-			
-			Activity activity = (Activity) this.parentContext;
-			
-			activity.runOnUiThread(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					synchronized (tileView)
-					{
-						ObjectAnimator animation = GenerateTranslateAnimation(tileView, thumbnailSize * rowNo, 312f + thumbnailSize * rowNo, delay);
-						animation.start();
-					}
-				}
-			});
-			
-			this.isAnimated = false;
+			ObjectAnimator animation = this.GenerateThumbnailUpAnimation(view);
+			animation.setStartDelay(delay);
+			animatorSet.play(animation);
+			delay += CLOSE_THUMBNAIL_ANIMATION_DELAY;
 		}
+		
+		return animatorSet;
 	}
 	
-	public void AnimateOpenFolder(Folder folder)
+	private AnimatorSet GenerateAnimationCloseFolderTiles(Folder folder)
 	{
-		if (folder == null)
-			return;
+		AnimatorSet animatorSet = new AnimatorSet();
 		
-		synchronized (this.parentContext)
+		List<View> tileViews = this.GetTileViewList(folder);
+		long delay = 0;
+		for (View view : tileViews)
 		{
-			this.isAnimated = true;
-			
-			this.openingFolder = folder;
-			this.openFolderAnimationCounter = 0;
-			
-			long delay = 0;
-			for (final TileBase subTile : folder.getSubTiles())
-			{
-				BaseTileViewHolder viewHolder = subTile.getParentViewHolder();
-				final View view = viewHolder.getItemView();
-				
-				Activity activity = (Activity) this.parentContext;
-				
-				delay += folderDelaySpan;
-				final long delayFinal = delay;
-				final ObjectAnimator animation = GenerateTranslateAnimation(view, -400f, 0, delayFinal);
-				animation.addListener(openFolderAnimationListener);
-				
-				activity.runOnUiThread(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						animation.start();
-					}
-				});
-			}
-			
-			this.isAnimated = false;
+			ObjectAnimator animation = this.GenerateTileUpAnimation(view);
+			animation.setStartDelay(delay);
+			animatorSet.play(animation);
+			animatorSet.playTogether(this.GenerateAlphaAnimation(view, true));
+			delay += CLOSE_TILE_ANIMATION_DELAY;
 		}
+		
+		return animatorSet;
 	}
 	
-	public void AnimateCloseFolder(FolderTile folderTile)
+	private ObjectAnimator GenerateThumbnailUpAnimation(View view)
 	{
-		synchronized (this.parentContext)
+		ObjectAnimator animation = ObjectAnimator.ofFloat(view, "translationY", 0f);
+		animation.setDuration(CLOSE_THUMBNAIL_ANIMATION_DURATION);
+		animation.setInterpolator(new OvershootInterpolator());
+		return animation;
+	}
+	
+	private ObjectAnimator GenerateTileUpAnimation(View view)
+	{
+		ObjectAnimator animation = ObjectAnimator.ofFloat(view, "translationY", 0f, TILE_START_POSITION);
+		animation.setDuration(CLOSE_TILE_ANIMATION_DURATION);
+		animation.setInterpolator(new AnticipateInterpolator());
+		return animation;
+	}
+	
+	private ObjectAnimator GenerateAlphaAnimation(View view, boolean inverse)
+	{
+		float startValue = 0.0f;
+		float endValue = 1.0f;
+		long duration = OPEN_TILE_ANIMATION_DURATION * 2;
+		
+		if (inverse)
 		{
-			this.isAnimated = true;
-			
-			BaseTileViewHolder viewHolderBase = folderTile.getParentViewHolder();
-			if (viewHolderBase instanceof FolderTileViewHolder)
-			{
-				FolderTileViewHolder folderTileViewHolder = (FolderTileViewHolder)viewHolderBase;
-				List<View> subTileViews = folderTileViewHolder.getSubTileViewList();
-				
-				int maxThumbnailCountOnRow = this.getTileCountOnSingleRow(folderTile);
-				
-				long delay = 0;
-				for (int i = 0; i < subTileViews.size(); i++)
-				{
-					View view = subTileViews.get(i);
-					int rowNo = i / maxThumbnailCountOnRow;
-					this.AnimateCloseFolder(view, rowNo, delay);
-					delay += tileDelaySpan;
-				}
-				
-				View folderTileView = viewHolderBase.getItemView();
-				if (folderTileView != null)
-					folderTileView.invalidate();
-			}
-			
-			this.isAnimated = false;
+			startValue = 1.0f;
+			endValue = 0.0f;
+			duration = CLOSE_TILE_ANIMATION_DURATION * 2;
 		}
-	}
-	
-	private void AnimateCloseFolder(final View tileView, final int rowNo, final long delay)
-	{
-		if (tileView == null)
-			return;
 		
-		if (this.parentContext == null || !(this.parentContext instanceof Activity))
-			return;
-		
-		synchronized (this.parentContext)
-		{
-			this.isAnimated = true;
-			
-			final int thumbnailSize = (SizeConverter.Current.GetTileWidth(TileBase.TileSize.Medium) - 2) / 3;
-			
-			Activity activity = (Activity) this.parentContext;
-			
-			activity.runOnUiThread(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					synchronized (tileView)
-					{
-						ObjectAnimator animation = GenerateTranslateAnimation(tileView, 312f + thumbnailSize, thumbnailSize * rowNo, delay);
-						animation.start();
-					}
-				}
-			});
-			
-			this.isAnimated = false;
-		}
-	}
-	
-	public void AnimateCloseFolder(Folder folder)
-	{
-		if (folder == null)
-			return;
-		
-		synchronized (this.parentContext)
-		{
-			this.isAnimated = true;
-			
-			this.closingFolder = folder;
-			this.closeFolderAnimationCounter = 0;
-			
-			long delay = 0;
-			List<Tile> subTiles = new ArrayList<>(folder.getSubTiles());
-			Collections.reverse(subTiles);
-			
-			for (final Tile subTile : subTiles)
-			{
-				BaseTileViewHolder viewHolder = subTile.getParentViewHolder();
-				final View view = viewHolder.getItemView();
-				
-				Activity activity = (Activity) this.parentContext;
-				
-				final long delayFinal = delay;
-				final ObjectAnimator animation = GenerateTranslateAnimation(view, 0f, -400f, delayFinal);
-				animation.addListener(closeFolderAnimationListener);
-				
-				activity.runOnUiThread(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						synchronized (subTile)
-						{
-							animation.start();
-						}
-					}
-				});
-				
-				delay += folderDelaySpan;
-			}
-			
-			this.isAnimated = false;
-		}
-	}
-	
-	private ObjectAnimator GenerateTranslateAnimation(View view, float fromY, float toY, long delay)
-	{
-		ObjectAnimator anim = ObjectAnimator.ofFloat(view, "y", fromY, toY);
-		anim.setDuration(this.animTime);
-		anim.setStartDelay(delay);
-		//anim.start();
-		
+		ObjectAnimator anim = ObjectAnimator.ofFloat(view, "alpha", startValue, endValue);
+		anim.setInterpolator(new TileOpacityInterpolator());
+		anim.setDuration(duration);
 		return anim;
 	}
 	
-	private int getTileCountOnSingleRow(FolderTile folderTile)
+	private List<View> GetThumbnailList(FolderTile folderTile)
 	{
-		if (folderTile.getTileSize() == TileBase.TileSize.Small)
-			return 1;
-		if (folderTile.getTileSize() == TileBase.TileSize.Medium)
-			return 3;
-		if (folderTile.getTileSize() == TileBase.TileSize.MediumWide)
-			return 6;
-		if (folderTile.getTileSize() == TileBase.TileSize.Large)
-			return 6;
+		if (folderTile == null)
+			return null;
 		
-		return 3;
+		BaseTileViewHolder viewHolderBase = folderTile.getParentViewHolder();
+		if (viewHolderBase instanceof FolderTileViewHolder)
+		{
+			FolderTileViewHolder folderTileViewHolder = (FolderTileViewHolder)viewHolderBase;
+			List<View> subTileViews = folderTileViewHolder.getSubTileViewList();
+			
+			return subTileViews;
+		}
+		
+		return new ArrayList<>();
 	}
 	
-	public interface FolderAnimationListener
+	private List<View> GetTileViewList(Folder folder)
 	{
-		void OpenFolderAnimationEnded();
-		void CloseFolderAnimationEnded();
+		if (folder == null)
+			return null;
+		
+		List<View> tileViewList = new ArrayList<>();
+		
+		List<Tile> subTiles = folder.getSubTiles();
+		for (TileBase subTile : subTiles)
+		{
+			BaseTileViewHolder viewHolder = subTile.getParentViewHolder();
+			if (viewHolder != null)
+			{
+				View view = viewHolder.getItemView();
+				if (view != null)
+				{
+					tileViewList.add(view);
+				}
+			}
+		}
+		
+		return tileViewList;
+	}
+	
+	class TileOpacityInterpolator implements TimeInterpolator
+	{
+		@Override
+		public float getInterpolation(float t)
+		{
+			if (t == 1)
+				return 1.0f;
+			
+			if (t < 0.677f)
+				return 0.0f;
+			else
+				return t;
+		}
 	}
 }

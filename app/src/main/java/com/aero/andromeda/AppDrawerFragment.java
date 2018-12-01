@@ -93,8 +93,10 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 		ServiceLocator.Current().RegisterInstance(this.tileAnimationManager);
 		this.tileAnimationManager.Start();
 		
+		/*
 		this.folderAnimationManager = new FolderAnimationManager(this.getActivity());
 		ServiceLocator.Current().RegisterInstance(this.folderAnimationManager);
+		*/
 		
 		return view;
 	}

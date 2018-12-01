@@ -1,8 +1,9 @@
 package com.aero.andromeda.managers;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.support.v7.widget.RecyclerView;
 
-import com.aero.andromeda.AppDrawerFragment;
 import com.aero.andromeda.adapters.TilesAdapter;
 import com.aero.andromeda.models.tiles.FolderTile;
 import com.aero.andromeda.models.tiles.Folder;
@@ -21,6 +22,8 @@ public class TileFolderManager
 	private static TileFolderManager self = new TileFolderManager();
 	public static TileFolderManager Current = self;
 	
+	private final FolderAnimationManager folderAnimationManager;
+	
 	private FolderViewHolder folderViewHolder;
 	private TilesAdapter folderTilesAdapter;
 	
@@ -29,6 +32,7 @@ public class TileFolderManager
 	
 	private TileFolderManager()
 	{
+		this.folderAnimationManager = FolderAnimationManager.Init();
 		this.tileFolder = new Folder();
 	}
 	
@@ -52,31 +56,12 @@ public class TileFolderManager
 		spannedGridLayoutManager.setItemOrderIsStable(true);
 		recyclerView.setLayoutManager(spannedGridLayoutManager);
 		recyclerView.setAdapter(this.folderTilesAdapter);
-		this.folderTilesAdapter.notifyDataSetChanged();
 		
-		FolderAnimationManager folderAnimationManager = ServiceLocator.Current().GetInstance(FolderAnimationManager.class);
-		folderAnimationManager.addAnimationListener(new FolderAnimationManager.FolderAnimationListener()
-		{
-			@Override
-			public void OpenFolderAnimationEnded()
-			{
-				OnOpenFolderAnimationEnded();
-			}
-			
-			@Override
-			public void CloseFolderAnimationEnded()
-			{
-				OnCloseFolderAnimationEnded();
-			}
-		});
+		this.folderTilesAdapter.notifyDataSetChanged();
 	}
 	
 	public void OnClickFolderTile(FolderTile folderTile)
 	{
-		FolderAnimationManager folderAnimationManager = ServiceLocator.Current().GetInstance(FolderAnimationManager.class);
-		if (folderAnimationManager.isAnimatedNow())
-			return;
-		
 		if (!this.IsFolderOpened())
 		{
 			this.OpenFolder(folderTile);
@@ -89,16 +74,6 @@ public class TileFolderManager
 			if (aDifferentTile)
 				this.OpenFolder(folderTile);
 		}
-		
-		/*
-		if (this.folderTilesAdapter != null)
-		{
-			synchronized (this.folderTilesAdapter)
-			{
-				this.folderTilesAdapter.notifyAll();
-			}
-		}
-		*/
 	}
 	
 	synchronized private void OpenFolder(FolderTile folderTile)
@@ -116,27 +91,12 @@ public class TileFolderManager
 			int indexOfTile = mainTilesAdapter.getItemIndex(this.openedFolderTile);
 			mainTilesAdapter.InsertTile(this.tileFolder, indexOfTile + 1);
 			
-			this.OnFolderOpening(folderTile);
-			this.OnFolderOpened(folderTile);
-			
-			//this.mainTilesAdapter.ScrollToItem(indexOfTile);
+			FolderAnimationManager.Current.OpenFolder(folderTile, this.tileFolder, null);
 		}
 		catch (Exception ex)
 		{
 		
 		}
-	}
-	
-	private void OnFolderOpening(FolderTile folderTile)
-	{
-		FolderAnimationManager folderAnimationManager = ServiceLocator.Current().GetInstance(FolderAnimationManager.class);
-		folderAnimationManager.AnimateOpenFolder(folderTile);
-	}
-	
-	private void OnFolderOpened(FolderTile folderTile)
-	{
-		FolderAnimationManager folderAnimationManager = ServiceLocator.Current().GetInstance(FolderAnimationManager.class);
-		folderAnimationManager.AnimateOpenFolder(this.tileFolder);
 	}
 	
 	synchronized public void CloseFolder()
@@ -145,40 +105,25 @@ public class TileFolderManager
 		{
 			if (!this.IsFolderOpened())
 				return;
-				
-			this.OnFolderClosing(this.openedFolderTile);
-			this.OnFolderClosed(this.openedFolderTile);
-			// Devamı CloseFolderAnimationEnded() metodunda
+			
+			FolderAnimationManager.Current.CloseFolder(this.openedFolderTile, this.tileFolder, new AnimatorListenerAdapter()
+			{
+				@Override
+				public void onAnimationEnd(Animator animation)
+				{
+					super.onAnimationEnd(animation);
+					
+					TilesAdapter mainTilesAdapter = ServiceLocator.Current().GetInstance(IAppService.class).getTilesAdapter();
+					TileFolderManager.this.tileFolder.SetParentTile(null);
+					int indexOfTile = mainTilesAdapter.getItemIndex(TileFolderManager.this.tileFolder);
+					mainTilesAdapter.RemoveTile(indexOfTile);
+					TileFolderManager.this.openedFolderTile = null;
+				}
+			});
 		}
 		catch (Exception ex)
 		{
 		
 		}
-	}
-	
-	private void OnFolderClosing(FolderTile folderTile)
-	{
-		FolderAnimationManager folderAnimationManager = ServiceLocator.Current().GetInstance(FolderAnimationManager.class);
-		folderAnimationManager.AnimateCloseFolder(this.tileFolder);
-	}
-	
-	private void OnFolderClosed(FolderTile folderTile)
-	{
-		FolderAnimationManager folderAnimationManager = ServiceLocator.Current().GetInstance(FolderAnimationManager.class);
-		folderAnimationManager.AnimateCloseFolder(folderTile);
-	}
-	
-	public void OnOpenFolderAnimationEnded()
-	{
-	
-	}
-	
-	public void OnCloseFolderAnimationEnded()
-	{
-		TilesAdapter mainTilesAdapter = ServiceLocator.Current().GetInstance(IAppService.class).getTilesAdapter();
-		this.tileFolder.SetParentTile(null);
-		int indexOfTile = mainTilesAdapter.getItemIndex(this.tileFolder);
-		mainTilesAdapter.RemoveTile(indexOfTile);
-		this.openedFolderTile = null;
 	}
 }

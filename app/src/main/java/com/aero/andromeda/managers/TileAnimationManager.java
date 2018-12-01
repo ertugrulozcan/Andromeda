@@ -199,8 +199,6 @@ public class TileAnimationManager
 		}
 	}
 	
-	;
-	
 	class TileFlipInterpolator implements TimeInterpolator
 	{
 		@Override

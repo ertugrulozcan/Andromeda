@@ -32,6 +32,8 @@ public class BlurDrawerLayout extends DrawerLayout {
 			float downScaleFactor = ta.getFloat(R.styleable.BlurDrawerLayout_downScaleFactor,
 					BlurActionBarDrawerToggle.DEFAULT_DOWNSCALEFACTOR);
 			
+			downScaleFactor = 5.0f;
+			
 			int toolbarRef = ta.getResourceId(R.styleable.BlurDrawerLayout_toolbar, 0);
 			Toolbar toolbar = (Toolbar) ((Activity) context).findViewById(toolbarRef);
 			

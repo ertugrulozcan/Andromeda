@@ -3,12 +3,14 @@ package com.aero.andromeda;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -30,6 +32,10 @@ import com.aero.andromeda.services.interfaces.IAppService;
 import com.aero.andromeda.services.interfaces.IBadgeIntentService;
 import com.aero.andromeda.services.interfaces.ISearchService;
 import com.aero.andromeda.services.interfaces.ISettingsService;
+
+import at.favre.lib.dali.Dali;
+import at.favre.lib.dali.builder.nav.DaliBlurDrawerToggle;
+import at.favre.lib.dali.builder.nav.NavigationDrawerListener;
 
 public class MainActivity extends FragmentActivity
 {

@@ -7,12 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.aero.andromeda.Andromeda;
 import com.aero.andromeda.R;
 import com.aero.andromeda.helpers.OnStartDragListener;
 import com.aero.andromeda.managers.TileFolderManager;
 import com.aero.andromeda.models.TilesFooter;
-import com.aero.andromeda.models.tiles.Folder;
 import com.aero.andromeda.models.tiles.TileBase;
 import com.aero.andromeda.ui.*;
 
@@ -21,9 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 public class TilesAdapter extends RecyclerView.Adapter<BaseTileViewHolder> implements ItemTouchHelperAdapter
 {
@@ -40,6 +35,8 @@ public class TilesAdapter extends RecyclerView.Adapter<BaseTileViewHolder> imple
 	
 	private List<TileBase> tileList;
 	private HashMap<View, TileBase> tileViewDictionary;
+	
+	private List<TileBindListener> listeners = new ArrayList<>();
 	
 	public TilesAdapter(List<TileBase> tileList, boolean isMainTilesAdapter, boolean hasStableIds)
 	{
@@ -160,6 +157,9 @@ public class TilesAdapter extends RecyclerView.Adapter<BaseTileViewHolder> imple
 		this.OnTileViewHolderChanged(tile, itemView);
 		
 		baseHolder.bindViewHolder(tile, i, this.dragStartListener);
+		
+		for (TileBindListener listener : listeners)
+			listener.OnAfterBind(itemView);
 	}
 	
 	@Override
@@ -291,5 +291,15 @@ public class TilesAdapter extends RecyclerView.Adapter<BaseTileViewHolder> imple
 		{
 			this.tileViewDictionary.put(newView, tile);
 		}
+	}
+	
+	public void addTileBindListener(TileBindListener listener)
+	{
+		this.listeners.add(listener);
+	}
+	
+	public interface TileBindListener
+	{
+		void OnAfterBind(View view);
 	}
 }
