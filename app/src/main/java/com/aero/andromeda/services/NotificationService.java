@@ -13,6 +13,7 @@ import android.text.TextUtils;
 
 import com.aero.andromeda.MainActivity;
 import com.aero.andromeda.R;
+import com.aero.andromeda.helpers.Colors;
 import com.aero.andromeda.services.interfaces.INotificationService;
 
 public class NotificationService extends NotificationListenerService implements INotificationService
@@ -140,7 +141,7 @@ public class NotificationService extends NotificationListenerService implements 
 	
 	private AlertDialog buildNotificationServiceAlertDialog()
 	{
-		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.parentContext);
+		final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.parentContext, R.style.AppCompatAlertDialogStyle);
 		alertDialogBuilder.setTitle(R.string.notification_listener_service);
 		alertDialogBuilder.setMessage(R.string.notification_listener_service_explanation);
 		alertDialogBuilder.setPositiveButton(R.string.yes,
@@ -162,6 +163,22 @@ public class NotificationService extends NotificationListenerService implements 
 					}
 				});
 		
-		return(alertDialogBuilder.create());
+		final AlertDialog dialog = alertDialogBuilder.create();
+		
+		dialog.setOnShowListener(new DialogInterface.OnShowListener()
+		{
+			@Override
+			public void onShow(DialogInterface arg0)
+			{
+				int color = parentContext.getResources().getColor(R.color.colorAccent);
+				dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
+				dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
+				
+				
+				dialog.getWindow().setBackgroundDrawable(Colors.rgb("#171717"));
+			}
+		});
+		
+		return(dialog);
 	}
 }

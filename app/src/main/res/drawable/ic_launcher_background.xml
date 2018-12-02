@@ -8,6 +8,14 @@
 
     <path
         android:pathData="M1,1 H99 V99 H1Z"
+        android:fillColor="#313131"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0">
+    </path>
+
+    <!--
+    <path
+        android:pathData="M1,1 H99 V99 H1Z"
         android:strokeColor="#FFFFFF"
         android:strokeWidth="0">
         <aapt:attr name="android:fillColor">
@@ -15,10 +23,11 @@
                 android:endColor="#0D1F40"
                 android:endX="90"
                 android:endY="99"
-                android:startColor="#2562C4"
+                android:startColor="#C42562"
                 android:startX="-50"
                 android:startY="-50"
                 android:type="linear" />
         </aapt:attr>
     </path>
+    -->
 </vector>
