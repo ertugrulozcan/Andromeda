@@ -74,7 +74,7 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 				public void onClick(View v)
 				{
 					if (BaseTileViewHolder.this.bindedTile != null)
-						BaseTileViewHolder.this.bindedTile.OnLongClick(BaseTileViewHolder.this);
+						BaseTileViewHolder.this.bindedTile.OnLongClick(BaseTileViewHolder.this, BaseTileViewHolder.this.tileMenuButton);
 				}
 			});
 		}
@@ -438,7 +438,7 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		{
 			FrameLayout.LayoutParams tileBoxLayoutParams = new FrameLayout.LayoutParams(FULL_TILE_SIZE, LinearLayout.LayoutParams.WRAP_CONTENT);
 			int margin = TILE_MARGIN;
-			int topMargin = SizeConverter.Current.GetDeviceResolution().heightPixels / 60 + 20;
+			int topMargin = 0;
 			tileBoxLayoutParams.setMargins(margin, topMargin, margin, margin);
 			tileBoxLayoutParams.gravity = Gravity.CENTER_VERTICAL;
 			

@@ -86,17 +86,13 @@ public abstract class Tile extends TileBase
 	}
 	
 	@Override
-	public boolean OnLongClick(BaseTileViewHolder holder)
+	public boolean OnLongClick(BaseTileViewHolder holder, View holdedView)
 	{
-		if (holder == null)
+		if (holdedView == null)
 			return false;
 		
-		View view = holder.getItemView();
-		if (view == null)
-			return false;
-		
-		PowerMenuBase powerMenu = this.GivePopupMenu(view);
-		powerMenu.showAsAnchorLeftTop(view);
+		PowerMenuBase powerMenu = this.GivePopupMenu(holdedView);
+		powerMenu.showAsAnchorLeftTop(holdedView);
 		
 		return true;
 	}

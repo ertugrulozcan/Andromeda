@@ -1,5 +1,7 @@
 package com.aero.andromeda.models.tiles;
 
+import android.view.View;
+
 import com.aero.andromeda.helpers.Colors;
 import com.aero.andromeda.managers.TileFolderManager;
 import com.aero.andromeda.ui.BaseTileViewHolder;
@@ -41,7 +43,7 @@ public class FolderTile extends Tile
 	}
 	
 	@Override
-	public boolean OnLongClick(BaseTileViewHolder holder)
+	public boolean OnLongClick(BaseTileViewHolder holder, View holdedView)
 	{
 		return false;
 	}

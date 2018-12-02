@@ -1,5 +1,7 @@
 package com.aero.andromeda.models;
 
+import android.view.View;
+
 import com.aero.andromeda.helpers.Colors;
 import com.aero.andromeda.models.tiles.TileBase;
 import com.aero.andromeda.ui.BaseTileViewHolder;
@@ -22,7 +24,7 @@ public class TilesHeader extends TileBase
 	}
 	
 	@Override
-	public boolean OnLongClick(BaseTileViewHolder holder)
+	public boolean OnLongClick(BaseTileViewHolder holder, View holdedView)
 	{
 		return false;
 	}

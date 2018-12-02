@@ -31,7 +31,6 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 	private RecyclerView recyclerView;
 	private TilesAdapter tilesAdapter;
 	private TileAnimationManager tileAnimationManager;
-	private FolderAnimationManager folderAnimationManager;
 	private TilesLayoutManager gridLayoutManager;
 	private ItemTouchHelper itemTouchHelper;
 	private boolean isEnabled = true;
@@ -92,11 +91,6 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 		this.tileAnimationManager = new TileAnimationManager(this.getActivity(), this.tilesAdapter);
 		ServiceLocator.Current().RegisterInstance(this.tileAnimationManager);
 		this.tileAnimationManager.Start();
-		
-		/*
-		this.folderAnimationManager = new FolderAnimationManager(this.getActivity());
-		ServiceLocator.Current().RegisterInstance(this.folderAnimationManager);
-		*/
 		
 		return view;
 	}

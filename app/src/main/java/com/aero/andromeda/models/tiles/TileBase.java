@@ -2,6 +2,7 @@ package com.aero.andromeda.models.tiles;
 
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.view.View;
 
 import com.aero.andromeda.helpers.Colors;
 import com.aero.andromeda.models.AppModel;
@@ -45,7 +46,7 @@ public abstract class TileBase
 	
 	public abstract void OnClick(BaseTileViewHolder holder);
 	
-	public abstract boolean OnLongClick(BaseTileViewHolder holder);
+	public abstract boolean OnLongClick(BaseTileViewHolder holder, View view);
 	
 	public TileSize getTileSize()
 	{

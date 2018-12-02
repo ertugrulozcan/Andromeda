@@ -1,6 +1,7 @@
 package com.aero.andromeda.models;
 
 import android.graphics.drawable.ColorDrawable;
+import android.view.View;
 
 import com.aero.andromeda.MainActivity;
 import com.aero.andromeda.helpers.Colors;
@@ -27,7 +28,7 @@ public class TilesFooter extends TileBase
 	}
 	
 	@Override
-	public boolean OnLongClick(BaseTileViewHolder holder)
+	public boolean OnLongClick(BaseTileViewHolder holder, View holdedView)
 	{
 		return false;
 	}

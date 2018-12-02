@@ -159,7 +159,7 @@ public class Folder extends TileBase
 	}
 	
 	@Override
-	public boolean OnLongClick(BaseTileViewHolder holder)
+	public boolean OnLongClick(BaseTileViewHolder holder, View holdedView)
 	{
 		return false;
 	}
