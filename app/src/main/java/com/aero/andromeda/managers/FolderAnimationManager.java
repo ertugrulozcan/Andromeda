@@ -18,7 +18,6 @@ import com.aero.andromeda.models.tiles.Tile;
 import com.aero.andromeda.models.tiles.TileBase;
 import com.aero.andromeda.ui.BaseTileViewHolder;
 import com.aero.andromeda.ui.FolderTileViewHolder;
-import com.aero.andromeda.ui.FolderViewHolder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,14 +37,20 @@ public class FolderAnimationManager
 		return new FolderAnimationManager();
 	}
 	
-	private final long OPEN_THUMBNAIL_ANIMATION_DELAY = 90;
-	private final long OPEN_TILE_ANIMATION_DELAY = 90;
-	private final long CLOSE_THUMBNAIL_ANIMATION_DELAY = 90;
-	private final long CLOSE_TILE_ANIMATION_DELAY = 90;
+	public static final long OPEN_THUMBNAIL_ANIMATION_DELAY = 90;
+	public static final long OPEN_THUMBNAIL_ANIMATION_DURATION = 300;
+	public static final long OPEN_TILE_ANIMATION_DELAY = 100;
+	public static final long OPEN_TILE_ANIMATION_DURATION = 300;
+	
+	public static final long CLOSE_THUMBNAIL_ANIMATION_DELAY = 90;
+	public static final long CLOSE_THUMBNAIL_ANIMATION_DURATION = 300;
+	public static final long CLOSE_TILE_ANIMATION_DELAY = 100;
+	public static final long CLOSE_TILE_ANIMATION_DURATION = 300;
+	
 	private final float TILE_START_POSITION = -(SizeConverter.Current.GetTileWidth(TileBase.TileSize.Medium) + 10);
 	
 	
-	public void OpenFolder(FolderTile folderTile, Folder folder, AnimatorListenerAdapter afterOpened)
+	public void OpenFolder(final FolderTile folderTile, final Folder folder, AnimatorListenerAdapter afterOpened)
 	{
 		final AnimatorSet thumbnailsOpenAnimation = this.GenerateAnimationOpenFolderThumbnails(folderTile);
 		final AnimatorSet tilesOpenAnimation = this.GenerateAnimationOpenFolderTiles(folder);
@@ -57,10 +62,12 @@ public class FolderAnimationManager
 		if (afterOpened != null)
 			thumbnailsOpenAnimation.addListener(afterOpened);
 		
+		thumbnailsOpenAnimation.addListener(this.GenerateHardwareLayerCleanerAdaptor(folderTile, folder));
+		
 		thumbnailsOpenAnimation.start();
 	}
 	
-	public void CloseFolder(FolderTile folderTile, Folder folder, AnimatorListenerAdapter afterOpened)
+	public void CloseFolder(final FolderTile folderTile, final Folder folder, AnimatorListenerAdapter afterOpened)
 	{
 		final AnimatorSet tilesCloseAnimation = this.GenerateAnimationCloseFolderTiles(folder);
 		final AnimatorSet thumbnailsCloseAnimation = this.GenerateAnimationCloseFolderThumbnails(folderTile);
@@ -71,6 +78,8 @@ public class FolderAnimationManager
 		
 		if (afterOpened != null)
 			tilesCloseAnimation.addListener(afterOpened);
+		
+		tilesCloseAnimation.addListener(this.GenerateHardwareLayerCleanerAdaptor(folderTile, folder));
 		
 		//tilesCloseAnimation.playTogether(folderHeightAnimation);
 		tilesCloseAnimation.playSequentially(thumbnailsCloseAnimation);
@@ -87,12 +96,12 @@ public class FolderAnimationManager
 		
 		Collections.reverse(thumbnailViews);
 		
-		long duration = OPEN_THUMBNAIL_ANIMATION_DELAY * (thumbnailViews.size() + 1);
-		long delay = 0;
+		long delay = 50;
 		
 		for (View view : thumbnailViews)
 		{
-			ObjectAnimator animation = this.GenerateThumbnailDownAnimation(view, duration);
+			ObjectAnimator animation = this.GenerateThumbnailDownAnimation(view, OPEN_THUMBNAIL_ANIMATION_DURATION);
+			view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 			animation.setStartDelay(delay);
 			animatorSet.play(animation);
 			delay += OPEN_THUMBNAIL_ANIMATION_DELAY;
@@ -110,18 +119,18 @@ public class FolderAnimationManager
 			return null;
 		
 		long delay = 300;
-		long duration = OPEN_TILE_ANIMATION_DELAY * (tileViews.size() + 1);
 		
 		for (View view : tileViews)
 		{
+			view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 			view.setTranslationY(TILE_START_POSITION);
 			view.setAlpha(0.0f);
 			
-			ObjectAnimator animation = this.GenerateTileDownAnimation(view, duration);
+			ObjectAnimator animation = this.GenerateTileDownAnimation(view, OPEN_TILE_ANIMATION_DURATION);
 			delay += OPEN_TILE_ANIMATION_DELAY;
 			animation.setStartDelay(delay);
 			animatorSet.play(animation);
-			animatorSet.playTogether(this.GenerateAlphaAnimation(view, duration, false));
+			animatorSet.playTogether(this.GenerateAlphaAnimation(view, OPEN_TILE_ANIMATION_DURATION, false));
 		}
 		
 		return animatorSet;
@@ -153,11 +162,11 @@ public class FolderAnimationManager
 			return null;
 		
 		long delay = 150;
-		long duration = CLOSE_THUMBNAIL_ANIMATION_DELAY * (thumbnailViews.size() + 1);
 		
 		for (View view : thumbnailViews)
 		{
-			ObjectAnimator animation = this.GenerateThumbnailUpAnimation(view, duration);
+			ObjectAnimator animation = this.GenerateThumbnailUpAnimation(view, CLOSE_THUMBNAIL_ANIMATION_DURATION);
+			view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 			delay += CLOSE_THUMBNAIL_ANIMATION_DELAY;
 			animation.setStartDelay(delay);
 			animatorSet.play(animation);
@@ -174,15 +183,15 @@ public class FolderAnimationManager
 		if (tileViews.size() == 0)
 			return null;
 		
-		long duration = CLOSE_TILE_ANIMATION_DELAY * (tileViews.size() + 1);
 		long delay = 0;
 		
 		for (View view : tileViews)
 		{
-			ObjectAnimator animation = this.GenerateTileUpAnimation(view, duration);
+			ObjectAnimator animation = this.GenerateTileUpAnimation(view, CLOSE_TILE_ANIMATION_DURATION);
+			view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 			animation.setStartDelay(delay);
 			
-			ObjectAnimator alphaAnimation = this.GenerateAlphaAnimation(view, duration, true);
+			ObjectAnimator alphaAnimation = this.GenerateAlphaAnimation(view, CLOSE_TILE_ANIMATION_DURATION, true);
 			alphaAnimation.setStartDelay(delay);
 			animatorSet.playTogether(alphaAnimation);
 			
@@ -303,6 +312,41 @@ public class FolderAnimationManager
 		}
 		
 		return tileViewList;
+	}
+	
+	private AnimatorListenerAdapter GenerateHardwareLayerCleanerAdaptor(final FolderTile folderTile, final Folder folder)
+	{
+		AnimatorListenerAdapter hardwareLayerCleaningAdapter =  new AnimatorListenerAdapter()
+		{
+			@Override
+			public void onAnimationEnd(Animator animation)
+			{
+				super.onAnimationEnd(animation);
+				
+				FolderAnimationManager.this.ClearHardwareLayerFrames(folderTile);
+				FolderAnimationManager.this.ClearHardwareLayerFrames(folder);
+			}
+		};
+		
+		return hardwareLayerCleaningAdapter;
+	}
+	
+	private void ClearHardwareLayerFrames(FolderTile folderTile)
+	{
+		List<View> thumbnailViews = this.GetThumbnailList(folderTile);
+		for (View view : thumbnailViews)
+		{
+			view.setLayerType(View.LAYER_TYPE_NONE, null);
+		}
+	}
+	
+	private void ClearHardwareLayerFrames(Folder folder)
+	{
+		List<View> tileViews = this.GetTileViewList(folder);
+		for (View view : tileViews)
+		{
+			view.setLayerType(View.LAYER_TYPE_NONE, null);
+		}
 	}
 	
 	class TileOpacityInterpolator implements TimeInterpolator

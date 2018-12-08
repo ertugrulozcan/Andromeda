@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.support.v7.widget.RecyclerView;
 
+import com.aero.andromeda.MainActivity;
 import com.aero.andromeda.adapters.TilesAdapter;
 import com.aero.andromeda.models.tiles.FolderTile;
 import com.aero.andromeda.models.tiles.Folder;
@@ -106,6 +107,7 @@ public class TileFolderManager
 			if (!this.IsFolderOpened())
 				return;
 			
+			// Start closing animation
 			FolderAnimationManager.Current.CloseFolder(this.openedFolderTile, this.tileFolder, new AnimatorListenerAdapter()
 			{
 				@Override
@@ -113,17 +115,56 @@ public class TileFolderManager
 				{
 					super.onAnimationEnd(animation);
 					
-					TilesAdapter mainTilesAdapter = ServiceLocator.Current().GetInstance(IAppService.class).getTilesAdapter();
 					TileFolderManager.this.tileFolder.SetParentTile(null);
-					int indexOfTile = mainTilesAdapter.getItemIndex(TileFolderManager.this.tileFolder);
-					mainTilesAdapter.RemoveTile(indexOfTile);
 					TileFolderManager.this.openedFolderTile = null;
 				}
 			});
+			
+			// Remove closed tile
+			this.RemoveTileOnBackground(this.tileFolder);
 		}
 		catch (Exception ex)
 		{
-		
+			ex.printStackTrace();
 		}
+	}
+	
+	private void RemoveTileOnBackground(final Folder tileFolder)
+	{
+		final IAppService appService = ServiceLocator.Current().GetInstance(IAppService.class);
+		final MainActivity mainActivity = (MainActivity)appService.getMainContext();
+		final TilesAdapter mainTilesAdapter = appService.getTilesAdapter();
+		
+		final long delay = FolderAnimationManager.CLOSE_TILE_ANIMATION_DURATION - 50;
+		
+		Thread thread = new Thread()
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					sleep(delay);
+					
+					mainActivity.runOnUiThread(
+							new Runnable()
+							{
+								@Override
+								public void run()
+								{
+									int indexOfTile = mainTilesAdapter.getItemIndex(tileFolder);
+									mainTilesAdapter.RemoveTile(indexOfTile);
+								}
+							}
+					);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		};
+		
+		thread.start();
 	}
 }
