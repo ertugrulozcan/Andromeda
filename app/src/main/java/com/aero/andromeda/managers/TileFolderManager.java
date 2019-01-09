@@ -3,6 +3,7 @@ package com.aero.andromeda.managers;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.support.v7.widget.RecyclerView;
+import android.view.Choreographer;
 
 import com.aero.andromeda.MainActivity;
 import com.aero.andromeda.adapters.TilesAdapter;
@@ -41,6 +42,8 @@ public class TileFolderManager
 	{
 		this.folderAnimationManager = FolderAnimationManager.Init();
 		this.tileFolder = new Folder();
+		
+		//Choreographer.getInstance().postFrameCallback();
 	}
 	
 	public boolean IsFolderOpened()
@@ -93,7 +96,7 @@ public class TileFolderManager
 	{
 		synchronized (this.openFolderLock)
 		{
-			if (folderTile == null || this.isFolderOpening)
+			if (this.IsFolderOpened() || folderTile == null || this.isFolderOpening)
 				return;
 			
 			this.isFolderOpening = true;
@@ -133,7 +136,7 @@ public class TileFolderManager
 	{
 		synchronized (this.closeFolderLock)
 		{
-			if (this.isFolderClosing)
+			if (!this.IsFolderOpened() || this.isFolderClosing)
 				return;
 			
 			this.isFolderClosing = true;

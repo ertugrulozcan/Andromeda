@@ -49,7 +49,8 @@ public class TileOrderManager
 		ServiceLocator.Current().GetInstance(MainActivity.class).CoverDarkBackground();
 		
 		this.tileAnimationManager.Stop();
-		WobbleAnimationManager.Current(this.tilesAdapter).startWobble();
+		//WobbleAnimationManager.Current(this.tilesAdapter).startWobble();
+		WobbleAnimationManager.Current(this.tilesAdapter).execute();
 		
 		this.SelectTile(selectedViewHolder);
 		
@@ -69,7 +70,8 @@ public class TileOrderManager
 		
 		this.appDrawerFragment.RefreshLayout(false);
 		
-		WobbleAnimationManager.Current(this.tilesAdapter).stopWobble(true);
+		//WobbleAnimationManager.Current(this.tilesAdapter).stopWobble(true);
+		WobbleAnimationManager.Current(this.tilesAdapter).stop(null);
 		this.tileAnimationManager.Start();
 	}
 	
@@ -83,7 +85,7 @@ public class TileOrderManager
 				this.selectTileViewHolder = null;
 				unselectedTileHolder.onItemUnselected();
 				
-				WobbleAnimationManager.Current(this.tilesAdapter).startWobble(unselectedTileHolder.getItemView());
+				// WobbleAnimationManager.Current(this.tilesAdapter).startWobble(unselectedTileHolder.getItemView());
 			}
 			
 			this.selectTileViewHolder = tileHolder;
@@ -91,7 +93,7 @@ public class TileOrderManager
 			if (this.selectTileViewHolder != null)
 			{
 				this.selectTileViewHolder.onItemSelected();
-				WobbleAnimationManager.Current(this.tilesAdapter).stopWobble(this.selectTileViewHolder.getItemView());
+				// WobbleAnimationManager.Current(this.tilesAdapter).stopWobble(this.selectTileViewHolder.getItemView());
 			}
 		}
 	}

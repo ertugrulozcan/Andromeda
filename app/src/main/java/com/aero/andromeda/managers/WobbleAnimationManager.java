@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.view.View;
 
 import com.aero.andromeda.R;
@@ -22,7 +23,7 @@ import java.util.List;
 import static android.view.View.LAYER_TYPE_HARDWARE;
 import static android.view.View.LAYER_TYPE_NONE;
 
-public class WobbleAnimationManager
+public class WobbleAnimationManager extends AsyncTask<View, Void, View>
 {
 	private TilesAdapter tilesAdapter;
 	
@@ -43,6 +44,53 @@ public class WobbleAnimationManager
 	
 	private HashMap<View, ObjectAnimator> viewAnimatorDictionary = new HashMap<>();
 	
+	
+	@Override
+	protected void onPreExecute()
+	{
+		super.onPreExecute();
+	}
+	
+	@Override
+	protected View doInBackground(View... params)
+	{
+		View view = null;
+		if (params != null && params.length > 0)
+		{
+			view = params[0];
+		}
+		
+		return view;
+	}
+	
+	public void stop(View view)
+	{
+		if (view == null)
+			this.stopWobble(true);
+		else
+			this.stopWobble(view);
+		
+		this.cancel(true);
+	}
+	
+	@Override
+	protected void onPostExecute(View view)
+	{
+		super.onPostExecute(view);
+		
+		if (view == null)
+			this.startWobble();
+		else
+			this.startWobble(view);
+	}
+	
+	@Override
+	protected void onCancelled(View view)
+	{
+		super.onCancelled(view);
+	}
+	
+	
 	private int getChildCount()
 	{
 		return this.tilesAdapter.getTileViewList().size();
@@ -53,7 +101,7 @@ public class WobbleAnimationManager
 		return this.tilesAdapter.getTileViewList().get(index);
 	}
 	
-	public void startWobble(View view)
+	private void startWobble(View view)
 	{
 		if (this.viewAnimatorDictionary.containsKey(view))
 		{
@@ -66,7 +114,7 @@ public class WobbleAnimationManager
 		}
 	}
 	
-	public void startWobble()
+	private void startWobble()
 	{
 		for (int i = 0; i < getChildCount(); i++)
 		{
@@ -93,7 +141,7 @@ public class WobbleAnimationManager
 		}
 	}
 	
-	public void stopWobble(View view)
+	private void stopWobble(View view)
 	{
 		if (this.viewAnimatorDictionary.containsKey(view))
 		{
@@ -103,7 +151,7 @@ public class WobbleAnimationManager
 		}
 	}
 	
-	public void stopWobble(boolean resetRotation)
+	private void stopWobble(boolean resetRotation)
 	{
 		List<Animator> mWobbleAnimators = new ArrayList(this.viewAnimatorDictionary.values());
 		for (Animator wobbleAnimator : mWobbleAnimators)
