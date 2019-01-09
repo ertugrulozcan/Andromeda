@@ -61,6 +61,8 @@ public class TileOrderManager
 		Andromeda.isEditMode = false;
 		this.selectTileViewHolder = null;
 		
+		TilePopupMenuManager.Current().CloseAllMenus();
+		
 		this.mainActivity.UnlockNavigationDrawer();
 		this.mainActivity.UnlockViewPager();
 		ServiceLocator.Current().GetInstance(MainActivity.class).UncoverDarkBackground();

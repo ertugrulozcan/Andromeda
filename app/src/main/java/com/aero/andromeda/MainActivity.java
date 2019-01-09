@@ -22,6 +22,7 @@ import com.aero.andromeda.blur.BlurDrawerLayout;
 import com.aero.andromeda.helpers.SizeConverter;
 import com.aero.andromeda.managers.TileFolderManager;
 import com.aero.andromeda.managers.TileOrderManager;
+import com.aero.andromeda.managers.TilePopupMenuManager;
 import com.aero.andromeda.receivers.WallpaperChangedReceiver;
 import com.aero.andromeda.services.AppService;
 import com.aero.andromeda.services.BadgeIntentService;
@@ -193,6 +194,8 @@ public class MainActivity extends FragmentActivity
 			// Otherwise, select the previous step.
 			this.viewPagerAdapter.setCurrentPageIndex(this.viewPagerAdapter.getCurrentPageIndex() - 1);
 		}
+		
+		TilePopupMenuManager.Current().CloseMenu();
 	}
 	
 	private void SetWallpaper()

@@ -14,6 +14,7 @@ import com.aero.andromeda.AppDrawerFragment;
 import com.aero.andromeda.AppListFragment;
 import com.aero.andromeda.MainActivity;
 import com.aero.andromeda.R;
+import com.aero.andromeda.managers.TilePopupMenuManager;
 import com.aero.andromeda.receivers.ScreenLockReceiver;
 import com.aero.andromeda.slideup.SlideUp;
 import com.aero.andromeda.slideup.SlideUpBuilder;
@@ -125,6 +126,7 @@ public class LockScreenAdapter
 	
 	public void lock()
 	{
+		TilePopupMenuManager.Current().CloseAllMenus();
 		this.slideUp.show();
 	}
 	
