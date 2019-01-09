@@ -61,7 +61,10 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".SettingsActivity" android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".EditTileActivity"></activity>
     </application>
 
 </manifest>

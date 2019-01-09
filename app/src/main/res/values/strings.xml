@@ -4,6 +4,13 @@
     <string name="notification_service_label">Andromeda Notification Service</string>
     <string name="test">Test</string>
 
+    <string name="edit">Edit</string>
+    <string name="editLowerCase">EDIT</string>
+
+    <string name="edit_tile">Edit Tile</string>
+    <string name="tile_color">Tile Color</string>
+    <string name="opacity">Opacity</string>
+
     <string name="pin_to_home">Pin to home</string>
     <string name="uninstall">Uninstall</string>
     <string name="info">Info</string>
@@ -37,4 +44,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="all_apps">All apps</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
