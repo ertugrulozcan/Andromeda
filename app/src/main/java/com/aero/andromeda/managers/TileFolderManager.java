@@ -31,6 +31,12 @@ public class TileFolderManager
 	private FolderTile openedFolderTile;
 	private Folder tileFolder;
 	
+	private boolean isFolderOpening = false;
+	private boolean isFolderClosing = false;
+	
+	private Object openFolderLock = new Object();
+	private Object closeFolderLock = new Object();
+	
 	private TileFolderManager()
 	{
 		this.folderAnimationManager = FolderAnimationManager.Init();
@@ -79,92 +85,126 @@ public class TileFolderManager
 	
 	synchronized private void OpenFolder(FolderTile folderTile)
 	{
-		if (folderTile == null)
-			return;
-		
-		try
+		synchronized (this.openFolderLock)
 		{
-			TilesAdapter mainTilesAdapter = ServiceLocator.Current().GetInstance(IAppService.class).getTilesAdapter();
+			if (folderTile == null || this.isFolderOpening)
+				return;
 			
-			this.openedFolderTile = folderTile;
-			this.tileFolder.SetParentTile(this.openedFolderTile);
+			this.isFolderOpening = true;
 			
-			int indexOfTile = mainTilesAdapter.getItemIndex(this.openedFolderTile);
-			mainTilesAdapter.InsertTile(this.tileFolder, indexOfTile + 1);
-			
-			FolderAnimationManager.Current.OpenFolder(folderTile, this.tileFolder, null);
-		}
-		catch (Exception ex)
-		{
-		
+			try
+			{
+				TilesAdapter mainTilesAdapter = ServiceLocator.Current().GetInstance(IAppService.class).getTilesAdapter();
+				
+				this.openedFolderTile = folderTile;
+				this.tileFolder.SetParentTile(this.openedFolderTile);
+				
+				int indexOfTile = mainTilesAdapter.getItemIndex(this.openedFolderTile);
+				mainTilesAdapter.InsertTile(this.tileFolder, indexOfTile + 1);
+				
+				this.folderAnimationManager.OpenFolder(folderTile, this.tileFolder, new AnimatorListenerAdapter()
+				{
+					@Override
+					public void onAnimationEnd(Animator animation)
+					{
+						super.onAnimationEnd(animation);
+						
+						synchronized (TileFolderManager.this.openFolderLock)
+						{
+							TileFolderManager.this.isFolderOpening = false;
+						}
+					}
+				});
+			}
+			catch (Exception ex)
+			{
+				this.isFolderOpening = false;
+			}
 		}
 	}
 	
 	synchronized public void CloseFolder()
 	{
-		try
+		synchronized (this.closeFolderLock)
 		{
-			if (!this.IsFolderOpened())
+			if (this.isFolderClosing)
 				return;
 			
-			// Start closing animation
-			FolderAnimationManager.Current.CloseFolder(this.openedFolderTile, this.tileFolder, new AnimatorListenerAdapter()
-			{
-				@Override
-				public void onAnimationEnd(Animator animation)
-				{
-					super.onAnimationEnd(animation);
-					
-					TileFolderManager.this.tileFolder.SetParentTile(null);
-					TileFolderManager.this.openedFolderTile = null;
-				}
-			});
+			this.isFolderClosing = true;
 			
-			// Remove closed tile
-			this.RemoveTileOnBackground(this.tileFolder);
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
+			try
+			{
+				if (!this.IsFolderOpened())
+					return;
+				
+				// Start closing animation
+				this.folderAnimationManager.CloseFolder(this.openedFolderTile, this.tileFolder, new AnimatorListenerAdapter()
+				{
+					@Override
+					public void onAnimationEnd(Animator animation)
+					{
+						super.onAnimationEnd(animation);
+						
+						TileFolderManager.this.tileFolder.SetParentTile(null);
+						TileFolderManager.this.openedFolderTile = null;
+						
+						synchronized (TileFolderManager.this.closeFolderLock)
+						{
+							TileFolderManager.this.isFolderClosing = false;
+						}
+					}
+				});
+				
+				// Remove closed tile
+				this.RemoveTileOnBackground(this.tileFolder);
+			}
+			catch (Exception ex)
+			{
+				this.isFolderClosing = false;
+				ex.printStackTrace();
+			}
 		}
 	}
 	
 	private void RemoveTileOnBackground(final Folder tileFolder)
 	{
-		final IAppService appService = ServiceLocator.Current().GetInstance(IAppService.class);
-		final MainActivity mainActivity = (MainActivity)appService.getMainContext();
-		final TilesAdapter mainTilesAdapter = appService.getTilesAdapter();
-		
-		final long delay = FolderAnimationManager.CLOSE_TILE_ANIMATION_DURATION - 50;
-		
-		Thread thread = new Thread()
+		synchronized (tileFolder)
 		{
-			@Override
-			public void run()
+			final IAppService appService = ServiceLocator.Current().GetInstance(IAppService.class);
+			final MainActivity mainActivity = (MainActivity)appService.getMainContext();
+			final TilesAdapter mainTilesAdapter = appService.getTilesAdapter();
+			
+			final long delay = FolderAnimationManager.CLOSE_TILE_ANIMATION_DURATION - 50;
+			
+			Thread thread = new Thread()
 			{
-				try
+				@Override
+				public void run()
 				{
-					sleep(delay);
-					
-					mainActivity.runOnUiThread(
-							new Runnable()
-							{
-								@Override
-								public void run()
+					try
+					{
+						sleep(delay);
+						
+						mainActivity.runOnUiThread(
+								new Runnable()
 								{
-									int indexOfTile = mainTilesAdapter.getItemIndex(tileFolder);
-									mainTilesAdapter.RemoveTile(indexOfTile);
+									@Override
+									public void run()
+									{
+										int indexOfTile = mainTilesAdapter.getItemIndex(tileFolder);
+										mainTilesAdapter.RemoveTile(indexOfTile);
+									}
 								}
-							}
-					);
+						);
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
 				}
-				catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		};
-		
-		thread.start();
+			};
+			
+			thread.start();
+		}
 	}
 }

@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import static android.view.View.LAYER_TYPE_HARDWARE;
 import static android.view.View.LAYER_TYPE_NONE;
 
 public class WobbleAnimationManager
@@ -135,6 +136,7 @@ public class WobbleAnimationManager
 		{
 			ObjectAnimator animator = createBaseWobble(v);
 			animator.setFloatValues(-3, 3);
+			v.setLayerType(LAYER_TYPE_HARDWARE, null);
 			this.viewAnimatorDictionary.put(v, animator);
 		}
 		
@@ -148,6 +150,7 @@ public class WobbleAnimationManager
 		{
 			ObjectAnimator animator = createBaseWobble(v);
 			animator.setFloatValues(3, -3);
+			v.setLayerType(LAYER_TYPE_HARDWARE, null);
 			this.viewAnimatorDictionary.put(v, animator);
 		}
 		

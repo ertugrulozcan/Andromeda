@@ -56,7 +56,18 @@ public class FolderAnimationManager
 		final AnimatorSet tilesOpenAnimation = this.GenerateAnimationOpenFolderTiles(folder);
 		
 		if (thumbnailsOpenAnimation == null || tilesOpenAnimation == null)
+		{
+			if (afterOpened != null)
+			{
+				if (thumbnailsOpenAnimation != null)
+					afterOpened.onAnimationEnd(thumbnailsOpenAnimation);
+				
+				if (tilesOpenAnimation != null)
+					afterOpened.onAnimationEnd(tilesOpenAnimation);
+			}
+			
 			return;
+		}
 		
 		thumbnailsOpenAnimation.playSequentially(tilesOpenAnimation);
 		if (afterOpened != null)
@@ -67,21 +78,30 @@ public class FolderAnimationManager
 		thumbnailsOpenAnimation.start();
 	}
 	
-	public void CloseFolder(final FolderTile folderTile, final Folder folder, AnimatorListenerAdapter afterOpened)
+	public void CloseFolder(final FolderTile folderTile, final Folder folder, AnimatorListenerAdapter afterClosed)
 	{
 		final AnimatorSet tilesCloseAnimation = this.GenerateAnimationCloseFolderTiles(folder);
 		final AnimatorSet thumbnailsCloseAnimation = this.GenerateAnimationCloseFolderThumbnails(folderTile);
-		//final ValueAnimator folderHeightAnimation = this.GenerateFolderHeightAnimation(folder);
 		
 		if (tilesCloseAnimation == null || thumbnailsCloseAnimation == null)
+		{
+			if (afterClosed != null)
+			{
+				if (tilesCloseAnimation != null)
+					afterClosed.onAnimationEnd(tilesCloseAnimation);
+				
+				if (thumbnailsCloseAnimation != null)
+					afterClosed.onAnimationEnd(thumbnailsCloseAnimation);
+			}
+			
 			return;
+		}
 		
-		if (afterOpened != null)
-			tilesCloseAnimation.addListener(afterOpened);
+		if (afterClosed != null)
+			tilesCloseAnimation.addListener(afterClosed);
 		
 		tilesCloseAnimation.addListener(this.GenerateHardwareLayerCleanerAdaptor(folderTile, folder));
 		
-		//tilesCloseAnimation.playTogether(folderHeightAnimation);
 		tilesCloseAnimation.playSequentially(thumbnailsCloseAnimation);
 		tilesCloseAnimation.start();
 	}
@@ -231,43 +251,6 @@ public class FolderAnimationManager
 		
 		ObjectAnimator anim = ObjectAnimator.ofFloat(view, "alpha", startValue, endValue);
 		anim.setInterpolator(new TileOpacityInterpolator(inverse));
-		anim.setDuration(duration);
-		
-		return anim;
-	}
-	
-	private ValueAnimator GenerateFolderHeightAnimation(Folder folder)
-	{
-		if (folder == null)
-			return null;
-		
-		BaseTileViewHolder folderViewHolder = folder.getParentViewHolder();
-		if (folderViewHolder == null)
-			return null;
-		
-		final View folderView = folderViewHolder.getItemView();
-		if (folderView == null)
-			return null;
-		
-		List<View> tileViews = this.GetTileViewList(folder);
-		if (tileViews.size() == 0)
-			return null;
-		
-		final long duration = CLOSE_TILE_ANIMATION_DELAY * (tileViews.size() + 1);
-		
-		ValueAnimator anim = ValueAnimator.ofInt(folderView.getMeasuredHeight(), -100);
-		anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener()
-		{
-			@Override
-			public void onAnimationUpdate(ValueAnimator valueAnimator)
-			{
-				int val = (Integer) valueAnimator.getAnimatedValue();
-				ViewGroup.LayoutParams layoutParams = folderView.getLayoutParams();
-				layoutParams.height = val;
-				folderView.setLayoutParams(layoutParams);
-			}
-		});
-		
 		anim.setDuration(duration);
 		
 		return anim;
