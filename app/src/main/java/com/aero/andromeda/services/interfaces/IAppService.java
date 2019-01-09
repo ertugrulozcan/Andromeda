@@ -30,6 +30,8 @@ public interface IAppService
 	
 	List<IAppMenuItem> getMenuItemList();
 	
+	TileBase getTile(long id);
+	
 	List<TileBase> getTileList();
 	
 	AppListAdapter getAppListAdapter();

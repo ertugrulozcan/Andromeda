@@ -190,6 +190,17 @@ public class AppService implements IAppService
 		return this.tilesAdapter;
 	}
 	
+	public TileBase getTile(long id)
+	{
+		for (TileBase tile : this.tileList)
+		{
+			if (tile.getId() == id)
+				return tile;
+		}
+		
+		return null;
+	}
+	
 	public List<TileBase> getTileList()
 	{
 		return tileList;
