@@ -38,7 +38,7 @@ public class FolderTile extends Tile
 		if (holder instanceof FolderTileViewHolder)
 		{
 			FolderTileViewHolder folderTileViewHolder = (FolderTileViewHolder)holder;
-			TileFolderManager.Current.OnClickFolderTile(this);
+			TileFolderManager.Current.OnClickFolderTileAsync(this);
 		}
 	}
 	

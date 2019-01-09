@@ -67,6 +67,12 @@ public class TileFolderManager
 		this.folderTilesAdapter.notifyDataSetChanged();
 	}
 	
+	public void OnClickFolderTileAsync(FolderTile folderTile)
+	{
+		FolderAnimationTask task = new FolderAnimationTask(this);
+		task.execute(folderTile);
+	}
+	
 	public void OnClickFolderTile(FolderTile folderTile)
 	{
 		if (!this.IsFolderOpened())
