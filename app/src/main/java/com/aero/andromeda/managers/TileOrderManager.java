@@ -5,6 +5,7 @@ import com.aero.andromeda.AppDrawerFragment;
 import com.aero.andromeda.MainActivity;
 import com.aero.andromeda.adapters.TilesAdapter;
 import com.aero.andromeda.animations.TileAnimationManager;
+import com.aero.andromeda.animations.WobbleAnimationManager;
 import com.aero.andromeda.services.ServiceLocator;
 import com.aero.andromeda.services.interfaces.IAppService;
 import com.aero.andromeda.ui.BaseTileViewHolder;
