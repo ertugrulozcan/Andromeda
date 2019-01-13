@@ -6,6 +6,7 @@ import android.animation.TimeInterpolator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.view.View;
 
 import com.aero.andromeda.R;
@@ -13,6 +14,7 @@ import com.aero.andromeda.adapters.TilesAdapter;
 import com.aero.andromeda.animations.tileanimations.FlipAnimation;
 import com.aero.andromeda.animations.tileanimations.ITileAnimation;
 import com.aero.andromeda.models.tiles.FakeTile;
+import com.aero.andromeda.models.tiles.FolderTile;
 import com.aero.andromeda.models.tiles.TileBase;
 import com.aero.andromeda.models.tiles.Folder;
 import com.aero.andromeda.services.interfaces.IAppService;
@@ -25,24 +27,29 @@ import java.util.TimerTask;
 public class TileAnimationManager
 {
 	private final IAppService appService;
-	private final AnimationTask animationTask;
+	private AnimationTask animationTask;
 	
 	private final Class[] AnimationTypes = { FlipAnimation.class };
 	
 	public TileAnimationManager(IAppService appService)
 	{
 		this.appService = appService;
-		this.animationTask = new AnimationTask();
 	}
 	
 	public void Start()
 	{
-		this.animationTask.Start();
+		this.Stop();
+		
+		this.animationTask = new AnimationTask();
+		this.animationTask.execute();
 	}
 	
 	public void Stop()
 	{
-		this.animationTask.Stop();
+		if (this.animationTask != null)
+			this.animationTask.Stop();
+		
+		this.animationTask = null;
 	}
 	
 	private ITileAnimation GenerateTileAnimation(int no)
@@ -55,7 +62,7 @@ public class TileAnimationManager
 		return null;
 	}
 	
-	class AnimationTask
+	class AnimationTask extends AsyncTask<Void, Void, Void>
 	{
 		private Timer timer;
 		
@@ -63,7 +70,7 @@ public class TileAnimationManager
 		private ITileAnimation tileAnimation2;
 		private ITileAnimation tileAnimation3;
 		
-		public void Start()
+		private void Start()
 		{
 			this.Stop();
 			
@@ -71,7 +78,7 @@ public class TileAnimationManager
 			timer.schedule(new AnimationTimer(), 100, 3600);
 		}
 		
-		public void Stop()
+		private void Stop()
 		{
 			if (tileAnimation1 != null)
 				tileAnimation1.Stop();
@@ -90,6 +97,34 @@ public class TileAnimationManager
 				this.timer.cancel();
 			
 			this.timer = null;
+			
+			this.cancel(true);
+		}
+		
+		@Override
+		protected Void doInBackground(Void... voids)
+		{
+			this.Start();
+			
+			return null;
+		}
+		
+		@Override
+		protected void onPreExecute()
+		{
+			super.onPreExecute();
+		}
+		
+		@Override
+		protected void onPostExecute(Void param)
+		{
+			super.onPostExecute(param);
+		}
+		
+		@Override
+		protected void onCancelled(Void param)
+		{
+			super.onCancelled(param);
 		}
 		
 		class AnimationTimer extends TimerTask
