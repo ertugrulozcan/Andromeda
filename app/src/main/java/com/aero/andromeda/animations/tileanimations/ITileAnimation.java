@@ -6,6 +6,8 @@ public interface ITileAnimation
 {
 	boolean IsEnabled();
 	
+	void Start(TileBase tile, int delay);
+	
 	void Start(TileBase tile);
 	
 	void Stop();

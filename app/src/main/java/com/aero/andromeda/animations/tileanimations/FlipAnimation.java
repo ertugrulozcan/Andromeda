@@ -55,9 +55,15 @@ public class FlipAnimation implements ITileAnimation
 	@Override
 	public void Start(TileBase tile)
 	{
+		Start(tile, 0);
+	}
+	
+	@Override
+	public void Start(TileBase tile, int delay)
+	{
 		this.Load();
 		this.isEnabled = true;
-		this.Animate(tile);
+		this.Animate(tile, delay);
 	}
 	
 	@Override
@@ -87,7 +93,7 @@ public class FlipAnimation implements ITileAnimation
 		this.tileFlipAnimation = null;
 	}
 	
-	private void Animate(final TileBase tile)
+	private void Animate(final TileBase tile, int delay)
 	{
 		if (tile == null)
 			return;
@@ -112,6 +118,8 @@ public class FlipAnimation implements ITileAnimation
 		
 		if (this.parentContext == null || !(this.parentContext instanceof Activity))
 			return;
+		
+		this.tileFlipAnimation.setStartDelay(delay);
 		
 		Activity activity = (Activity) this.parentContext;
 		

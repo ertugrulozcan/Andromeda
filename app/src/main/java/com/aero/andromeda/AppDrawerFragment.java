@@ -61,6 +61,7 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
+		IAppService appService = ServiceLocator.Current().GetInstance(IAppService.class);
 		ISettingsService settingsService = ServiceLocator.Current().GetInstance(ISettingsService.class);
 		UISettings uiSettings = settingsService.getUISettings();
 		
@@ -70,8 +71,6 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 		this.gridLayoutManager.setItemOrderIsStable(true);
 		
 		// GridLayoutManager gridLayoutManager = new GridLayoutManager(this.getActivity(), 6, GridLayoutManager.VERTICAL, false);
-		
-		IAppService appService = ServiceLocator.Current().GetInstance(IAppService.class);
 		this.tilesAdapter = appService.getTilesAdapter();
 		
 		this.recyclerView = view.findViewById(R.id.recycler_view);
@@ -83,7 +82,7 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 		this.itemTouchHelper.attachToRecyclerView(recyclerView);
 		this.tilesAdapter.setDragStartListener(this);
 		
-		this.tileAnimationManager = new TileAnimationManager(this.getActivity(), this.tilesAdapter);
+		this.tileAnimationManager = new TileAnimationManager(appService);
 		ServiceLocator.Current().RegisterInstance(this.tileAnimationManager);
 		this.tileAnimationManager.Start();
 		

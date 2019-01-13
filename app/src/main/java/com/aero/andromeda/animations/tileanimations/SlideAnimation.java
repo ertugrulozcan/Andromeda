@@ -11,6 +11,12 @@ public class SlideAnimation implements ITileAnimation
 	}
 	
 	@Override
+	public void Start(TileBase tile, int delay)
+	{
+	
+	}
+	
+	@Override
 	public void Start(TileBase tile)
 	{
 	
