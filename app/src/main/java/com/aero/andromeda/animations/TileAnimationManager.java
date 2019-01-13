@@ -1,4 +1,4 @@
-package com.aero.andromeda.managers;
+package com.aero.andromeda.animations;
 
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
@@ -30,7 +30,7 @@ public class TileAnimationManager
 	
 	private AnimatorSet tileFlipAnimation = null;
 	private AnimatorSet tileFlipAnimation1, tileFlipAnimation2, tileFlipAnimation3;
-	private TileFlipInterpolator tileFlipInterpolator;
+	private com.aero.andromeda.animations.TileAnimationManager.TileFlipInterpolator tileFlipInterpolator;
 	
 	public TileAnimationManager(Context context, TilesAdapter tilesAdapter)
 	{
@@ -38,7 +38,7 @@ public class TileAnimationManager
 		this.tilesAdapter = tilesAdapter;
 		
 		this.timer = new Timer();
-		this.tileFlipInterpolator = new TileFlipInterpolator();
+		this.tileFlipInterpolator = new com.aero.andromeda.animations.TileAnimationManager.TileFlipInterpolator();
 	}
 	
 	@SuppressLint("ResourceType")
@@ -52,7 +52,7 @@ public class TileAnimationManager
 		tileFlipAnimation3.setStartDelay(tileFlipAnimation3.getStartDelay() + 2000);
 		
 		timer = new Timer();
-		timer.schedule(new TileAnimationManager.AnimationTask(), 100, 3600);
+		timer.schedule(new com.aero.andromeda.animations.TileAnimationManager.AnimationTask(), 100, 3600);
 	}
 	
 	private void UnloadAnimations()

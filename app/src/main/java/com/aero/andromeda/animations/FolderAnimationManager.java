@@ -1,4 +1,4 @@
-package com.aero.andromeda.managers;
+package com.aero.andromeda.animations;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -25,16 +25,16 @@ import java.util.List;
 
 public class FolderAnimationManager
 {
-	public static FolderAnimationManager Current;
+	public static com.aero.andromeda.animations.FolderAnimationManager Current;
 	
 	private FolderAnimationManager()
 	{
 		Current = this;
 	}
 	
-	public static FolderAnimationManager Init()
+	public static com.aero.andromeda.animations.FolderAnimationManager Init()
 	{
-		return new FolderAnimationManager();
+		return new com.aero.andromeda.animations.FolderAnimationManager();
 	}
 	
 	public static final long OPEN_THUMBNAIL_ANIMATION_DELAY = 90;
@@ -250,7 +250,7 @@ public class FolderAnimationManager
 		}
 		
 		ObjectAnimator anim = ObjectAnimator.ofFloat(view, "alpha", startValue, endValue);
-		anim.setInterpolator(new TileOpacityInterpolator(inverse));
+		anim.setInterpolator(new com.aero.andromeda.animations.FolderAnimationManager.TileOpacityInterpolator(inverse));
 		anim.setDuration(duration);
 		
 		return anim;
@@ -306,8 +306,8 @@ public class FolderAnimationManager
 			{
 				super.onAnimationEnd(animation);
 				
-				FolderAnimationManager.this.ClearHardwareLayerFrames(folderTile);
-				FolderAnimationManager.this.ClearHardwareLayerFrames(folder);
+				com.aero.andromeda.animations.FolderAnimationManager.this.ClearHardwareLayerFrames(folderTile);
+				com.aero.andromeda.animations.FolderAnimationManager.this.ClearHardwareLayerFrames(folder);
 			}
 		};
 		

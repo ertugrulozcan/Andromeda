@@ -1,4 +1,4 @@
-package com.aero.andromeda.managers;
+package com.aero.andromeda.animations;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -27,12 +27,12 @@ public class WobbleAnimationManager extends AsyncTask<View, Void, View>
 {
 	private TilesAdapter tilesAdapter;
 	
-	private static WobbleAnimationManager self;
+	private static com.aero.andromeda.animations.WobbleAnimationManager self;
 	
-	public static WobbleAnimationManager Current(TilesAdapter tilesAdapter)
+	public static com.aero.andromeda.animations.WobbleAnimationManager Current(TilesAdapter tilesAdapter)
 	{
 		if (self == null)
-			self = new WobbleAnimationManager(tilesAdapter);
+			self = new com.aero.andromeda.animations.WobbleAnimationManager(tilesAdapter);
 		
 		return self;
 	}
@@ -121,13 +121,13 @@ public class WobbleAnimationManager extends AsyncTask<View, Void, View>
 			TileBase tile = this.tilesAdapter.getItem(i);
 			
 			if (tile == null ||
-				tile instanceof Folder ||
-				tile instanceof FolderTile ||
-				tile instanceof FakeTile ||
-				tile.getTileType() == TileBase.TileType.TilesHeader ||
-				tile.getTileType() == TileBase.TileType.TilesFooter ||
-				tile.getTileType() == TileBase.TileType.FolderTile ||
-				tile.getTileType() == TileBase.TileType.Folder)
+					tile instanceof Folder ||
+					tile instanceof FolderTile ||
+					tile instanceof FakeTile ||
+					tile.getTileType() == TileBase.TileType.TilesHeader ||
+					tile.getTileType() == TileBase.TileType.TilesFooter ||
+					tile.getTileType() == TileBase.TileType.FolderTile ||
+					tile.getTileType() == TileBase.TileType.Folder)
 				continue;
 			
 			View v = getChildAt(i);
@@ -226,3 +226,4 @@ public class WobbleAnimationManager extends AsyncTask<View, Void, View>
 		return animator;
 	}
 }
+

@@ -3,10 +3,11 @@ package com.aero.andromeda.managers;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.support.v7.widget.RecyclerView;
-import android.view.Choreographer;
 
 import com.aero.andromeda.MainActivity;
 import com.aero.andromeda.adapters.TilesAdapter;
+import com.aero.andromeda.animations.FolderAnimationManager;
+import com.aero.andromeda.animations.FolderAnimationTask;
 import com.aero.andromeda.models.tiles.FolderTile;
 import com.aero.andromeda.models.tiles.Folder;
 import com.aero.andromeda.models.tiles.TileBase;

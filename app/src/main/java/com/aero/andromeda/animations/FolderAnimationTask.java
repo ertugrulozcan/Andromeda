@@ -1,7 +1,8 @@
-package com.aero.andromeda.managers;
+package com.aero.andromeda.animations;
 
 import android.os.AsyncTask;
 
+import com.aero.andromeda.managers.TileFolderManager;
 import com.aero.andromeda.models.tiles.FolderTile;
 
 public class FolderAnimationTask extends AsyncTask<FolderTile, Integer, FolderTile>
@@ -44,3 +45,4 @@ public class FolderAnimationTask extends AsyncTask<FolderTile, Integer, FolderTi
 		super.onCancelled(folderTile);
 	}
 }
+
