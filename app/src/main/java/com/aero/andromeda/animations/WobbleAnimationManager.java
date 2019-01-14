@@ -23,9 +23,10 @@ import java.util.List;
 import static android.view.View.LAYER_TYPE_HARDWARE;
 import static android.view.View.LAYER_TYPE_NONE;
 
-public class WobbleAnimationManager extends AsyncTask<View, Void, View>
+public class WobbleAnimationManager
 {
 	private TilesAdapter tilesAdapter;
+	private WobbleAnimationTask animationTask;
 	
 	private static com.aero.andromeda.animations.WobbleAnimationManager self;
 	
@@ -44,52 +45,26 @@ public class WobbleAnimationManager extends AsyncTask<View, Void, View>
 	
 	private HashMap<View, ObjectAnimator> viewAnimatorDictionary = new HashMap<>();
 	
-	
-	@Override
-	protected void onPreExecute()
+	public void Start()
 	{
-		super.onPreExecute();
-	}
-	
-	@Override
-	protected View doInBackground(View... params)
-	{
-		View view = null;
-		if (params != null && params.length > 0)
-		{
-			view = params[0];
-		}
+		this.Stop(null);
 		
-		return view;
+		this.animationTask = new WobbleAnimationTask();
+		this.animationTask.execute();
 	}
 	
-	public void stop(View view)
+	public void Stop(View view)
 	{
 		if (view == null)
 			this.stopWobble(true);
 		else
 			this.stopWobble(view);
 		
-		this.cancel(true);
-	}
-	
-	@Override
-	protected void onPostExecute(View view)
-	{
-		super.onPostExecute(view);
+		if (this.animationTask != null)
+			this.animationTask.cancel(true);
 		
-		if (view == null)
-			this.startWobble();
-		else
-			this.startWobble(view);
+		this.animationTask = null;
 	}
-	
-	@Override
-	protected void onCancelled(View view)
-	{
-		super.onCancelled(view);
-	}
-	
 	
 	private int getChildCount()
 	{
@@ -224,6 +199,44 @@ public class WobbleAnimationManager extends AsyncTask<View, Void, View>
 		});
 		
 		return animator;
+	}
+	
+	class WobbleAnimationTask extends AsyncTask<View, Void, View>
+	{
+		@Override
+		protected void onPreExecute()
+		{
+			super.onPreExecute();
+		}
+		
+		@Override
+		protected View doInBackground(View... params)
+		{
+			View view = null;
+			if (params != null && params.length > 0)
+			{
+				view = params[0];
+			}
+			
+			return view;
+		}
+		
+		@Override
+		protected void onPostExecute(View view)
+		{
+			super.onPostExecute(view);
+			
+			if (view == null)
+				startWobble();
+			else
+				startWobble(view);
+		}
+		
+		@Override
+		protected void onCancelled(View view)
+		{
+			super.onCancelled(view);
+		}
 	}
 }
 

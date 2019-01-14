@@ -52,7 +52,7 @@ public class TileOrderManager
 		
 		this.tileAnimationManager.Stop();
 		//WobbleAnimationManager.Current(this.tilesAdapter).startWobble();
-		WobbleAnimationManager.Current(this.tilesAdapter).execute();
+		WobbleAnimationManager.Current(this.tilesAdapter).Start();
 		
 		this.SelectTile(selectedViewHolder);
 		
@@ -73,7 +73,7 @@ public class TileOrderManager
 		this.appDrawerFragment.RefreshLayout(false);
 		
 		//WobbleAnimationManager.Current(this.tilesAdapter).stopWobble(true);
-		WobbleAnimationManager.Current(this.tilesAdapter).stop(null);
+		WobbleAnimationManager.Current(this.tilesAdapter).Stop(null);
 		this.tileAnimationManager.Start();
 	}
 	
