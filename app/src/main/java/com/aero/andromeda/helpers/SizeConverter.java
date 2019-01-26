@@ -132,4 +132,12 @@ public class SizeConverter
 	{
 		return (int)(70 * this.GetTileSizeProportion());
 	}
+	
+	public float GetDefaultFontSize()
+	{
+		if (this.LAYOUT_WIDTH == 6)
+			return 16;
+		else
+			return 11;
+	}
 }
