@@ -35,9 +35,7 @@ public class FlipAnimation implements ITileAnimation
 	private Context parentContext;
 	
 	private boolean isEnabled;
-	
 	private AnimatorSet tileFlipAnimation = null;
-	
 	private TileFlipInterpolator tileFlipInterpolator;
 	
 	public FlipAnimation(Context context)
@@ -55,7 +53,7 @@ public class FlipAnimation implements ITileAnimation
 	@Override
 	public void Start(TileBase tile)
 	{
-		Start(tile, 0);
+		this.Start(tile, 0);
 	}
 	
 	@Override

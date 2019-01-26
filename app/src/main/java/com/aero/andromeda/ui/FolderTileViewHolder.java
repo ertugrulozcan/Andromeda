@@ -98,6 +98,12 @@ public class FolderTileViewHolder extends BaseTileViewHolder
 		}
 	}
 	
+	@Override
+	protected void setSecondViewProperties(TileBase tile)
+	{
+	
+	}
+	
 	public List<View> getSubTileViewList()
 	{
 		return subTileViewList;

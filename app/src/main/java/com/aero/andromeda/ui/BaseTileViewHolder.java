@@ -44,6 +44,7 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 	protected FrameLayout tileInnerBox;
 	protected FrameLayout tileContentLayout;
 	protected FrameLayout tileBackgroundCover;
+	protected FrameLayout tileSecondViewLayout;
 	protected RelativeLayout tileCountBadge;
 	protected TextView tileCountBadgeTextView;
 	protected ImageButton tileMenuButton;
@@ -61,6 +62,7 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		this.tileInnerBox = itemView.findViewById(R.id.tileInnerBox);
 		this.tileContentLayout = itemView.findViewById(R.id.tileContentLayout);
 		this.tileBackgroundCover = itemView.findViewById(R.id.tileBackgroundCover);
+		this.tileSecondViewLayout = itemView.findViewById(R.id.tileSecondViewLayout);
 		this.tileCountBadge = itemView.findViewById(R.id.tileCountBadge);
 		this.tileCountBadgeTextView = itemView.findViewById(R.id.tileCountBadgeTextView);
 		this.tileMenuButton = itemView.findViewById(R.id.tileMenuButton);
@@ -106,6 +108,8 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 	
 	protected abstract void setLayoutProperties(final TileBase tile);
 	
+	protected abstract void setSecondViewProperties(final TileBase tile);
+	
 	public void bindViewHolder(final TileBase tile, int index, final OnStartDragListener dragStartListener)
 	{
 		this.bindedTile = tile;
@@ -113,6 +117,12 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		
 		if (this.tileInnerBox != null)
 			this.tileInnerBox.setBackground(tile.getTileColor());
+		
+		if (this.tileSecondViewLayout != null)
+		{
+			this.tileSecondViewLayout.setTranslationY(SizeConverter.Current.GetTileHeight(tile.getTileSize()));
+			this.setSecondViewProperties(tile);
+		}
 		
 		this.setLayoutProperties(tile);
 		this.setTileSizes(tile);

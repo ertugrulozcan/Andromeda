@@ -63,7 +63,7 @@ public class Colors
 	{
 		try
 		{
-			String hexColor = String.format("#55%06X", (0xFFFFFF & drawable.getColor()));
+			String hexColor = String.format("#FF%06X", (0xFFFFFF & drawable.getColor()));
 			
 			return rgb(hexColor);
 		}

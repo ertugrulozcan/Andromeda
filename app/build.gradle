@@ -32,9 +32,9 @@ dependencies {
     implementation 'com.android.support:design:28.0.0'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'at.favre.lib:dali:0.3.5'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    testİmplementation 'junit:junit:4.12'
+    androidTestİmplementation 'com.android.support.test:runner:1.0.2'
+    androidTestİmplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "com.github.skydoves:powermenu:2.0.5"
     implementation('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.11.0@aar') {

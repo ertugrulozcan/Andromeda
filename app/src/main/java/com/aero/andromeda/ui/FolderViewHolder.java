@@ -57,6 +57,12 @@ public class FolderViewHolder extends BaseTileViewHolder
 		this.tileLabel.setText(tile.getCaption());
 	}
 	
+	@Override
+	protected void setSecondViewProperties(TileBase tile)
+	{
+	
+	}
+	
 	public RecyclerView getRecyclerView()
 	{
 		return recyclerView;

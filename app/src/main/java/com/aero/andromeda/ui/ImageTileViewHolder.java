@@ -17,4 +17,10 @@ public class ImageTileViewHolder extends BaseTileViewHolder
 	{
 	
 	}
+	
+	@Override
+	protected void setSecondViewProperties(TileBase tile)
+	{
+	
+	}
 }

@@ -13,23 +13,30 @@ import com.aero.andromeda.R;
 import com.aero.andromeda.adapters.TilesAdapter;
 import com.aero.andromeda.animations.tileanimations.FlipAnimation;
 import com.aero.andromeda.animations.tileanimations.ITileAnimation;
+import com.aero.andromeda.animations.tileanimations.SlideAnimation;
+import com.aero.andromeda.models.NotificationInfo;
 import com.aero.andromeda.models.tiles.FakeTile;
 import com.aero.andromeda.models.tiles.FolderTile;
 import com.aero.andromeda.models.tiles.TileBase;
 import com.aero.andromeda.models.tiles.Folder;
+import com.aero.andromeda.services.ServiceLocator;
 import com.aero.andromeda.services.interfaces.IAppService;
+import com.aero.andromeda.services.interfaces.INotificationService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class TileAnimationManager
 {
 	private final IAppService appService;
 	private AnimationTask animationTask;
 	
-	private final Class[] AnimationTypes = { FlipAnimation.class };
+	private final Class[] AnimationTypes = { FlipAnimation.class, SlideAnimation.class};
 	
 	public TileAnimationManager(IAppService appService)
 	{
@@ -52,14 +59,28 @@ public class TileAnimationManager
 		this.animationTask = null;
 	}
 	
-	private ITileAnimation GenerateTileAnimation(int no)
+	private ITileAnimation GenerateTileAnimation(TileBase tile, int no)
 	{
 		switch (no)
 		{
-			case 0: return new FlipAnimation(appService.getMainContext());
+			case 0:
+			default:
+				return new FlipAnimation(appService.getMainContext());
+			case 1:
+			case 2:
+			case 3:
+			{
+				if (tile.getTileSize() == TileBase.TileSize.Small)
+					return new FlipAnimation(appService.getMainContext());
+				
+				INotificationService notificationService = ServiceLocator.Current().GetInstance(INotificationService.class);
+				NotificationInfo notificationInfo = notificationService.GetNotificationInfo(tile);
+				if (notificationInfo == null)
+					return new FlipAnimation(appService.getMainContext());
+				
+				return new SlideAnimation(appService.getMainContext());
+			}
 		}
-		
-		return null;
 	}
 	
 	class AnimationTask extends AsyncTask<Void, Void, Void>
@@ -75,7 +96,7 @@ public class TileAnimationManager
 			this.Stop();
 			
 			this.timer = new Timer();
-			timer.schedule(new AnimationTimer(), 100, 3600);
+			timer.schedule(new AnimationTimer(), 100, 5400);
 		}
 		
 		private void Stop()
@@ -141,15 +162,15 @@ public class TileAnimationManager
 						
 						int rand1 = this.GenerateRandomIndex(random, tiles.size() - 1, -1);
 						final TileBase tile1 = tiles.get(rand1);
-						tileAnimation1 = GenerateTileAnimation(random.nextInt(AnimationTypes.length));
+						tileAnimation1 = GenerateTileAnimation(tile1, random.nextInt(AnimationTypes.length + 2));
 						
 						int rand2 = this.GenerateRandomIndex(random, tiles.size() - 1, rand1);
 						final TileBase tile2 = tiles.get(rand2);
-						tileAnimation2 = GenerateTileAnimation(random.nextInt(AnimationTypes.length));
+						tileAnimation2 = GenerateTileAnimation(tile2, random.nextInt(AnimationTypes.length + 2));
 						
 						int rand3 = this.GenerateRandomIndex(random, tiles.size() - 1, rand2);
 						final TileBase tile3 = tiles.get(rand3);
-						tileAnimation3 = GenerateTileAnimation(random.nextInt(AnimationTypes.length));
+						tileAnimation3 = GenerateTileAnimation(tile3, random.nextInt(AnimationTypes.length + 2));
 						
 						tileAnimation1.Start(tile1);
 						tileAnimation2.Start(tile2, 1000);
@@ -162,12 +183,21 @@ public class TileAnimationManager
 				}
 			}
 			
+			private Queue<Integer> lastUsingIndexes = new ConcurrentLinkedQueue<>();
+			
 			private int GenerateRandomIndex(Random random, int bound, int ignore)
 			{
 				int rand;
 				
 				do { rand = random.nextInt(bound); }
-				while (rand == ignore);
+				while (rand == ignore || lastUsingIndexes.contains(rand));
+				
+				if (lastUsingIndexes.size() > 4)
+				{
+					lastUsingIndexes.poll();
+				}
+				
+				lastUsingIndexes.add(rand);
 				
 				return rand;
 			}

@@ -16,6 +16,8 @@ public interface IAppService
 {
 	AppLoader GetAppLoader();
 	
+	AppModel GetAppModel(String packageName);
+	
 	void StartApplication(AppModel appModel);
 	
 	void UninstallPackage(AppMenuItem appMenuItem);

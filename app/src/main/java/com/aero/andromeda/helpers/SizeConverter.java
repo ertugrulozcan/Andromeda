@@ -72,6 +72,22 @@ public class SizeConverter
 		}
 	}
 	
+	public int GetTileHeight(TileBase.TileSize tileSize)
+	{
+		switch (tileSize)
+		{
+			default:
+			case Small:
+				return GetTileWidth(TileBase.TileSize.Small);
+			case Medium:
+				return GetTileWidth(TileBase.TileSize.Medium);
+			case MediumWide:
+				return GetTileWidth(TileBase.TileSize.Medium);
+			case Large:
+				return GetTileWidth(TileBase.TileSize.Large);
+		}
+	}
+	
 	public int GetTileMargin()
 	{
 		return this.GetDeviceResolution().widthPixels * TILE_MARGIN / SCREEN_WIDTH;

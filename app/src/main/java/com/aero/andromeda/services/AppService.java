@@ -34,8 +34,6 @@ public class AppService implements IAppService
 	private final Context mainContext;
 	private final AppLoader appLoader;
 	
-	private INotificationService notificationService;
-	
 	private TilesAdapter tilesAdapter;
 	private AppListAdapter appListAdapter;
 	
@@ -60,9 +58,6 @@ public class AppService implements IAppService
 		
 		this.tileList = this.tileListManager.GetTileList();
 		this.tilesAdapter = new TilesAdapter(this.tileList, true, true);
-		
-		this.notificationService = new NotificationService();
-		ServiceLocator.Current().RegisterInstance(this.notificationService);
 	}
 	
 	public void StartApplication(AppModel appModel)
@@ -421,6 +416,17 @@ public class AppService implements IAppService
 		{
 			if (this.appModelList.get(i).getApplicationPackageName().equals(packageName))
 				return this.appModelList.get(i);
+		}
+		
+		return null;
+	}
+	
+	public AppModel GetAppModel(String packageName)
+	{
+		for (AppModel appModel : this.appModelList)
+		{
+			if (appModel.getApplicationPackageName().equals(packageName))
+				return appModel;
 		}
 		
 		return null;

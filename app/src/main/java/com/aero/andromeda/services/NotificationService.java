@@ -14,12 +14,23 @@ import android.text.TextUtils;
 import com.aero.andromeda.MainActivity;
 import com.aero.andromeda.R;
 import com.aero.andromeda.helpers.Colors;
+import com.aero.andromeda.models.AppModel;
+import com.aero.andromeda.models.NotificationInfo;
+import com.aero.andromeda.models.tiles.TileBase;
+import com.aero.andromeda.services.interfaces.IAppService;
 import com.aero.andromeda.services.interfaces.INotificationService;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class NotificationService extends NotificationListenerService implements INotificationService
 {
 	private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
 	private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
+	
+	private HashMap<AppModel, NotificationInfo> NotificationInfoDict;
 	
 	private static final class ApplicationPackageNames
 	{
@@ -43,6 +54,9 @@ public class NotificationService extends NotificationListenerService implements 
 	public NotificationService()
 	{
 		this.parentContext = ServiceLocator.Current().GetInstance(MainActivity.class);
+		this.NotificationInfoDict = new LinkedHashMap<>();
+		
+		this.PopulateMockNotificationInfos();
 		
 		if (!isNotificationServiceEnabled())
 		{
@@ -51,6 +65,52 @@ public class NotificationService extends NotificationListenerService implements 
 		}
 		
 		StatusBarNotification[] activeNotifications = this.getActiveNotifications();
+	}
+	
+	private void PopulateMockNotificationInfos()
+	{
+		IAppService appService = ServiceLocator.Current().GetInstance(IAppService.class);
+		HashMap<String, NotificationInfo> mockNotificationInfos = new LinkedHashMap<>();
+		
+		mockNotificationInfos.put("com.android.contacts", new NotificationInfo("2 cevapsız arama", "İsmet Acar Doğan"));
+		mockNotificationInfos.put("com.google.android.gm", new NotificationInfo("4 okunmamış e-posta", "Yaz Dönemi Ders Programı - Yaz dönemi ders programı ve ..."));
+		mockNotificationInfos.put("com.microsoft.office.outlook", new NotificationInfo("Microsoft Store", "Join now! Developer Hackaton '19"));
+		mockNotificationInfos.put("com.whatsapp", new NotificationInfo("3 okunmamış mesaj", "Mesajlar gizlendi."));
+		mockNotificationInfos.put("com.twitter.android", new NotificationInfo("Kaçırmış olabileceğin tweet'ler var", "Twitter"));
+		mockNotificationInfos.put("com.instagram.android", new NotificationInfo("", ""));
+		mockNotificationInfos.put("com.linkedin.android", new NotificationInfo("", ""));
+		mockNotificationInfos.put("com.spotify.music", new NotificationInfo("Son dinlenen", "Eagles, Hotel California - Live at the Los Angeles"));
+		mockNotificationInfos.put("com.google.android.youtube", new NotificationInfo("Google Asistan Artık Türkçe", "Sen iste Google Asistan yapsın, hayatın kolaylaşsın. Hemen keşfet!"));
+		mockNotificationInfos.put("com.android.vending", new NotificationInfo("12 güncelleme var", "Spotify, Chrome, Twitter, Instagram ve 8 uygulama daha"));
+		mockNotificationInfos.put("com.google.android.apps.maps", new NotificationInfo("Konum servisleri kapalı", "Anlık bildirimler için konum servislerini açınız"));
+		
+		List<String> packageNames = new ArrayList<String>(mockNotificationInfos.keySet());
+		for (int i = 0; i < packageNames.size(); i++)
+		{
+			String packageName = packageNames.get(i);
+			NotificationInfo notificationInfo = mockNotificationInfos.get(packageName);
+			
+			AppModel appModel = appService.GetAppModel(packageName);
+			if (appModel != null)
+			{
+				this.NotificationInfoDict.put(appModel, notificationInfo);
+			}
+		}
+	}
+	
+	public NotificationInfo GetNotificationInfo(TileBase tile)
+	{
+		if (tile == null)
+			return null;
+		
+		AppModel appModel = tile.getApplication();
+		if (appModel == null)
+			return null;
+		
+		if (this.NotificationInfoDict.containsKey(appModel))
+			return this.NotificationInfoDict.get(appModel);
+		
+		return null;
 	}
 	
 	private boolean isNotificationServiceEnabled()

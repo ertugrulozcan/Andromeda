@@ -17,4 +17,10 @@ public class LiveTileViewHolder extends BaseTileViewHolder
 	{
 	
 	}
+	
+	@Override
+	protected void setSecondViewProperties(TileBase tile)
+	{
+	
+	}
 }

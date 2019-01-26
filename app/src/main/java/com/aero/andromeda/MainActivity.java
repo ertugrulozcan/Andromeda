@@ -26,11 +26,13 @@ import com.aero.andromeda.managers.TilePopupMenuManager;
 import com.aero.andromeda.receivers.WallpaperChangedReceiver;
 import com.aero.andromeda.services.AppService;
 import com.aero.andromeda.services.BadgeIntentService;
+import com.aero.andromeda.services.NotificationService;
 import com.aero.andromeda.services.SearchService;
 import com.aero.andromeda.services.ServiceLocator;
 import com.aero.andromeda.services.SettingsService;
 import com.aero.andromeda.services.interfaces.IAppService;
 import com.aero.andromeda.services.interfaces.IBadgeIntentService;
+import com.aero.andromeda.services.interfaces.INotificationService;
 import com.aero.andromeda.services.interfaces.ISearchService;
 import com.aero.andromeda.services.interfaces.ISettingsService;
 
@@ -100,6 +102,9 @@ public class MainActivity extends FragmentActivity
 		
 		ISearchService searchService = new SearchService(appService);
 		ServiceLocator.Current().RegisterInstance(searchService);
+		
+		INotificationService notificationService = new NotificationService();
+		ServiceLocator.Current().RegisterInstance(notificationService);
 		
 		this.testFragment = TestFragment.newInstance();
 		this.appDrawerFragment = AppDrawerFragment.newInstance();
