@@ -1,11 +1,16 @@
 package com.aero.andromeda;
 
 import android.app.WallpaperManager;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -26,6 +31,7 @@ import com.aero.andromeda.managers.TilePopupMenuManager;
 import com.aero.andromeda.receivers.WallpaperChangedReceiver;
 import com.aero.andromeda.services.AppService;
 import com.aero.andromeda.services.BadgeIntentService;
+import com.aero.andromeda.services.NotificationListener;
 import com.aero.andromeda.services.NotificationService;
 import com.aero.andromeda.services.SearchService;
 import com.aero.andromeda.services.ServiceLocator;
@@ -52,6 +58,11 @@ public class MainActivity extends FragmentActivity
 	private FrameLayout baseLayout;
 	private FrameLayout baseLayoutCover;
 	private BlurDrawerLayout navigationDrawerLayout;
+	
+	private NotificationReceiver notificationReceiver;
+	private ServiceConnection notificationServiceConnection;
+	
+	private boolean isNeedRestart = false;
 	
 	public AppDrawerFragment getAppDrawerFragment()
 	{
@@ -103,23 +114,53 @@ public class MainActivity extends FragmentActivity
 		ISearchService searchService = new SearchService(appService);
 		ServiceLocator.Current().RegisterInstance(searchService);
 		
-		INotificationService notificationService = new NotificationService();
-		ServiceLocator.Current().RegisterInstance(notificationService);
+		this.ConnectToNotificationService();
 		
 		this.testFragment = TestFragment.newInstance();
-		this.appDrawerFragment = AppDrawerFragment.newInstance();
-		this.appListFragment = AppListFragment.newInstance();
+		this.appDrawerFragment = new AppDrawerFragment();
+		this.appListFragment = new AppListFragment();
 		
 		this.viewPagerAdapter = new ViewPagerAdapter(this);
 		this.lockScreenAdapter = new LockScreenAdapter(this);
+		
+		this.SetWallpaper();
+	}
+	
+	private void ConnectToNotificationService()
+	{
+		INotificationService notificationService = new NotificationService();
+		ServiceLocator.Current().RegisterInstance(notificationService);
+		
+		this.notificationServiceConnection = new ServiceConnection()
+		{
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service)
+			{
+				Log.d("NOTIF", "NLS Started");
+				NotificationListener.ServiceBinder binder = (NotificationListener.ServiceBinder)service;
+			}
+			
+			@Override
+			public void onServiceDisconnected(ComponentName name)
+			{
+				Log.d("NOTIF", "NLS Stopped");
+			}
+		};
+		
+		Intent intent = new Intent(this, NotificationService.class);
+		startService(intent);
+		bindService(intent, this.notificationServiceConnection, Context.BIND_AUTO_CREATE);
+		
+		this.notificationReceiver = new NotificationReceiver();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(NotificationService.NOTIFICATION_SERVICE_LISTENER_KEY);
+		registerReceiver(this.notificationReceiver, filter);
 	}
 	
 	@Override
 	protected void onStart()
 	{
 		super.onStart();
-		
-		this.SetWallpaper();
 		
 		this.viewPagerAdapter.SwipeToHome();
 	}
@@ -129,7 +170,21 @@ public class MainActivity extends FragmentActivity
 	{
 		super.onResume();
 		
-		this.appDrawerFragment.Enable();
+		if (this.isNeedRestart)
+		{
+			//this.recreate();
+			
+			this.getSupportFragmentManager()
+					.beginTransaction()
+					.detach(this.appDrawerFragment)
+					.attach(this.appDrawerFragment)
+					.commit();
+		}
+		else
+		{
+			if (!this.lockScreenAdapter.isLocked())
+				this.appDrawerFragment.Enable();
+		}
 	}
 	
 	@Override
@@ -167,6 +222,9 @@ public class MainActivity extends FragmentActivity
 		try
 		{
 			unregisterReceiver(this.lockScreenAdapter.getScreenStateReceiver());
+			unregisterReceiver(this.notificationReceiver);
+			unbindService(this.notificationServiceConnection);
+			this.notificationServiceConnection = null;
 		}
 		catch (Exception ex)
 		{
@@ -275,5 +333,19 @@ public class MainActivity extends FragmentActivity
 	public void UncoverDarkBackground()
 	{
 		this.baseLayoutCover.setVisibility(View.INVISIBLE);
+	}
+	
+	public void FlagAsNeedRestart()
+	{
+		this.isNeedRestart = true;
+	}
+	
+	class NotificationReceiver extends BroadcastReceiver
+	{
+		@Override
+		public void onReceive(Context context, Intent intent)
+		{
+			// String temp = intent.getStringExtra(NotificationService.NOTIFICATION_EVENT_INTENT_KEY) + "\n" + txtView.getText();
+		}
 	}
 }

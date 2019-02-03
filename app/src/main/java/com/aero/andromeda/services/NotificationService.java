@@ -1,104 +1,35 @@
 package com.aero.andromeda.services;
 
-import android.app.AlertDialog;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.IBinder;
-import android.provider.Settings;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.text.TextUtils;
 
-import com.aero.andromeda.MainActivity;
-import com.aero.andromeda.R;
-import com.aero.andromeda.helpers.Colors;
 import com.aero.andromeda.models.AppModel;
+import com.aero.andromeda.models.NotificationGroup;
 import com.aero.andromeda.models.NotificationInfo;
 import com.aero.andromeda.models.tiles.TileBase;
 import com.aero.andromeda.services.interfaces.IAppService;
 import com.aero.andromeda.services.interfaces.INotificationService;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 
-public class NotificationService extends NotificationListenerService implements INotificationService
+public class NotificationService implements INotificationService
 {
-	private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
-	private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
+	public static String NOTIFICATION_SERVICE_LISTENER_KEY = "com.aero.andromeda.services.TILE_NOTIFICATION_LISTENER_SERVICE";
+	public static String NOTIFICATION_INTENT_ACTION_KEY = "com.aero.andromeda.services.TILE_NOTIFICATION_LISTENER";
+	public static String NOTIFICATION_EVENT_INTENT_KEY = "notification_event";
+	public static String NOTIFICATION_COMMAND_KEY = "command";
+	public static String LIST_NOTIFICATIONS_KEY = "list";
+	public static String CLEAR_NOTIFICATIONS_KEY = "clearAll";
 	
-	private HashMap<AppModel, NotificationInfo> NotificationInfoDict;
-	
-	private static final class ApplicationPackageNames
-	{
-		public static final String FACEBOOK_PACK_NAME = "com.facebook.katana";
-		public static final String FACEBOOK_MESSENGER_PACK_NAME = "com.facebook.orca";
-		public static final String WHATSAPP_PACK_NAME = "com.whatsapp";
-		public static final String INSTAGRAM_PACK_NAME = "com.instagram.android";
-	}
-	
-	public static final class InterceptedNotificationCode
-	{
-		public static final int FACEBOOK_CODE = 1;
-		public static final int WHATSAPP_CODE = 2;
-		public static final int INSTAGRAM_CODE = 3;
-		public static final int OTHER_NOTIFICATIONS_CODE = 4; // We ignore all notification with code == 4
-	}
-	
-	private Context parentContext;
-	private AlertDialog enableNotificationListenerAlertDialog;
+	private HashMap<AppModel, NotificationGroup> NotificationGroups;
 	
 	public NotificationService()
 	{
-		this.parentContext = ServiceLocator.Current().GetInstance(MainActivity.class);
-		this.NotificationInfoDict = new LinkedHashMap<>();
-		
-		this.PopulateMockNotificationInfos();
-		
-		if (!isNotificationServiceEnabled())
-		{
-			enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog();
-			enableNotificationListenerAlertDialog.show();
-		}
-		
-		StatusBarNotification[] activeNotifications = this.getActiveNotifications();
+		this.NotificationGroups = new LinkedHashMap<>();
 	}
 	
-	private void PopulateMockNotificationInfos()
-	{
-		IAppService appService = ServiceLocator.Current().GetInstance(IAppService.class);
-		HashMap<String, NotificationInfo> mockNotificationInfos = new LinkedHashMap<>();
-		
-		mockNotificationInfos.put("com.android.contacts", new NotificationInfo("2 cevapsız arama", "İsmet Acar Doğan"));
-		mockNotificationInfos.put("com.google.android.gm", new NotificationInfo("4 okunmamış e-posta", "Yaz Dönemi Ders Programı - Yaz dönemi ders programı ve ..."));
-		mockNotificationInfos.put("com.microsoft.office.outlook", new NotificationInfo("Microsoft Store", "Join now! Developer Hackaton '19"));
-		mockNotificationInfos.put("com.whatsapp", new NotificationInfo("3 okunmamış mesaj", "Mesajlar gizlendi."));
-		mockNotificationInfos.put("com.twitter.android", new NotificationInfo("Kaçırmış olabileceğin tweet'ler var", "Twitter"));
-		mockNotificationInfos.put("com.instagram.android", new NotificationInfo("", ""));
-		mockNotificationInfos.put("com.linkedin.android", new NotificationInfo("", ""));
-		mockNotificationInfos.put("com.spotify.music", new NotificationInfo("Son dinlenen", "Eagles, Hotel California - Live at the Los Angeles"));
-		mockNotificationInfos.put("com.google.android.youtube", new NotificationInfo("Google Asistan Artık Türkçe", "Sen iste Google Asistan yapsın, hayatın kolaylaşsın. Hemen keşfet!"));
-		mockNotificationInfos.put("com.android.vending", new NotificationInfo("12 güncelleme var", "Spotify, Chrome, Twitter, Instagram ve 8 uygulama daha"));
-		mockNotificationInfos.put("com.google.android.apps.maps", new NotificationInfo("Konum servisleri kapalı", "Anlık bildirimler için konum servislerini açınız"));
-		
-		List<String> packageNames = new ArrayList<String>(mockNotificationInfos.keySet());
-		for (int i = 0; i < packageNames.size(); i++)
-		{
-			String packageName = packageNames.get(i);
-			NotificationInfo notificationInfo = mockNotificationInfos.get(packageName);
-			
-			AppModel appModel = appService.GetAppModel(packageName);
-			if (appModel != null)
-			{
-				this.NotificationInfoDict.put(appModel, notificationInfo);
-			}
-		}
-	}
-	
-	public NotificationInfo GetNotificationInfo(TileBase tile)
+	public NotificationGroup GetNotificationGroup(TileBase tile)
 	{
 		if (tile == null)
 			return null;
@@ -107,138 +38,36 @@ public class NotificationService extends NotificationListenerService implements 
 		if (appModel == null)
 			return null;
 		
-		if (this.NotificationInfoDict.containsKey(appModel))
-			return this.NotificationInfoDict.get(appModel);
+		if (this.NotificationGroups.containsKey(appModel))
+			return this.NotificationGroups.get(appModel);
 		
 		return null;
 	}
 	
-	private boolean isNotificationServiceEnabled()
+	public void AddNotification(StatusBarNotification notification)
 	{
-		String pkgName = this.parentContext.getPackageName();
+		IAppService appService = ServiceLocator.Current().GetInstance(IAppService.class);
+		if (appService == null)
+			return;
 		
-		final String flat = Settings.Secure.getString(this.parentContext.getContentResolver(), ENABLED_NOTIFICATION_LISTENERS);
+		String packageName = notification.getPackageName();
 		
-		if (!TextUtils.isEmpty(flat))
+		NotificationInfo notificationInfo = new NotificationInfo(1, notification.getNotification().tickerText.toString(), notification.toString());
+		
+		AppModel appModel = appService.GetAppModel(packageName);
+		if (appModel != null)
 		{
-			final String[] names = flat.split(":");
-			for (int i = 0; i < names.length; i++)
+			if (this.NotificationGroups.containsKey(appModel))
 			{
-				final ComponentName cn = ComponentName.unflattenFromString(names[i]);
-				if (cn != null)
-				{
-					if (TextUtils.equals(pkgName, cn.getPackageName()))
-					{
-						return true;
-					}
-				}
+				NotificationGroup notificationGroup = this.NotificationGroups.get(appModel);
+				notificationGroup.Add(notificationInfo);
+			}
+			else
+			{
+				NotificationGroup notificationGroup = new NotificationGroup(appModel.getApplicationPackageName());
+				this.NotificationGroups.put(appModel, notificationGroup);
+				notificationGroup.Add(notificationInfo);
 			}
 		}
-		
-		return false;
-	}
-	
-	@Override
-	public IBinder onBind(Intent intent)
-	{
-		return super.onBind(intent);
-	}
-	
-	@Override
-	public void onNotificationPosted(StatusBarNotification sbn)
-	{
-		int notificationCode = matchNotificationCode(sbn);
-		
-		if (notificationCode != InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE)
-		{
-		
-		}
-	}
-	
-	@Override
-	public void onNotificationRemoved(StatusBarNotification sbn)
-	{
-		int notificationCode = matchNotificationCode(sbn);
-		
-		if (notificationCode != InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE)
-		{
-			StatusBarNotification[] activeNotifications = this.getActiveNotifications();
-			
-			if (activeNotifications != null && activeNotifications.length > 0)
-			{
-				for (int i = 0; i < activeNotifications.length; i++)
-				{
-					if (notificationCode == matchNotificationCode(activeNotifications[i]))
-					{
-					
-					}
-				}
-			}
-		}
-	}
-	
-	private int matchNotificationCode(StatusBarNotification sbn)
-	{
-		String packageName = sbn.getPackageName();
-		
-		if (packageName.equals(ApplicationPackageNames.FACEBOOK_PACK_NAME) || packageName.equals(ApplicationPackageNames.FACEBOOK_MESSENGER_PACK_NAME))
-		{
-			return (InterceptedNotificationCode.FACEBOOK_CODE);
-		}
-		else if (packageName.equals(ApplicationPackageNames.INSTAGRAM_PACK_NAME))
-		{
-			return (InterceptedNotificationCode.INSTAGRAM_CODE);
-		}
-		else if (packageName.equals(ApplicationPackageNames.WHATSAPP_PACK_NAME))
-		{
-			return (InterceptedNotificationCode.WHATSAPP_CODE);
-		}
-		else
-		{
-			return (InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE);
-		}
-	}
-	
-	private AlertDialog buildNotificationServiceAlertDialog()
-	{
-		final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.parentContext, R.style.AppCompatAlertDialogStyle);
-		alertDialogBuilder.setTitle(R.string.notification_listener_service);
-		alertDialogBuilder.setMessage(R.string.notification_listener_service_explanation);
-		alertDialogBuilder.setPositiveButton(R.string.yes,
-				new DialogInterface.OnClickListener()
-				{
-					public void onClick(DialogInterface dialog, int id)
-					{
-						parentContext.startActivity(new Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS));
-					}
-				});
-		
-		alertDialogBuilder.setNegativeButton(R.string.no,
-				new DialogInterface.OnClickListener()
-				{
-					public void onClick(DialogInterface dialog, int id)
-					{
-						// If you choose to not enable the notification listener
-						// the app. will not work as expected
-					}
-				});
-		
-		final AlertDialog dialog = alertDialogBuilder.create();
-		
-		dialog.setOnShowListener(new DialogInterface.OnShowListener()
-		{
-			@Override
-			public void onShow(DialogInterface arg0)
-			{
-				int color = parentContext.getResources().getColor(R.color.colorAccent);
-				dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
-				dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
-				
-				
-				dialog.getWindow().setBackgroundDrawable(Colors.rgb("#171717"));
-			}
-		});
-		
-		return(dialog);
 	}
 }

@@ -96,9 +96,6 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 				}
 			});
 		}
-		
-		if (this.tileCountBadge != null)
-			this.tileCountBadge.setVisibility(View.INVISIBLE);
 	}
 	
 	public long getId()
@@ -127,9 +124,6 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		this.setLayoutProperties(tile);
 		this.setTileSizes(tile);
 		this.setClickListener(tile, dragStartListener);
-		
-		if (this.tileCountBadgeTextView != null)
-			this.tileCountBadgeTextView.setText(index + "");
 		
 		this.setEditModeProperties(tile);
 		TileOrderManager.Current().RefreshSelectedTileHolder(this);

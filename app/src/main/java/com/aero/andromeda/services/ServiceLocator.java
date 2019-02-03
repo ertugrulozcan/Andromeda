@@ -26,8 +26,8 @@ public class ServiceLocator
 	public <T extends Object> void RegisterInstance(T service)
 	{
 		Class<T> t = (Class<T>) service.getClass();
-		if (!this.serviceDictionary.containsKey(t))
-			this.serviceDictionary.put(t, service);
+		//if (!this.serviceDictionary.containsKey(t))
+		this.serviceDictionary.put(t, service);
 	}
 	
 	public <T extends Object> T GetInstance(Class<T> t)

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.aero.andromeda.R;
 import com.aero.andromeda.helpers.Colors;
 import com.aero.andromeda.helpers.SizeConverter;
+import com.aero.andromeda.models.NotificationGroup;
 import com.aero.andromeda.models.NotificationInfo;
 import com.aero.andromeda.models.tiles.FakeTile;
 import com.aero.andromeda.models.tiles.TileBase;
@@ -93,29 +94,52 @@ public class TileViewHolder extends BaseTileViewHolder
 			TextView tileSecondViewName = this.tileSecondViewLayout.findViewById(R.id.live_tile_name);
 			if (tileSecondViewName != null)
 				tileSecondViewName.setText(tile.getCaption());
-			
-			INotificationService notificationService = ServiceLocator.Current().GetInstance(INotificationService.class);
-			NotificationInfo notificationInfo = notificationService.GetNotificationInfo(tile);
-			if (notificationInfo != null)
+		}
+	}
+	
+	public void UpdateTileNotification()
+	{
+		TileBase tile = this.getTile();
+		if (tile == null)
+			return;
+		
+		INotificationService notificationService = ServiceLocator.Current().GetInstance(INotificationService.class);
+		NotificationGroup notificationGroup = notificationService.GetNotificationGroup(tile);
+		if (notificationGroup != null && notificationGroup.GetCount() > 0)
+		{
+			if (this.tileCountBadge != null && this.tileCountBadgeTextView != null)
 			{
-				TextView tileSecondViewTitle = this.tileSecondViewLayout.findViewById(R.id.live_tile_title);
-				if (tileSecondViewTitle != null)
-				{
-					tileSecondViewTitle.setText(notificationInfo.getTitle());
-					tileSecondViewTitle.setTextSize(SizeConverter.Current.GetDefaultFontSize());
-				}
-				
-				TextView tileSecondViewDetail = this.tileSecondViewLayout.findViewById(R.id.live_tile_detail);
-				if (tileSecondViewDetail != null)
-				{
-					tileSecondViewDetail.setText(notificationInfo.getMessage());
-					
-					if (notificationInfo.getMessage().length() <= 16)
-						tileSecondViewDetail.setTextSize(16);
-					else
-						tileSecondViewDetail.setTextSize(SizeConverter.Current.GetDefaultFontSize() - 2);
-				}
+				this.tileCountBadgeTextView.setText("" + notificationGroup.GetCount());
 			}
+			
+			NotificationInfo notificationInfo = notificationGroup.GetNext();
+			
+			TextView tileSecondViewTitle = this.tileSecondViewLayout.findViewById(R.id.live_tile_title);
+			if (tileSecondViewTitle != null)
+			{
+				tileSecondViewTitle.setText(notificationInfo.getTitle());
+				tileSecondViewTitle.setTextSize(SizeConverter.Current.GetDefaultFontSize());
+			}
+			
+			TextView tileSecondViewDetail = this.tileSecondViewLayout.findViewById(R.id.live_tile_detail);
+			if (tileSecondViewDetail != null)
+			{
+				tileSecondViewDetail.setText(notificationInfo.getMessage());
+				
+				if (notificationInfo.getMessage().length() <= 16)
+					tileSecondViewDetail.setTextSize(SizeConverter.Current.GetDefaultFontSize() + 6);
+				else if (notificationInfo.getMessage().length() <= 30)
+					tileSecondViewDetail.setTextSize(SizeConverter.Current.GetDefaultFontSize());
+				else
+					tileSecondViewDetail.setTextSize(SizeConverter.Current.GetDefaultFontSize() - 3.5f);
+			}
+		}
+		else
+		{
+			if (this.tileCountBadge != null)
+				this.tileCountBadge.setVisibility(View.INVISIBLE);
+			if (this.tileCountBadgeTextView != null)
+				this.tileCountBadgeTextView.setText("");
 		}
 	}
 }

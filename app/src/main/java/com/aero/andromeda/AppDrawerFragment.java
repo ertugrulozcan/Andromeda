@@ -25,26 +25,16 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 {
 	private RecyclerView recyclerView;
 	private TilesAdapter tilesAdapter;
-	private TileAnimationManager tileAnimationManager;
 	private TilesLayoutManager gridLayoutManager;
 	private ItemTouchHelper itemTouchHelper;
 	private boolean isEnabled = true;
 	
 	public AppDrawerFragment()
 	{
-		// Required empty public constructor
-	}
-	
-	public static AppDrawerFragment newInstance()
-	{
-		AppDrawerFragment fragment = new AppDrawerFragment();
-		
-		ServiceLocator.Current().RegisterInstance(fragment);
-		
 		Bundle args = new Bundle();
-		fragment.setArguments(args);
+		this.setArguments(args);
 		
-		return fragment;
+		ServiceLocator.Current().RegisterInstance(this);
 	}
 	
 	@Override
@@ -82,10 +72,6 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 		this.itemTouchHelper.attachToRecyclerView(recyclerView);
 		this.tilesAdapter.setDragStartListener(this);
 		
-		this.tileAnimationManager = new TileAnimationManager(appService);
-		ServiceLocator.Current().RegisterInstance(this.tileAnimationManager);
-		this.tileAnimationManager.Start();
-		
 		return view;
 	}
 	
@@ -121,18 +107,14 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 	
 	public void Enable()
 	{
+		TileAnimationManager.Current().Start();
 		this.isEnabled = true;
-		
-		if (this.tileAnimationManager != null)
-			this.tileAnimationManager.Start();
 	}
 	
 	public void Disable()
 	{
 		this.isEnabled = false;
-		
-		if (this.tileAnimationManager != null)
-			this.tileAnimationManager.Stop();
+		TileAnimationManager.Current().Stop();
 	}
 	
 	public boolean isEnabled()

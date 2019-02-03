@@ -2,6 +2,7 @@ package com.aero.andromeda.models;
 
 public class NotificationInfo
 {
+	private int id;
 	private String title;
 	private String message;
 	
@@ -15,9 +16,15 @@ public class NotificationInfo
 		return message;
 	}
 	
-	public NotificationInfo(String title, String message)
+	public NotificationInfo(int id, String title, String message)
 	{
+		this.id = id;
 		this.title = title;
 		this.message = message;
+	}
+	
+	public int getId()
+	{
+		return this.id;
 	}
 }

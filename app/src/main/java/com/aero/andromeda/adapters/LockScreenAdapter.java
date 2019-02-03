@@ -94,6 +94,11 @@ public class LockScreenAdapter
 		this.setClockFonts();
 	}
 	
+	public boolean isLocked()
+	{
+		return this.slideUp.isVisible() || this.slideUp.isAnimationRunning();
+	}
+	
 	private void RegisterToScreenLockBroadcast()
 	{
 		if (this.screenStateReceiver == null)

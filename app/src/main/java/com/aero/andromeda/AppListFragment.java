@@ -34,24 +34,15 @@ public class AppListFragment extends Fragment
 	
 	public AppListFragment()
 	{
-		// Required empty public constructor
-	}
-	
-	public static AppListFragment newInstance()
-	{
-		AppListFragment fragment = new AppListFragment();
-		
 		Bundle args = new Bundle();
 		//args.putString(ARG_PARAM1, param1);
 		//args.putString(ARG_PARAM2, param2);
-		fragment.setArguments(args);
+		this.setArguments(args);
 		
-		ServiceLocator.Current().RegisterInstance(fragment);
+		this.appListAdapter = new AppListAdapter();
+		this.searchResultsAdapter = new SearchResultsAdapter();
 		
-		fragment.appListAdapter = new AppListAdapter();
-		fragment.searchResultsAdapter = new SearchResultsAdapter();
-		
-		return fragment;
+		ServiceLocator.Current().RegisterInstance(this);
 	}
 	
 	@Override

@@ -58,6 +58,7 @@ public class NavigationDrawerFragment extends Fragment
 				MainActivity mainActivity = (MainActivity)NavigationDrawerFragment.this.getActivity();
 				final Intent i = new Intent(mainActivity, SettingsActivity.class);
 				startActivity(i);
+				mainActivity.FlagAsNeedRestart();
 				mainActivity.CloseNavigationDrawer();
 			}
 		});

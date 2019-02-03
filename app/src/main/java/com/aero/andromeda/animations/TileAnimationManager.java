@@ -1,29 +1,22 @@
 package com.aero.andromeda.animations;
 
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
-import android.animation.TimeInterpolator;
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
-import android.view.View;
+import android.os.Handler;
+import android.os.Looper;
 
-import com.aero.andromeda.R;
-import com.aero.andromeda.adapters.TilesAdapter;
+import com.aero.andromeda.MainActivity;
 import com.aero.andromeda.animations.tileanimations.FlipAnimation;
 import com.aero.andromeda.animations.tileanimations.ITileAnimation;
 import com.aero.andromeda.animations.tileanimations.SlideAnimation;
+import com.aero.andromeda.models.NotificationGroup;
 import com.aero.andromeda.models.NotificationInfo;
-import com.aero.andromeda.models.tiles.FakeTile;
-import com.aero.andromeda.models.tiles.FolderTile;
 import com.aero.andromeda.models.tiles.TileBase;
-import com.aero.andromeda.models.tiles.Folder;
 import com.aero.andromeda.services.ServiceLocator;
 import com.aero.andromeda.services.interfaces.IAppService;
 import com.aero.andromeda.services.interfaces.INotificationService;
+import com.aero.andromeda.ui.BaseTileViewHolder;
+import com.aero.andromeda.ui.TileViewHolder;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
@@ -33,18 +26,30 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class TileAnimationManager
 {
-	private final IAppService appService;
-	private AnimationTask animationTask;
+	private static TileAnimationManager self;
 	
+	public static TileAnimationManager Current()
+	{
+		if (self == null)
+			self = new TileAnimationManager();
+		
+		return self;
+	}
+	
+	private IAppService appService;
+	private AnimationTask animationTask;
 	private final Class[] AnimationTypes = { FlipAnimation.class, SlideAnimation.class};
 	
-	public TileAnimationManager(IAppService appService)
+	private TileAnimationManager()
 	{
-		this.appService = appService;
+		this.appService = ServiceLocator.Current().GetInstance(IAppService.class);
 	}
 	
 	public void Start()
 	{
+		if (this.animationTask != null)
+			return;
+		
 		this.Stop();
 		
 		this.animationTask = new AnimationTask();
@@ -53,9 +58,10 @@ public class TileAnimationManager
 	
 	public void Stop()
 	{
-		if (this.animationTask != null)
-			this.animationTask.Stop();
+		if (this.animationTask == null)
+			return;
 		
+		this.animationTask.Stop();
 		this.animationTask = null;
 	}
 	
@@ -70,15 +76,32 @@ public class TileAnimationManager
 			case 2:
 			case 3:
 			{
-				if (tile.getTileSize() == TileBase.TileSize.Small)
-					return new FlipAnimation(appService.getMainContext());
+				if (tile.getTileSize() != TileBase.TileSize.Small)
+				{
+					INotificationService notificationService = ServiceLocator.Current().GetInstance(INotificationService.class);
+					NotificationGroup notificationGroup = notificationService.GetNotificationGroup(tile);
+					if (notificationGroup != null && notificationGroup.GetCount() > 0)
+					{
+						BaseTileViewHolder baseViewHolder = tile.getParentViewHolder();
+						if (baseViewHolder != null && baseViewHolder instanceof TileViewHolder)
+						{
+							final TileViewHolder viewHolder = (TileViewHolder) baseViewHolder;
+							
+							ServiceLocator.Current().GetInstance(MainActivity.class).runOnUiThread(
+								new Runnable()
+								{
+									public void run()
+									{
+										viewHolder.UpdateTileNotification();
+									}
+								});
+							
+							return new SlideAnimation(appService.getMainContext());
+						}
+					}
+				}
 				
-				INotificationService notificationService = ServiceLocator.Current().GetInstance(INotificationService.class);
-				NotificationInfo notificationInfo = notificationService.GetNotificationInfo(tile);
-				if (notificationInfo == null)
-					return new FlipAnimation(appService.getMainContext());
-				
-				return new SlideAnimation(appService.getMainContext());
+				return new FlipAnimation(appService.getMainContext());
 			}
 		}
 	}
@@ -115,7 +138,10 @@ public class TileAnimationManager
 			tileAnimation3 = null;
 			
 			if (this.timer != null)
+			{
+				this.timer.purge();
 				this.timer.cancel();
+			}
 			
 			this.timer = null;
 			

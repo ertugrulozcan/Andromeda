@@ -43,7 +43,7 @@
                 <include layout="@layout/tile_second_view" />
             </FrameLayout>
 
-            <RelativeLayout
+            <!--<RelativeLayout
                 android:id="@+id/tileCountBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -61,6 +61,24 @@
                     android:padding="2.5dp"
                     android:width="20dp"
                     android:height="20dp" />
+            </RelativeLayout>-->
+
+            <RelativeLayout
+                android:id="@+id/tileCountBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|right">
+                <TextView
+                    android:id="@+id/tileCountBadgeTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"
+                    android:textSize="24sp"
+                    android:fontFamily="@font/segoe_wp_black"
+                    android:layout_gravity="center"
+                    android:textAlignment="center"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginRight="7dp" />
             </RelativeLayout>
         </FrameLayout>
 

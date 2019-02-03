@@ -1,9 +1,13 @@
 package com.aero.andromeda.services.interfaces;
 
-import com.aero.andromeda.models.NotificationInfo;
+import android.service.notification.StatusBarNotification;
+
+import com.aero.andromeda.models.NotificationGroup;
 import com.aero.andromeda.models.tiles.TileBase;
 
 public interface INotificationService
 {
-	NotificationInfo GetNotificationInfo(TileBase tile);
+	void AddNotification(StatusBarNotification notification);
+	
+	NotificationGroup GetNotificationGroup(TileBase tile);
 }
