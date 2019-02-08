@@ -120,8 +120,13 @@ public class TileViewHolder extends BaseTileViewHolder
 			TextView tileSecondViewTitle = this.tileSecondViewLayout.findViewById(R.id.live_tile_title);
 			if (tileSecondViewTitle != null)
 			{
-				tileSecondViewTitle.setText(notificationInfo.getTitle());
-				tileSecondViewTitle.setTextSize(SizeConverter.Current.GetDefaultFontSize());
+                String notifTitle = notificationInfo.getTitle();
+				tileSecondViewTitle.setText(notifTitle);
+
+				if (notifTitle.length() > 30)
+				    tileSecondViewTitle.setTextSize(SizeConverter.Current.GetDefaultFontSize() - 4);
+				else
+                    tileSecondViewTitle.setTextSize(SizeConverter.Current.GetDefaultFontSize());
 			}
 			
 			TextView tileSecondViewDetail = this.tileSecondViewLayout.findViewById(R.id.live_tile_detail);
