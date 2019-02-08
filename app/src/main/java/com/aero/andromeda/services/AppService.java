@@ -195,6 +195,18 @@ public class AppService implements IAppService
 		
 		return null;
 	}
+
+	public TileBase getTile(String packageName)
+    {
+        for (TileBase tile : this.tileList)
+        {
+            AppModel appModel = tile.getApplication();
+            if (appModel != null && appModel.getApplicationPackageName().equals(packageName))
+                return tile;
+        }
+
+        return null;
+    }
 	
 	public List<TileBase> getTileList()
 	{

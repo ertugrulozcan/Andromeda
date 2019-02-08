@@ -107,6 +107,9 @@ public class TileViewHolder extends BaseTileViewHolder
 		NotificationGroup notificationGroup = notificationService.GetNotificationGroup(tile);
 		if (notificationGroup != null && notificationGroup.GetCount() > 0)
 		{
+            this.itemView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            this.tileSecondViewLayout.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
 			if (this.tileCountBadge != null && this.tileCountBadgeTextView != null)
 			{
 				this.tileCountBadgeTextView.setText("" + notificationGroup.GetCount());
@@ -141,5 +144,14 @@ public class TileViewHolder extends BaseTileViewHolder
 			if (this.tileCountBadgeTextView != null)
 				this.tileCountBadgeTextView.setText("");
 		}
+
+        this.itemView.invalidate();
+        this.itemView.requestLayout();
+
+        this.tileSecondViewLayout.invalidate();
+        this.tileSecondViewLayout.requestLayout();
+
+        this.itemView.setLayerType(View.LAYER_TYPE_NONE, null);
+        this.tileSecondViewLayout.setLayerType(View.LAYER_TYPE_NONE, null);
 	}
 }

@@ -30,6 +30,12 @@ public class NotificationGroup
 	
 	public void Add(NotificationInfo notificationInfo)
 	{
+        for (NotificationInfo notification : this.notificationList)
+        {
+            if (notification.getId() == notificationInfo.getId())
+                return;
+        }
+
 		this.notificationList.add(notificationInfo);
 	}
 	
@@ -41,6 +47,15 @@ public class NotificationGroup
 				this.notificationList.remove(notification);
 		}
 	}
+
+    public void Remove(int id)
+    {
+        for (NotificationInfo notification : this.notificationList)
+        {
+            if (notification.getId() == id)
+                this.notificationList.remove(notification);
+        }
+    }
 	
 	public NotificationInfo GetNext()
 	{

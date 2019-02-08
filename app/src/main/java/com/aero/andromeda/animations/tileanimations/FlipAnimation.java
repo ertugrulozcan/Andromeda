@@ -16,6 +16,7 @@ import android.view.animation.AnticipateInterpolator;
 import android.view.animation.OvershootInterpolator;
 
 import com.aero.andromeda.R;
+import com.aero.andromeda.animations.TileAnimationManager;
 import com.aero.andromeda.helpers.SizeConverter;
 import com.aero.andromeda.models.tiles.FakeTile;
 import com.aero.andromeda.models.tiles.Folder;
@@ -30,73 +31,44 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 
-public class FlipAnimation implements ITileAnimation
+public class FlipAnimation extends TileAnimationBase
 {
-	private Context parentContext;
-	
-	private boolean isEnabled;
-	private AnimatorSet tileFlipAnimation = null;
 	private TileFlipInterpolator tileFlipInterpolator;
 	
-	public FlipAnimation(Context context)
+	public FlipAnimation(Context context, TileAnimationManager tileAnimationManager)
 	{
-		this.parentContext = context;
+        super(context, tileAnimationManager);
 		this.tileFlipInterpolator = new TileFlipInterpolator();
 	}
 	
-	@Override
-	public boolean IsEnabled()
-	{
-		return this.isEnabled;
-	}
-	
-	@Override
-	public void Start(TileBase tile)
-	{
-		this.Start(tile, 0);
-	}
-	
-	@Override
-	public void Start(TileBase tile, int delay)
-	{
-		this.Load();
-		this.isEnabled = true;
-		this.Animate(tile, delay);
-	}
-	
-	@Override
-	public void Stop()
-	{
-		this.Unload();
-		this.isEnabled = false;
-	}
-	
+
 	@SuppressLint("ResourceType")
-	private void Load()
+    @Override
+    protected void Load(final TileBase tile)
 	{
-		this.tileFlipAnimation = (AnimatorSet) AnimatorInflater.loadAnimator(this.parentContext, R.anim.tile_flip);
-		
-		//tileFlipAnimation2.setStartDelay(tileFlipAnimation2.getStartDelay() + 1000);
+		this.setAnimator((AnimatorSet) AnimatorInflater.loadAnimator(this.getContext(), R.anim.tile_flip));
 	}
-	
-	private void Unload()
+
+    @Override
+    protected void Unload()
 	{
-		if (this.tileFlipAnimation != null)
+		if (this.getAnimator() != null)
 		{
-			this.tileFlipAnimation.end();
-			this.tileFlipAnimation.setupStartValues();
-			this.tileFlipAnimation.cancel();
+			this.getAnimator().end();
+			this.getAnimator().setupStartValues();
+			this.getAnimator().cancel();
 		}
 		
-		this.tileFlipAnimation = null;
+		this.setAnimator(null);
 	}
-	
-	private void Animate(final TileBase tile, int delay)
+
+    @Override
+	protected void Animate(final TileBase tile, int delay)
 	{
 		if (tile == null)
 			return;
 		
-		if (this.tileFlipAnimation == null)
+		if (this.getAnimator() == null)
 			return;
 		
 		if (tile.getTileType() == TileBase.TileType.FolderTile ||
@@ -114,12 +86,12 @@ public class FlipAnimation implements ITileAnimation
 		if (tileView == null)
 			return;
 		
-		if (this.parentContext == null || !(this.parentContext instanceof Activity))
+		if (this.getContext() == null || !(this.getContext() instanceof Activity))
 			return;
 		
-		this.tileFlipAnimation.setStartDelay(delay);
+		this.getAnimator().setStartDelay(delay);
 		
-		Activity activity = (Activity) this.parentContext;
+		Activity activity = (Activity) this.getContext();
 		
 		activity.runOnUiThread(new Runnable()
 		{
@@ -128,12 +100,12 @@ public class FlipAnimation implements ITileAnimation
 			{
 				synchronized (tile)
 				{
-					if (tileFlipAnimation == null || tileFlipAnimation.isRunning())
+					if (getAnimator() == null || getAnimator().isRunning())
 						return;
-					
-					tileFlipAnimation.setInterpolator(tileFlipInterpolator);
-					tileFlipAnimation.setTarget(tileView);
-					tileFlipAnimation.start();
+
+                    getAnimator().setInterpolator(tileFlipInterpolator);
+                    getAnimator().setTarget(tileView);
+                    getAnimator().start();
 				}
 			}
 		});

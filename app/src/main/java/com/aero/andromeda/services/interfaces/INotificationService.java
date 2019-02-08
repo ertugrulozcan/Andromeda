@@ -8,6 +8,8 @@ import com.aero.andromeda.models.tiles.TileBase;
 public interface INotificationService
 {
 	void AddNotification(StatusBarNotification notification);
+
+    void RemoveNotification(StatusBarNotification notification);
 	
 	NotificationGroup GetNotificationGroup(TileBase tile);
 }

@@ -1,10 +1,13 @@
 package com.aero.andromeda.services;
 
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -23,13 +26,13 @@ public class NotificationListener extends NotificationListenerService
 	{
 	
 	}
-	
+
 	@Override
 	public IBinder onBind(Intent intent)
 	{
 		isBound = true;
 		String action = intent.getAction();
-		
+
 		// action.equals(NotificationService.NOTIFICATION_INTENT_ACTION_KEY)
 		if (SERVICE_INTERFACE.equals(action))
 		{
@@ -40,7 +43,7 @@ public class NotificationListener extends NotificationListenerService
 			return binder;
 		}
 	}
-	
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startid)
 	{
@@ -54,6 +57,27 @@ public class NotificationListener extends NotificationListenerService
 			return NotificationListener.this;
 		}
 	}
+
+    @Override
+    @TargetApi(Build.VERSION_CODES.N)
+    public void onListenerConnected()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
+            this.AllActiveNotifications();
+        }
+    }
+
+    @Override
+    @TargetApi(Build.VERSION_CODES.N)
+    public void onListenerDisconnected()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
+            // Notification listener disconnected - requesting rebind
+            requestRebind(new ComponentName(this, NotificationListenerService.class));
+        }
+    }
 	
 	@Override
 	public void onCreate()
@@ -83,36 +107,34 @@ public class NotificationListener extends NotificationListenerService
 		sendBroadcast(i);
 		
 		INotificationService notificationService = ServiceLocator.Current().GetInstance(INotificationService.class);
-		StatusBarNotification[] notifications = NotificationListener.this.getActiveNotifications();
-		if (notifications != null)
-		{
-			for (StatusBarNotification otherNotification : notifications)
-			{
-				notificationService.AddNotification(otherNotification);
-			}
-		}
-		
 		notificationService.AddNotification(notification);
 	}
 	
 	@Override
-	public void onNotificationRemoved(StatusBarNotification sbn)
+	public void onNotificationRemoved(StatusBarNotification notification)
 	{
-		INotificationService notificationService = ServiceLocator.Current().GetInstance(INotificationService.class);
-		StatusBarNotification[] notifications = NotificationListener.this.getActiveNotifications();
-		if (notifications != null)
-		{
-			for (StatusBarNotification notification : notifications)
-			{
-				notificationService.AddNotification(notification);
-			}
-		}
-		
-		Intent i = new Intent(NotificationService.NOTIFICATION_INTENT_ACTION_KEY);
-		i.putExtra(NotificationService.NOTIFICATION_EVENT_INTENT_KEY, "onNotificationRemoved :" + sbn.getPackageName() + "\n");
+	    Intent i = new Intent(NotificationService.NOTIFICATION_INTENT_ACTION_KEY);
+		i.putExtra(NotificationService.NOTIFICATION_EVENT_INTENT_KEY, "onNotificationRemoved :" + notification.getPackageName() + "\n");
 		
 		sendBroadcast(i);
+
+        INotificationService notificationService = ServiceLocator.Current().GetInstance(INotificationService.class);
+        notificationService.RemoveNotification(notification);
 	}
+
+	private void AllActiveNotifications()
+    {
+        INotificationService notificationService = ServiceLocator.Current().GetInstance(INotificationService.class);
+
+        StatusBarNotification[] notifications = NotificationListener.this.getActiveNotifications();
+        if (notifications != null)
+        {
+            for (StatusBarNotification otherNotification : notifications)
+            {
+                notificationService.AddNotification(otherNotification);
+            }
+        }
+    }
 	
 	class NotificationReceiver extends BroadcastReceiver
 	{
@@ -130,14 +152,18 @@ public class NotificationListener extends NotificationListenerService
 				sendBroadcast(i1);
 				
 				int i = 1;
-				for (StatusBarNotification sbn : NotificationListener.this.getActiveNotifications())
-				{
-					Intent i2 = new Intent(NotificationService.NOTIFICATION_INTENT_ACTION_KEY);
-					i2.putExtra(NotificationService.NOTIFICATION_EVENT_INTENT_KEY, i + " " + sbn.getPackageName() + "\n");
-					sendBroadcast(i2);
-					
-					i++;
-				}
+                StatusBarNotification[] allActiveNotifications = NotificationListener.this.getActiveNotifications();
+                if (allActiveNotifications != null)
+                {
+                    for (StatusBarNotification sbn : allActiveNotifications)
+                    {
+                        Intent i2 = new Intent(NotificationService.NOTIFICATION_INTENT_ACTION_KEY);
+                        i2.putExtra(NotificationService.NOTIFICATION_EVENT_INTENT_KEY, i + " " + sbn.getPackageName() + "\n");
+                        sendBroadcast(i2);
+
+                        i++;
+                    }
+                }
 				
 				Intent i3 = new Intent(NotificationService.NOTIFICATION_INTENT_ACTION_KEY);
 				i3.putExtra(NotificationService.NOTIFICATION_EVENT_INTENT_KEY, "===== Notification List ====");

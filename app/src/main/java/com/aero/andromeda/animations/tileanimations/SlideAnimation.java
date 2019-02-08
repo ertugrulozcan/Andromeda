@@ -1,5 +1,6 @@
 package com.aero.andromeda.animations.tileanimations;
 
+import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
@@ -8,52 +9,23 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.aero.andromeda.R;
+import com.aero.andromeda.animations.TileAnimationManager;
 import com.aero.andromeda.helpers.SizeConverter;
 import com.aero.andromeda.models.tiles.FakeTile;
 import com.aero.andromeda.models.tiles.Folder;
 import com.aero.andromeda.models.tiles.TileBase;
 import com.aero.andromeda.ui.BaseTileViewHolder;
+import com.aero.andromeda.ui.TileViewHolder;
 
-public class SlideAnimation implements ITileAnimation
+public class SlideAnimation extends TileAnimationBase
 {
-	private Context parentContext;
-	
-	private boolean isEnabled;
-	private AnimatorSet tileSlideAnimation = null;
-	
-	public SlideAnimation(Context context)
+    public SlideAnimation(Context context, TileAnimationManager tileAnimationManager)
 	{
-		this.parentContext = context;
+	    super(context, tileAnimationManager);
 	}
-	
+
 	@Override
-	public boolean IsEnabled()
-	{
-		return this.isEnabled;
-	}
-	
-	@Override
-	public void Start(TileBase tile, int delay)
-	{
-		this.Load(tile);
-		this.isEnabled = true;
-		this.Animate(tile, delay);
-	}
-	
-	@Override
-	public void Start(TileBase tile)
-	{
-		this.Start(tile, 0);
-	}
-	
-	@Override
-	public void Stop()
-	{
-		this.Unload();
-		this.isEnabled = false;
-	}
-	
-	private void Load(TileBase tile)
+	protected void Load(TileBase tile)
 	{
 		final View tileView = tile.getParentViewHolder().getItemView();
 		if (tileView == null)
@@ -62,7 +34,7 @@ public class SlideAnimation implements ITileAnimation
 		final FrameLayout secondTileView = tileView.findViewById(R.id.tileSecondViewLayout);
 		if (secondTileView == null)
 			return;
-		
+
 		ObjectAnimator upAnimation = ObjectAnimator.ofFloat(secondTileView, "translationY", SizeConverter.Current.GetTileHeight(tile.getTileSize()), 0);
 		upAnimation.setDuration(300);
 		upAnimation.setInterpolator(new android.view.animation.DecelerateInterpolator());
@@ -72,29 +44,31 @@ public class SlideAnimation implements ITileAnimation
 		downAnimation.setInterpolator(new android.view.animation.AccelerateInterpolator());
 		downAnimation.setStartDelay(5000);
 		
-		this.tileSlideAnimation = new AnimatorSet();
-		this.tileSlideAnimation.playSequentially(upAnimation);
-		this.tileSlideAnimation.playSequentially(downAnimation);
+		this.setAnimator(new AnimatorSet());
+		this.getAnimator().playSequentially(upAnimation);
+		this.getAnimator().playSequentially(downAnimation);
 	}
-	
-	private void Unload()
+
+    @Override
+    protected void Unload()
 	{
-		if (this.tileSlideAnimation != null)
+		if (this.getAnimator() != null)
 		{
-			this.tileSlideAnimation.end();
-			this.tileSlideAnimation.setupStartValues();
-			this.tileSlideAnimation.cancel();
+			this.getAnimator().end();
+			this.getAnimator().setupStartValues();
+			this.getAnimator().cancel();
 		}
 		
-		this.tileSlideAnimation = null;
+		this.setAnimator(null);
 	}
-	
-	private void Animate(final TileBase tile, int delay)
+
+    @Override
+    protected void Animate(final TileBase tile, int delay)
 	{
 		if (tile == null)
 			return;
 		
-		if (this.tileSlideAnimation == null)
+		if (this.getAnimator() == null)
 			return;
 		
 		if (tile.getTileType() == TileBase.TileType.FolderTile ||
@@ -114,12 +88,12 @@ public class SlideAnimation implements ITileAnimation
 		
 		final FrameLayout secondTileView = tileView.findViewById(R.id.tileSecondViewLayout);
 		
-		if (secondTileView == null || this.parentContext == null || !(this.parentContext instanceof Activity))
+		if (secondTileView == null || this.getContext() == null || !(this.getContext() instanceof Activity))
 			return;
+
+		this.getAnimator().setStartDelay(delay);
 		
-		this.tileSlideAnimation.setStartDelay(delay);
-		
-		Activity activity = (Activity) this.parentContext;
+		Activity activity = (Activity) this.getContext();
 		
 		activity.runOnUiThread(new Runnable()
 		{
@@ -128,11 +102,11 @@ public class SlideAnimation implements ITileAnimation
 			{
 				synchronized (tile)
 				{
-					if (tileSlideAnimation == null || tileSlideAnimation.isRunning())
+					if (getAnimator() == null || getAnimator().isRunning())
 						return;
-					
-					tileSlideAnimation.setTarget(secondTileView);
-					tileSlideAnimation.start();
+
+                    getAnimator().setTarget(secondTileView);
+                    getAnimator().start();
 				}
 			}
 		});

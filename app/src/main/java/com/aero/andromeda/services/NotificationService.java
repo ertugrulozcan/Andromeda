@@ -1,8 +1,11 @@
 package com.aero.andromeda.services;
 
+import android.app.Notification;
 import android.content.Intent;
 import android.service.notification.StatusBarNotification;
 
+import com.aero.andromeda.adapters.NotificationInfoAdapter;
+import com.aero.andromeda.animations.TileAnimationManager;
 import com.aero.andromeda.models.AppModel;
 import com.aero.andromeda.models.NotificationGroup;
 import com.aero.andromeda.models.NotificationInfo;
@@ -44,30 +47,66 @@ public class NotificationService implements INotificationService
 		return null;
 	}
 	
-	public void AddNotification(StatusBarNotification notification)
+	public void AddNotification(StatusBarNotification statusBarNotification)
 	{
 		IAppService appService = ServiceLocator.Current().GetInstance(IAppService.class);
 		if (appService == null)
 			return;
 		
-		String packageName = notification.getPackageName();
-		
-		NotificationInfo notificationInfo = new NotificationInfo(1, notification.getNotification().tickerText.toString(), notification.toString());
-		
+		String packageName = statusBarNotification.getPackageName();
 		AppModel appModel = appService.GetAppModel(packageName);
 		if (appModel != null)
 		{
-			if (this.NotificationGroups.containsKey(appModel))
+			Notification notification = statusBarNotification.getNotification();
+			if (notification != null)
 			{
-				NotificationGroup notificationGroup = this.NotificationGroups.get(appModel);
-				notificationGroup.Add(notificationInfo);
-			}
-			else
-			{
-				NotificationGroup notificationGroup = new NotificationGroup(appModel.getApplicationPackageName());
-				this.NotificationGroups.put(appModel, notificationGroup);
-				notificationGroup.Add(notificationInfo);
+                NotificationInfo notificationInfo = NotificationInfoAdapter.GenerateNotificationInfo(statusBarNotification.getId(), notification, packageName);
+
+				if (this.NotificationGroups.containsKey(appModel))
+				{
+					NotificationGroup notificationGroup = this.NotificationGroups.get(appModel);
+					notificationGroup.Add(notificationInfo);
+				}
+				else
+				{
+					NotificationGroup notificationGroup = new NotificationGroup(appModel.getApplicationPackageName());
+					this.NotificationGroups.put(appModel, notificationGroup);
+					notificationGroup.Add(notificationInfo);
+				}
+
+				TileBase tile = appService.getTile(packageName);
+				if (tile != null)
+				    TileAnimationManager.Current().ImmediatelySlideAnimation(tile);
 			}
 		}
 	}
+
+    public void RemoveNotification(StatusBarNotification statusBarNotification)
+    {
+        IAppService appService = ServiceLocator.Current().GetInstance(IAppService.class);
+        if (appService == null)
+            return;
+
+        String packageName = statusBarNotification.getPackageName();
+        AppModel appModel = appService.GetAppModel(packageName);
+        if (appModel != null)
+        {
+            Notification notification = statusBarNotification.getNotification();
+            if (notification != null)
+            {
+                if (this.NotificationGroups.containsKey(appModel))
+                {
+                    NotificationGroup notificationGroup = this.NotificationGroups.get(appModel);
+                    notificationGroup.Remove(statusBarNotification.getId());
+
+                    if (notificationGroup.GetCount() == 0)
+                        this.NotificationGroups.remove(notificationGroup);
+                }
+
+                TileBase tile = appService.getTile(packageName);
+                if (tile != null)
+                    TileAnimationManager.Current().ImmediatelySlideAnimation(tile);
+            }
+        }
+    }
 }

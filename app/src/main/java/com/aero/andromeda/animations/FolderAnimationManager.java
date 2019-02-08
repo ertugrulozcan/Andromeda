@@ -121,7 +121,7 @@ public class FolderAnimationManager
 		for (View view : thumbnailViews)
 		{
 			ObjectAnimator animation = this.GenerateThumbnailDownAnimation(view, OPEN_THUMBNAIL_ANIMATION_DURATION);
-			view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+			//view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 			animation.setStartDelay(delay);
 			animatorSet.play(animation);
 			delay += OPEN_THUMBNAIL_ANIMATION_DELAY;
@@ -142,7 +142,7 @@ public class FolderAnimationManager
 		
 		for (View view : tileViews)
 		{
-			view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+			//view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 			view.setTranslationY(TILE_START_POSITION);
 			view.setAlpha(0.0f);
 			
@@ -186,7 +186,7 @@ public class FolderAnimationManager
 		for (View view : thumbnailViews)
 		{
 			ObjectAnimator animation = this.GenerateThumbnailUpAnimation(view, CLOSE_THUMBNAIL_ANIMATION_DURATION);
-			view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+			//view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 			delay += CLOSE_THUMBNAIL_ANIMATION_DELAY;
 			animation.setStartDelay(delay);
 			animatorSet.play(animation);
@@ -208,7 +208,7 @@ public class FolderAnimationManager
 		for (View view : tileViews)
 		{
 			ObjectAnimator animation = this.GenerateTileUpAnimation(view, CLOSE_TILE_ANIMATION_DURATION);
-			view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+			//view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 			animation.setStartDelay(delay);
 			
 			ObjectAnimator alphaAnimation = this.GenerateAlphaAnimation(view, CLOSE_TILE_ANIMATION_DURATION, true);
@@ -306,8 +306,8 @@ public class FolderAnimationManager
 			{
 				super.onAnimationEnd(animation);
 				
-				com.aero.andromeda.animations.FolderAnimationManager.this.ClearHardwareLayerFrames(folderTile);
-				com.aero.andromeda.animations.FolderAnimationManager.this.ClearHardwareLayerFrames(folder);
+				//com.aero.andromeda.animations.FolderAnimationManager.this.ClearHardwareLayerFrames(folderTile);
+				//com.aero.andromeda.animations.FolderAnimationManager.this.ClearHardwareLayerFrames(folder);
 			}
 		};
 		

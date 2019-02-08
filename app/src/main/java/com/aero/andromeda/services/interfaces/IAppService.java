@@ -33,6 +33,8 @@ public interface IAppService
 	List<IAppMenuItem> getMenuItemList();
 	
 	TileBase getTile(long id);
+
+    TileBase getTile(String packageName);
 	
 	List<TileBase> getTileList();
 	
