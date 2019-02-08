@@ -19,6 +19,8 @@ import com.aero.andromeda.ui.TileViewHolder;
 
 public class SlideAnimation extends TileAnimationBase
 {
+    private final static int Duration = 10000;
+
     public SlideAnimation(Context context, TileAnimationManager tileAnimationManager)
 	{
 	    super(context, tileAnimationManager);
@@ -42,7 +44,7 @@ public class SlideAnimation extends TileAnimationBase
 		ObjectAnimator downAnimation = ObjectAnimator.ofFloat(secondTileView, "translationY", 0, SizeConverter.Current.GetTileHeight(tile.getTileSize()));
 		downAnimation.setDuration(300);
 		downAnimation.setInterpolator(new android.view.animation.AccelerateInterpolator());
-		downAnimation.setStartDelay(5000);
+		downAnimation.setStartDelay(Duration);
 		
 		this.setAnimator(new AnimatorSet());
 		this.getAnimator().playSequentially(upAnimation);
