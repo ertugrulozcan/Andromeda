@@ -76,34 +76,34 @@ public class TileAnimationManager implements Animator.AnimatorListener
 
     public void ImmediatelySlideAnimation(TileBase tile)
     {
+        if (tile == null)
+            return;
+
         synchronized (lock)
         {
-            if (tile == null)
-                return;
-
             if (tileAnimatorDictionary.containsValue(tile))
                 return;
-
-            SlideAnimation slideAnimation = this.GenerateSlideAnimation(tile);
-            if (slideAnimation != null)
-                slideAnimation.Start(tile);
         }
+
+        SlideAnimation slideAnimation = this.GenerateSlideAnimation(tile);
+        if (slideAnimation != null)
+            slideAnimation.Start(tile);
     }
 
     public void ImmediatelyFlipAnimation(TileBase tile)
     {
+        if (tile == null)
+            return;
+
         synchronized (lock)
         {
-            if (tile == null)
-                return;
-
             if (tileAnimatorDictionary.containsValue(tile))
                 return;
-
-            FlipAnimation flipAnimation = this.GenerateFlipAnimation();
-            if (flipAnimation != null)
-                flipAnimation.Start(tile);
         }
+
+        FlipAnimation flipAnimation = this.GenerateFlipAnimation();
+        if (flipAnimation != null)
+            flipAnimation.Start(tile);
     }
 
     public FlipAnimation GenerateFlipAnimation()
@@ -277,17 +277,17 @@ public class TileAnimationManager implements Animator.AnimatorListener
 
                         for (int i = 0; i < syncAnimationCount; i++)
                         {
+                            rand = this.GenerateRandomIndex(random, tiles.size() - 1, rand);
+                            final TileBase tile = tiles.get(rand);
+
                             synchronized (lock)
                             {
-                                rand = this.GenerateRandomIndex(random, tiles.size() - 1, rand);
-                                final TileBase tile = tiles.get(rand);
-
                                 if (tileAnimatorDictionary.containsValue(tile))
                                     continue;
-
-                                animationArray[i] = GenerateRandomTileAnimation(tile, random);
-                                animationArray[i].Start(tile, i * 1500);
                             }
+
+                            animationArray[i] = GenerateRandomTileAnimation(tile, random);
+                            animationArray[i].Start(tile, i * 1500);
                         }
 					}
 				}
