@@ -27,4 +27,10 @@ public class NotificationInfo
 	{
 		return this.id;
 	}
+
+	public void Overwrite(NotificationInfo notif)
+    {
+        this.title = notif.title;
+        this.message = notif.message;
+    }
 }
