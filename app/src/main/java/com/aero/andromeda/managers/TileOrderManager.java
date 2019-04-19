@@ -26,7 +26,6 @@ public class TileOrderManager
 	
 	private final IAppService appService;
 	private final TilesAdapter tilesAdapter;
-	private final TileAnimationManager tileAnimationManager;
 	private final AppDrawerFragment appDrawerFragment;
 	private final MainActivity mainActivity;
 	
@@ -36,7 +35,6 @@ public class TileOrderManager
 	{
 		this.appService = ServiceLocator.Current().GetInstance(IAppService.class);
 		this.tilesAdapter = this.appService.getTilesAdapter();
-		this.tileAnimationManager = ServiceLocator.Current().GetInstance(TileAnimationManager.class);
 		this.appDrawerFragment = ServiceLocator.Current().GetInstance(AppDrawerFragment.class);
 		this.mainActivity = ServiceLocator.Current().GetInstance(MainActivity.class);
 	}
@@ -49,8 +47,8 @@ public class TileOrderManager
 		this.mainActivity.LockNavigationDrawer();
 		this.mainActivity.LockViewPager();
 		ServiceLocator.Current().GetInstance(MainActivity.class).CoverDarkBackground();
-		
-		this.tileAnimationManager.Stop();
+
+		TileAnimationManager.Current().Stop();
 		//WobbleAnimationManager.Current(this.tilesAdapter).startWobble();
 		WobbleAnimationManager.Current(this.tilesAdapter).Start();
 		
@@ -74,7 +72,7 @@ public class TileOrderManager
 		
 		//WobbleAnimationManager.Current(this.tilesAdapter).stopWobble(true);
 		WobbleAnimationManager.Current(this.tilesAdapter).Stop(null);
-		this.tileAnimationManager.Start();
+        TileAnimationManager.Current().Start();
 	}
 	
 	public void SelectTile(BaseTileViewHolder tileHolder)

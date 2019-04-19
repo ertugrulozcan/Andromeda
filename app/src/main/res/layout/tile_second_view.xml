@@ -16,7 +16,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_marginTop="8dp">
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="15dp">
         <TextView
             android:id="@+id/live_tile_title"
             android:layout_width="wrap_content"
@@ -32,6 +33,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/segoe_wp"
             android:textSize="15sp"
+            android:maxLines="5"
             android:layout_marginTop="3dp"
             android:layout_marginLeft="6dp"
             android:layout_marginRight="6dp" />

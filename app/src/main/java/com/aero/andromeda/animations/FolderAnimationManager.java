@@ -44,8 +44,9 @@ public class FolderAnimationManager
 	
 	public static final long CLOSE_THUMBNAIL_ANIMATION_DELAY = 90;
 	public static final long CLOSE_THUMBNAIL_ANIMATION_DURATION = 300;
-	public static final long CLOSE_TILE_ANIMATION_DELAY = 100;
-	public static final long CLOSE_TILE_ANIMATION_DURATION = 300;
+	public static final long CLOSE_TILE_ANIMATION_DELAY = 120;
+	public static final long CLOSE_TILE_ANIMATION_DURATION = 360;
+    public static final long CLOSE_TILE_ALPHA_ANIMATION_DURATION = 600;
 	
 	private final float TILE_START_POSITION = -(SizeConverter.Current.GetTileWidth(TileBase.TileSize.Medium) + 10);
 	
@@ -211,10 +212,11 @@ public class FolderAnimationManager
 			//view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 			animation.setStartDelay(delay);
 			
-			ObjectAnimator alphaAnimation = this.GenerateAlphaAnimation(view, CLOSE_TILE_ANIMATION_DURATION, true);
+			ObjectAnimator alphaAnimation = this.GenerateAlphaAnimation(view, CLOSE_TILE_ALPHA_ANIMATION_DURATION, true);
 			alphaAnimation.setStartDelay(delay);
-			animatorSet.playTogether(alphaAnimation);
-			
+
+			animatorSet.playTogether(animation, alphaAnimation);
+
 			animatorSet.play(animation);
 			delay += CLOSE_TILE_ANIMATION_DELAY;
 		}

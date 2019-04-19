@@ -37,8 +37,9 @@ public class FolderTile extends Tile
 	{
 		if (holder instanceof FolderTileViewHolder)
 		{
+            holder.setIsRecyclable(false);
 			FolderTileViewHolder folderTileViewHolder = (FolderTileViewHolder)holder;
-			TileFolderManager.Current.OnClickFolderTileAsync(this);
+            TileFolderManager.Current.OnClickFolderTileAsync(this);
 		}
 	}
 	

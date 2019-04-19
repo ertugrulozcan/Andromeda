@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class TilesLayoutManager extends RecyclerView.LayoutManager
+public class TilesLayoutManager extends TilesLayoutManagerBase
 {
 	public enum Orientation
 	{
@@ -149,7 +149,8 @@ public class TilesLayoutManager extends RecyclerView.LayoutManager
 			scrollBy(overScroll, state);
 		}
 	}
-	
+
+	@Override
 	public int getSpanCount()
 	{
 		return this.spanCount;

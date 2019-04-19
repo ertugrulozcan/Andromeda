@@ -3,6 +3,7 @@ package com.aero.andromeda.services;
 import android.app.Notification;
 import android.content.Intent;
 import android.service.notification.StatusBarNotification;
+import android.support.v7.widget.LinearSmoothScroller;
 
 import com.aero.andromeda.adapters.NotificationInfoAdapter;
 import com.aero.andromeda.animations.TileAnimationManager;
@@ -13,8 +14,10 @@ import com.aero.andromeda.models.tiles.TileBase;
 import com.aero.andromeda.services.interfaces.IAppService;
 import com.aero.andromeda.services.interfaces.INotificationService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class NotificationService implements INotificationService
 {
@@ -26,12 +29,15 @@ public class NotificationService implements INotificationService
 	public static String CLEAR_NOTIFICATIONS_KEY = "clearAll";
 	
 	private HashMap<AppModel, NotificationGroup> NotificationGroups;
+
+    private List<TileBase> TilesWithNotification;
 	
 	public NotificationService()
 	{
 		this.NotificationGroups = new LinkedHashMap<>();
+		this.TilesWithNotification = new ArrayList<>();
 	}
-	
+
 	public NotificationGroup GetNotificationGroup(TileBase tile)
 	{
 		if (tile == null)
@@ -76,7 +82,10 @@ public class NotificationService implements INotificationService
 
 				TileBase tile = appService.getTile(packageName);
 				if (tile != null)
-				    TileAnimationManager.Current().ImmediatelySlideAnimation(tile);
+                {
+                    this.TilesWithNotification.add(tile);
+                    TileAnimationManager.Current().ImmediatelySlideAnimation(tile);
+                }
 			}
 		}
 	}
@@ -105,8 +114,16 @@ public class NotificationService implements INotificationService
 
                 TileBase tile = appService.getTile(packageName);
                 if (tile != null)
+                {
+                    this.TilesWithNotification.remove(tile);
                     TileAnimationManager.Current().ImmediatelySlideAnimation(tile);
+                }
             }
         }
+    }
+
+    public List<TileBase> GetTilesWithNotification()
+    {
+        return this.TilesWithNotification;
     }
 }

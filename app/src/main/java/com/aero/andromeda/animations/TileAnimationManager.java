@@ -101,13 +101,18 @@ public class TileAnimationManager implements Animator.AnimatorListener
                 return;
         }
 
-        FlipAnimation flipAnimation = this.GenerateFlipAnimation();
+        FlipAnimation flipAnimation = this.GenerateFlipAnimation(tile);
         if (flipAnimation != null)
             flipAnimation.Start(tile);
     }
 
-    public FlipAnimation GenerateFlipAnimation()
+    public FlipAnimation GenerateFlipAnimation(TileBase tile)
     {
+        INotificationService notificationService = ServiceLocator.Current().GetInstance(INotificationService.class);
+        NotificationGroup notificationGroup = notificationService.GetNotificationGroup(tile);
+        if (notificationGroup != null && notificationGroup.GetCount() > 0)
+            return null;
+
         return new FlipAnimation(appService.getMainContext(), this);
     }
 
@@ -139,23 +144,6 @@ public class TileAnimationManager implements Animator.AnimatorListener
 
         return null;
     }
-
-	private ITileAnimation GenerateRandomTileAnimation(TileBase tile, Random random)
-	{
-		int no = random.nextInt(100);
-		if (0 <= no && no <= 20)
-        {
-            return this.GenerateFlipAnimation();
-        }
-        else if (20 < no && no <= 100)
-        {
-            SlideAnimation slideAnimation = this.GenerateSlideAnimation(tile);
-            if (slideAnimation != null)
-                return slideAnimation;
-        }
-
-        return this.GenerateFlipAnimation();
-	}
 
 	public void addTileAnimatorRelation(TileBase tile, Animator tileAnimation)
     {
@@ -201,7 +189,10 @@ public class TileAnimationManager implements Animator.AnimatorListener
 
     class AnimationTask extends AsyncTask<Void, Void, Void>
 	{
-		private Timer timer;
+	    private boolean isRunning;
+
+		private Timer flipAnimationTimer;
+        private Timer liveAnimationTimer;
 
 		private final int syncAnimationCount = 3;
 		
@@ -209,14 +200,24 @@ public class TileAnimationManager implements Animator.AnimatorListener
 		
 		private void Start()
 		{
+		    if (this.isRunning)
+		        return;
+
 			this.Stop();
-			
-			this.timer = new Timer();
-			timer.schedule(new AnimationTimer(), 100, 5400);
+
+			this.flipAnimationTimer = new Timer();
+            this.liveAnimationTimer = new Timer();
+
+            flipAnimationTimer.schedule(new FlipAnimationTimer(), 100, 5000);
+            liveAnimationTimer.schedule(new LiveTileAnimationTimer(), 100, 20000);
+
+            this.isRunning = true;
 		}
 		
 		private void Stop()
 		{
+            this.isRunning = false;
+
 		    for (int i = 0; i < syncAnimationCount; i++)
             {
                 if (animationArray[i] != null)
@@ -225,13 +226,20 @@ public class TileAnimationManager implements Animator.AnimatorListener
                 animationArray[i] = null;
             }
 			
-			if (this.timer != null)
+			if (this.flipAnimationTimer != null)
 			{
-				this.timer.purge();
-				this.timer.cancel();
+				this.flipAnimationTimer.purge();
+				this.flipAnimationTimer.cancel();
 			}
-			
-			this.timer = null;
+
+            if (this.liveAnimationTimer != null)
+            {
+                this.liveAnimationTimer.purge();
+                this.liveAnimationTimer.cancel();
+            }
+
+            this.flipAnimationTimer = null;
+            this.liveAnimationTimer = null;
 			
 			this.cancel(true);
 		}
@@ -239,30 +247,10 @@ public class TileAnimationManager implements Animator.AnimatorListener
 		@Override
 		protected Void doInBackground(Void... voids)
 		{
-			this.Start();
-			
 			return null;
 		}
-		
-		@Override
-		protected void onPreExecute()
-		{
-			super.onPreExecute();
-		}
-		
-		@Override
-		protected void onPostExecute(Void param)
-		{
-			super.onPostExecute(param);
-		}
-		
-		@Override
-		protected void onCancelled(Void param)
-		{
-			super.onCancelled(param);
-		}
-		
-		class AnimationTimer extends TimerTask
+
+		class FlipAnimationTimer extends TimerTask
 		{
 			@Override
 			public void run()
@@ -286,8 +274,12 @@ public class TileAnimationManager implements Animator.AnimatorListener
                                     continue;
                             }
 
-                            animationArray[i] = GenerateRandomTileAnimation(tile, random);
-                            animationArray[i].Start(tile, i * 1500);
+                            FlipAnimation flipAnimation = GenerateFlipAnimation(tile);
+                            if (flipAnimation != null)
+                            {
+                                animationArray[i] = flipAnimation;
+                                animationArray[i].Start(tile, i * 1500);
+                            }
                         }
 					}
 				}
@@ -296,25 +288,93 @@ public class TileAnimationManager implements Animator.AnimatorListener
 					System.err.println("AnimationTask error! : " + ex.getMessage());
 				}
 			}
-			
+
 			private Queue<Integer> lastUsingIndexes = new ConcurrentLinkedQueue<>();
-			
+
 			private int GenerateRandomIndex(Random random, int bound, int ignore)
 			{
 				int rand;
-				
+
 				do { rand = random.nextInt(bound); }
 				while (rand == ignore || lastUsingIndexes.contains(rand));
-				
+
 				if (lastUsingIndexes.size() > 4)
 				{
 					lastUsingIndexes.poll();
 				}
-				
+
 				lastUsingIndexes.add(rand);
-				
+
 				return rand;
 			}
 		}
+
+        class LiveTileAnimationTimer extends TimerTask
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    synchronized (lock)
+                    {
+                        INotificationService notificationService = ServiceLocator.Current().GetInstance(INotificationService.class);
+                        List<TileBase> tilesWithNotification = notificationService.GetTilesWithNotification();
+
+                        if (tilesWithNotification != null && tilesWithNotification.size() > 0)
+                        {
+                            Random random = new Random();
+                            int rand = this.GenerateRandomIndex(random, tilesWithNotification.size() - 1);
+                            final TileBase tile = tilesWithNotification.get(rand);
+
+                            if (tileAnimatorDictionary.containsValue(tile))
+                                return;
+
+                            ImmediatelySlideAnimation(tile);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.err.println("LiveTileAnimationTask error! : " + ex.getMessage());
+                }
+            }
+
+            private int lastUsingIndex = -1;
+            private int GenerateRandomIndex(Random random, int bound)
+            {
+                if (bound <= 1)
+                    return 0;
+
+                int rand;
+
+                do { rand = random.nextInt(bound); }
+                while (lastUsingIndex == rand);
+
+                lastUsingIndex = rand;
+
+                return rand;
+            }
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void param)
+        {
+            super.onPostExecute(param);
+
+            this.Start();
+        }
+
+        @Override
+        protected void onCancelled(Void param)
+        {
+            super.onCancelled(param);
+        }
 	}
 }

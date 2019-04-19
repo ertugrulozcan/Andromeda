@@ -157,16 +157,34 @@ public class TileFolderManager
 						
 						TileFolderManager.this.tileFolder.SetParentTile(null);
 						TileFolderManager.this.openedFolderTile = null;
-						
+
 						synchronized (TileFolderManager.this.closeFolderLock)
 						{
-							TileFolderManager.this.isFolderClosing = false;
+						    TileFolderManager.this.isFolderClosing = false;
 						}
 					}
 				});
-				
-				// Remove closed tile
-				this.RemoveTileOnBackground(this.tileFolder);
+
+				// Tile'larin kapanirken yukari dokulme animasyonu ile klasorun kapanis animasyonu arasina gecikme koymak icin;
+                Thread thread = new Thread()
+                {
+                    @Override
+                    public void run()
+                    {
+                        try
+                        {
+                            // Remove closed tile
+                            Thread.sleep(150);
+                            TileFolderManager.this.RemoveTileOnBackground(TileFolderManager.this.tileFolder);
+                        }
+                        catch (InterruptedException ex)
+                        {
+                            ex.printStackTrace();
+                        }
+                    }
+                };
+
+                thread.start();
 			}
 			catch (Exception ex)
 			{

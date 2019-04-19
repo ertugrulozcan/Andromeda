@@ -235,7 +235,15 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 	{
 		if (tile == null)
 			return;
-		
+
+        if (this.tileSecondViewLayout != null)
+        {
+            if (Andromeda.isEditMode)
+                this.tileSecondViewLayout.setVisibility(View.INVISIBLE);
+            else
+                this.tileSecondViewLayout.setVisibility(View.VISIBLE);
+        }
+
 		this.setTileMenuButtons(isSelectedTile);
 		this.setTileScale(tile, isSelectedTile);
 		this.setTileOpacity(tile, isSelectedTile);
@@ -510,49 +518,8 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 	{
 		ISettingsService settingsService = ServiceLocator.Current().GetInstance(ISettingsService.class);
 		UISettings uiSettings = settingsService.getUISettings();
-		
-		SpanSize spanSize = new SpanSize(1, 1);
-		
-		if (tile.getTileType() == TileBase.TileType.TilesHeader)
-		{
-			spanSize = new SpanSize(uiSettings.getLayoutWidth(), 2);
-		}
-		else if (tile.getTileType() == TileBase.TileType.TilesFooter)
-		{
-			spanSize = new SpanSize(uiSettings.getLayoutWidth(), 2);
-		}
-		else if (tile.getTileType() != TileBase.TileType.Folder)
-		{
-			switch (tile.getTileSize())
-			{
-				case Small:
-				{
-					spanSize = new SpanSize(1, 1);
-				}
-				break;
-				case Medium:
-				{
-					spanSize = new SpanSize(2, 2);
-				}
-				break;
-				case MediumWide:
-				{
-					spanSize = new SpanSize(4, 2);
-				}
-				break;
-				case Large:
-				{
-					spanSize = new SpanSize(4, 4);
-				}
-				break;
-			}
-		}
-		else
-		{
-			Folder folderTile = (Folder) tile;
-			spanSize = new SpanSize(uiSettings.getLayoutWidth(), folderTile.GetTotalRowCount());
-		}
-		
+
+		SpanSize spanSize = GetSpanSize(tile, uiSettings.getLayoutWidth());
 		TileSpanLayoutParams tileBoxLayoutParams = new TileSpanLayoutParams(spanSize);
 		
 		tileBoxLayoutParams.height = GridLayout.LayoutParams.WRAP_CONTENT;
@@ -563,6 +530,53 @@ public abstract class BaseTileViewHolder extends RecyclerView.ViewHolder impleme
 		
 		return tileBoxLayoutParams;
 	}
+
+	public static SpanSize GetSpanSize(TileBase tile, int columnCount)
+    {
+        SpanSize spanSize = new SpanSize(1, 1);
+
+        if (tile.getTileType() == TileBase.TileType.TilesHeader)
+        {
+            spanSize = new SpanSize(columnCount, 2);
+        }
+        else if (tile.getTileType() == TileBase.TileType.TilesFooter)
+        {
+            spanSize = new SpanSize(columnCount, 2);
+        }
+        else if (tile.getTileType() != TileBase.TileType.Folder)
+        {
+            switch (tile.getTileSize())
+            {
+                case Small:
+                {
+                    spanSize = new SpanSize(1, 1);
+                }
+                break;
+                case Medium:
+                {
+                    spanSize = new SpanSize(2, 2);
+                }
+                break;
+                case MediumWide:
+                {
+                    spanSize = new SpanSize(4, 2);
+                }
+                break;
+                case Large:
+                {
+                    spanSize = new SpanSize(4, 4);
+                }
+                break;
+            }
+        }
+        else
+        {
+            Folder folderTile = (Folder) tile;
+            spanSize = new SpanSize(columnCount, folderTile.GetTotalRowCount());
+        }
+
+        return spanSize;
+    }
 	
 	private int calculateTotalRowHeight(int rowCount)
 	{
