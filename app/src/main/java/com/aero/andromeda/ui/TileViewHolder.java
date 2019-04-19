@@ -112,7 +112,8 @@ public class TileViewHolder extends BaseTileViewHolder
 
 			if (this.tileCountBadge != null && this.tileCountBadgeTextView != null)
 			{
-				this.tileCountBadgeTextView.setText("" + notificationGroup.GetCount());
+			    int count = notificationGroup.GetCount();
+				this.tileCountBadgeTextView.setText("" + count);
 			}
 			
 			NotificationInfo notificationInfo = notificationGroup.GetNext();

@@ -119,6 +119,8 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		super.onViewCreated(view, savedInstanceState);
+
+        this.CheckNotificationAccessPermission();
 	}
 	
 	public View GetContainer(View view)
@@ -149,9 +151,7 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 
 	public void Enable()
 	{
-        // this.CheckNotificationAccessPermission();
-
-		TileAnimationManager.Current().Start();
+        TileAnimationManager.Current().Start();
 		this.isEnabled = true;
 	}
 
@@ -159,19 +159,7 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
     {
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE) != PackageManager.PERMISSION_GRANTED)
         {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE))
-            {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-                showExplanation("Permission Needed", "Rationale", Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE, REQUEST_PERMISSION_PHONE_STATE);
-            }
-            else
-            {
-                // No explanation needed, we can request the permission.
-                requestPermission(Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE, REQUEST_PERMISSION_PHONE_STATE);
-            }
+            showExplanation("İzin gerekli", "Canlı kutucukları ve bildirimleri kullanabilmeniz için Ayarlar>Bildirim Erişimi>Andromeda'ya gidip izin vermeniz gerekli.", Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE, REQUEST_PERMISSION_PHONE_STATE);
         }
     }
 
@@ -194,12 +182,18 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 
     private void showExplanation(String title, String message, final String permission, final int permissionRequestCode)
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity(), android.R.style.Theme_Material_Dialog_Alert);
         builder.setTitle(title).setMessage(message).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
         {
             public void onClick(DialogInterface dialog, int id)
             {
                 requestPermission(permission, permissionRequestCode);
+            }
+        }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int id)
+            {
+
             }
         });
 
@@ -208,7 +202,7 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 
     private void requestPermission(String permissionName, int permissionRequestCode)
     {
-        ActivityCompat.requestPermissions(this.getActivity(), new String[]{permissionName}, permissionRequestCode);
+        ActivityCompat.requestPermissions(this.getActivity(), new String[] { permissionName }, permissionRequestCode);
     }
 	
 	public void Disable()

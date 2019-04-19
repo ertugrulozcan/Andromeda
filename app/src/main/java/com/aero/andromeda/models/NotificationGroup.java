@@ -30,9 +30,13 @@ public class NotificationGroup
 	
 	public void Add(NotificationInfo notificationInfo)
 	{
+        int notifId = notificationInfo.getId();
+        if (notifId == 0)
+            return;
+
         for (NotificationInfo notification : this.notificationList)
         {
-            if (notification.getId() == notificationInfo.getId())
+            if (notification.getId() == notifId)
             {
                 notification.Overwrite(notificationInfo);
                 return;

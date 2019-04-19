@@ -209,7 +209,7 @@ public class TileAnimationManager implements Animator.AnimatorListener
             this.liveAnimationTimer = new Timer();
 
             flipAnimationTimer.schedule(new FlipAnimationTimer(), 100, 5000);
-            liveAnimationTimer.schedule(new LiveTileAnimationTimer(), 100, 20000);
+            liveAnimationTimer.schedule(new LiveTileAnimationTimer(), 0, 20000);
 
             this.isRunning = true;
 		}
