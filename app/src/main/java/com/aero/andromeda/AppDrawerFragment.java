@@ -119,8 +119,6 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		super.onViewCreated(view, savedInstanceState);
-
-        this.CheckNotificationAccessPermission();
 	}
 	
 	public View GetContainer(View view)
@@ -147,68 +145,22 @@ public class AppDrawerFragment extends Fragment implements OnStartDragListener
 			this.itemTouchHelper.startDrag(viewHolder);
 	}
 
-    private final int REQUEST_PERMISSION_PHONE_STATE = 1;
-
 	public void Enable()
 	{
+        if (this.recyclerView != null)
+            this.recyclerView.setEnabled(true);
+
         TileAnimationManager.Current().Start();
 		this.isEnabled = true;
 	}
-
-	private void CheckNotificationAccessPermission()
-    {
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE) != PackageManager.PERMISSION_GRANTED)
-        {
-            showExplanation("İzin gerekli", "Canlı kutucukları ve bildirimleri kullanabilmeniz için Ayarlar>Bildirim Erişimi>Andromeda'ya gidip izin vermeniz gerekli.", Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE, REQUEST_PERMISSION_PHONE_STATE);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
-    {
-        switch (requestCode)
-        {
-            case REQUEST_PERMISSION_PHONE_STATE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                {
-                    Toast.makeText(this.getActivity(), "Permission Granted!", Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    Toast.makeText(this.getActivity(), "Permission Denied!", Toast.LENGTH_SHORT).show();
-                }
-        }
-    }
-
-    private void showExplanation(String title, String message, final String permission, final int permissionRequestCode)
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity(), android.R.style.Theme_Material_Dialog_Alert);
-        builder.setTitle(title).setMessage(message).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
-        {
-            public void onClick(DialogInterface dialog, int id)
-            {
-                requestPermission(permission, permissionRequestCode);
-            }
-        }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener()
-        {
-            public void onClick(DialogInterface dialog, int id)
-            {
-
-            }
-        });
-
-        builder.create().show();
-    }
-
-    private void requestPermission(String permissionName, int permissionRequestCode)
-    {
-        ActivityCompat.requestPermissions(this.getActivity(), new String[] { permissionName }, permissionRequestCode);
-    }
 	
 	public void Disable()
 	{
 		this.isEnabled = false;
 		TileAnimationManager.Current().Stop();
+
+		if (this.recyclerView != null)
+            this.recyclerView.setEnabled(false);
 	}
 	
 	public boolean isEnabled()

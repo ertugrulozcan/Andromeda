@@ -1,9 +1,19 @@
 package com.aero.andromeda.services;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.Notification;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.service.notification.StatusBarNotification;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearSmoothScroller;
+import android.widget.Toast;
 
 import com.aero.andromeda.adapters.NotificationInfoAdapter;
 import com.aero.andromeda.animations.TileAnimationManager;
@@ -18,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 public class NotificationService implements INotificationService
 {
@@ -27,6 +38,8 @@ public class NotificationService implements INotificationService
 	public static String NOTIFICATION_COMMAND_KEY = "command";
 	public static String LIST_NOTIFICATIONS_KEY = "list";
 	public static String CLEAR_NOTIFICATIONS_KEY = "clearAll";
+
+    private final int REQUEST_PERMISSION_PHONE_STATE = 1;
 	
 	private HashMap<AppModel, NotificationGroup> NotificationGroups;
 
@@ -36,6 +49,8 @@ public class NotificationService implements INotificationService
 	{
 		this.NotificationGroups = new LinkedHashMap<>();
 		this.TilesWithNotification = new ArrayList<>();
+
+		this.CheckNotificationAccessPermission();
 	}
 
 	public NotificationGroup GetNotificationGroup(TileBase tile)
@@ -125,5 +140,43 @@ public class NotificationService implements INotificationService
     public List<TileBase> GetTilesWithNotification()
     {
         return this.TilesWithNotification;
+    }
+
+    // Check permissions
+
+    private void CheckNotificationAccessPermission()
+    {
+        IAppService appService = ServiceLocator.Current().GetInstance(IAppService.class);
+        Context mainActivityContext = appService.getMainContext();
+
+        Set<String> enabledListenerPackages = NotificationManagerCompat.getEnabledListenerPackages(mainActivityContext);
+        boolean isAuthorizedForNotificationAccess = enabledListenerPackages.contains(mainActivityContext.getPackageName());
+
+        if (!isAuthorizedForNotificationAccess)
+        {
+            this.RequestPermissionForNotificationAccess((Activity)mainActivityContext, "İzin gerekli", "Canlı kutucukları ve bildirimleri kullanabilmeniz için Ayarlar>Bildirim Erişimi>Andromeda'ya gidip izin vermeniz gerekli.", Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE, REQUEST_PERMISSION_PHONE_STATE);
+        }
+    }
+
+    private void RequestPermissionForNotificationAccess(final Activity activity, String title, String message, final String permission, final int permissionRequestCode)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity, android.R.style.Theme_Material_Dialog_Alert);
+        builder.setTitle(title).setMessage(message).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int id)
+            {
+                ActivityCompat.requestPermissions(activity, new String[] { permission }, permissionRequestCode);
+                activity.startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            }
+        })
+        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int id)
+            {
+
+            }
+        });
+
+        builder.create().show();
     }
 }
