@@ -324,7 +324,7 @@ public class TileAnimationManager implements Animator.AnimatorListener
                         if (tilesWithNotification != null && tilesWithNotification.size() > 0)
                         {
                             Random random = new Random();
-                            int rand = this.GenerateRandomIndex(random, tilesWithNotification.size() - 1);
+                            int rand = this.GenerateRandomIndex(random, tilesWithNotification.size());
                             final TileBase tile = tilesWithNotification.get(rand);
 
                             if (tileAnimatorDictionary.containsValue(tile))

@@ -21,11 +21,23 @@ public class NotificationListener extends NotificationListenerService
 	private boolean isBound = false;
 	
 	private NotificationReceiver notificationReceiver;
-	
-	public NotificationListener()
+
+	private static NotificationListener self;
+
+    public static NotificationListener Current()
+    {
+        return self;
+    }
+
+    public NotificationListener()
 	{
-	
+        self = this;
 	}
+
+	public void CheckForNotifications()
+    {
+        this.AllActiveNotifications();
+    }
 
 	@Override
 	public IBinder onBind(Intent intent)

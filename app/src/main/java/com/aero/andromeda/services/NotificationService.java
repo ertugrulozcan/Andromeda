@@ -139,6 +139,10 @@ public class NotificationService implements INotificationService
 
     public List<TileBase> GetTilesWithNotification()
     {
+        NotificationListener notificationListener = NotificationListener.Current();
+        if (notificationListener != null)
+            notificationListener.CheckForNotifications();
+        
         return this.TilesWithNotification;
     }
 
