@@ -593,12 +593,14 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
 	public final boolean onTouch(View v, MotionEvent event)
 	{
 		if (mAnimationProcessor.isAnimationRunning())
-			return false;
+			return true;
+
 		if (!mBuilder.mGesturesEnabled)
 		{
 			mBuilder.mSliderView.performClick();
 			return true;
 		}
+
 		boolean consumed;
 		switch (mBuilder.mStartGravity)
 		{
@@ -617,10 +619,12 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
 			default:
 				throw new IllegalArgumentException("You are using not supported gravity");
 		}
+
 		if (!consumed)
 		{
 			mBuilder.mSliderView.performClick();
 		}
+
 		return true;
 	}
 	//endregion
