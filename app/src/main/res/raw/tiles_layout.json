@@ -1,6 +1,6 @@
 {
   "tiles": [{
-    "packageName": "com.android.contacts",
+    "packageName": "com.google.android.contacts",
     "tileSize": 2,
     "tileType": 0,
     "tileBackground": "#5543B51F",

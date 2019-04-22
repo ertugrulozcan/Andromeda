@@ -142,7 +142,7 @@ public class NotificationService implements INotificationService
         NotificationListener notificationListener = NotificationListener.Current();
         if (notificationListener != null)
             notificationListener.CheckForNotifications();
-        
+
         return this.TilesWithNotification;
     }
 
